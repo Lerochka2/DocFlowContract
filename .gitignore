@@ -1,0 +1,40 @@
+﻿# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Java / Maven
+**/target/
+*.class
+*.jar
+
+# Node / Angular
+**/node_modules/
+**/dist/
+
+# Python
+**/__pycache__/
+**/.venv/
+**/venv/
+*.pyc
+
+# Environment and secrets
+.env
+*.env
+
+# Local document storage
+storage/*
+!storage/.gitkeep
+
+# Backups
+backup/*
+!backup/.gitkeep
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini
