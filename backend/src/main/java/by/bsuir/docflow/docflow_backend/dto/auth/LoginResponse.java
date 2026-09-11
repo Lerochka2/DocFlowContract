@@ -6,17 +6,22 @@ public class LoginResponse {
     private final String login;
     private final String fullName;
     private final String role;
+    private final String accessToken;
+    private final String tokenType;
 
     public LoginResponse(
             Long userId,
             String login,
             String fullName,
-            String role
+            String role,
+            String accessToken
     ) {
         this.userId = userId;
         this.login = login;
         this.fullName = fullName;
         this.role = role;
+        this.accessToken = accessToken;
+        this.tokenType = "Bearer";
     }
 
     public Long getUserId() {
@@ -33,5 +38,13 @@ public class LoginResponse {
 
     public String getRole() {
         return role;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
     }
 }
