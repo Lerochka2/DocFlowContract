@@ -1,5 +1,6 @@
 package by.bsuir.docflow.docflow_backend.controller;
 
+import by.bsuir.docflow.docflow_backend.dto.ContractCandidateResponse;
 import by.bsuir.docflow.docflow_backend.dto.DocumentLinkDetailsResponse;
 import by.bsuir.docflow.docflow_backend.dto.DocumentLinkRequest;
 import by.bsuir.docflow.docflow_backend.dto.DocumentLinkResponse;
@@ -58,6 +59,16 @@ public class DocumentLinkController {
     ) {
         return documentLinkQueryService
                 .getLinkedDocuments(
+                        documentId
+                );
+    }
+
+    @GetMapping("/{documentId}/link-candidates")
+    public List<ContractCandidateResponse> getLinkCandidates(
+            @PathVariable Long documentId
+    ) {
+        return documentLinkQueryService
+                .getLinkCandidates(
                         documentId
                 );
     }

@@ -27,9 +27,12 @@ public class DocumentLinkService {
             DocumentLinkRepository documentLinkRepository,
             DocumentRoutingService documentRoutingService
     ) {
-        this.documentRepository = documentRepository;
-        this.documentLinkRepository = documentLinkRepository;
-        this.documentRoutingService = documentRoutingService;
+        this.documentRepository =
+                documentRepository;
+        this.documentLinkRepository =
+                documentLinkRepository;
+        this.documentRoutingService =
+                documentRoutingService;
     }
 
     @Transactional
@@ -48,29 +51,37 @@ public class DocumentLinkService {
             );
         }
 
-        Document childDocument = documentRepository
-                .findById(childDocumentId)
-                .orElseThrow(
-                        () -> new DocumentNotFoundException(
-                                "Документ с ID "
-                                        + childDocumentId
-                                        + " не найден"
+        Document childDocument =
+                documentRepository
+                        .findById(
+                                childDocumentId
                         )
-                );
+                        .orElseThrow(
+                                () -> new DocumentNotFoundException(
+                                        "Документ с ID "
+                                                + childDocumentId
+                                                + " не найден"
+                                )
+                        );
 
-        Document contractDocument = documentRepository
-                .findById(request.contractDocumentId())
-                .orElseThrow(
-                        () -> new DocumentNotFoundException(
-                                "Основной договор с ID "
-                                        + request.contractDocumentId()
-                                        + " не найден"
+        Document contractDocument =
+                documentRepository
+                        .findById(
+                                request.contractDocumentId()
                         )
-                );
+                        .orElseThrow(
+                                () -> new DocumentNotFoundException(
+                                        "Основной договор с ID "
+                                                + request.contractDocumentId()
+                                                + " не найден"
+                                )
+                        );
 
         if (
                 childDocument.getId()
-                        .equals(contractDocument.getId())
+                        .equals(
+                                contractDocument.getId()
+                        )
         ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -107,6 +118,15 @@ public class DocumentLinkService {
             );
         }
 
+        if (!isAvailableContractStatus(
+                contractDocument.getStatus()
+        )) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Выбранный договор еще не готов для привязки документов"
+            );
+        }
+
         if (
                 documentLinkRepository
                         .existsByChildDocumentId(
@@ -119,7 +139,8 @@ public class DocumentLinkService {
             );
         }
 
-        DocumentLink link = new DocumentLink();
+        DocumentLink link =
+                new DocumentLink();
 
         link.setChildDocument(
                 childDocument
@@ -130,7 +151,9 @@ public class DocumentLinkService {
         );
 
         DocumentLink savedLink =
-                documentLinkRepository.save(link);
+                documentLinkRepository.save(
+                        link
+                );
 
         childDocument.setStatus(
                 DocumentStatus.LINKED
@@ -172,5 +195,18 @@ public class DocumentLinkService {
                 == DocumentType.AMENDMENT_PROLONGATION
                 || documentType
                 == DocumentType.APPENDIX;
+    }
+
+    private boolean isAvailableContractStatus(
+            DocumentStatus status
+    ) {
+
+        if (status == null) {
+            return false;
+        }
+
+        return status == DocumentStatus.VERIFIED
+                || status == DocumentStatus.READY_FOR_SED
+                || status == DocumentStatus.SENT_TO_SED;
     }
 }
