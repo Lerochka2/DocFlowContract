@@ -1,8 +1,10 @@
 package by.bsuir.docflow.docflow_backend.controller;
 
+import by.bsuir.docflow.docflow_backend.dto.ai.AiProcessingResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentDetailsResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentSummaryResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
+import by.bsuir.docflow.docflow_backend.service.AiProcessingService;
 import by.bsuir.docflow.docflow_backend.service.DocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,11 +26,14 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final AiProcessingService aiProcessingService;
 
     public DocumentController(
-            DocumentService documentService
+            DocumentService documentService,
+            AiProcessingService aiProcessingService
     ) {
         this.documentService = documentService;
+        this.aiProcessingService = aiProcessingService;
     }
 
     @PostMapping(
@@ -39,7 +44,8 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        Number userIdClaim = jwt.getClaim("userId");
+        Number userIdClaim =
+                jwt.getClaim("userId");
 
         if (userIdClaim == null) {
             throw new IllegalStateException(
@@ -47,10 +53,14 @@ public class DocumentController {
             );
         }
 
-        Long userId = userIdClaim.longValue();
+        Long userId =
+                userIdClaim.longValue();
 
         DocumentUploadResponse response =
-                documentService.upload(file, userId);
+                documentService.upload(
+                        file,
+                        userId
+                );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -67,5 +77,12 @@ public class DocumentController {
             @PathVariable Long id
     ) {
         return documentService.getDocument(id);
+    }
+
+    @PostMapping("/{id}/analyze")
+    public AiProcessingResponse analyzeDocument(
+            @PathVariable Long id
+    ) {
+        return aiProcessingService.analyze(id);
     }
 }

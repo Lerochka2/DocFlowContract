@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
 from app.services.document_classifier import DocumentClassifier
@@ -25,7 +25,7 @@ app = FastAPI(
         "AI microservice for contract document "
         "processing and classification"
     ),
-    version="0.5.0",
+    version="0.6.0",
 )
 
 
@@ -84,6 +84,59 @@ async def analyze_document(
 ) -> dict:
     file_bytes = await read_and_validate_pdf(file)
 
+    filename = (
+        file.filename
+        if file.filename
+        else "document.pdf"
+    )
+
+    return analyze_pdf_content(
+        filename,
+        file_bytes,
+    )
+
+
+@app.post("/internal/analyze")
+async def internal_analyze_document(
+    request: Request,
+    x_filename: str | None = Header(
+        default=None,
+        alias="X-Filename",
+    ),
+) -> dict:
+    content_type = request.headers.get(
+        "content-type",
+        "",
+    ).lower()
+
+    if not content_type.startswith(
+        "application/pdf"
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Ожидается Content-Type application/pdf",
+        )
+
+    file_bytes = await request.body()
+
+    validate_pdf_bytes(file_bytes)
+
+    filename = (
+        x_filename.strip()
+        if x_filename and x_filename.strip()
+        else "document.pdf"
+    )
+
+    return analyze_pdf_content(
+        filename,
+        file_bytes,
+    )
+
+
+def analyze_pdf_content(
+    filename: str,
+    file_bytes: bytes,
+) -> dict:
     try:
         extraction_result = pdf_text_extractor.extract(
             file_bytes
@@ -96,7 +149,7 @@ async def analyze_document(
 
     if not extraction_result["has_text"]:
         return {
-            "filename": file.filename,
+            "filename": filename,
             "pageCount": extraction_result["page_count"],
             "characterCount": 0,
             "hasText": False,
@@ -113,8 +166,10 @@ async def analyze_document(
         }
 
     try:
-        classification_result = document_classifier.classify(
-            extraction_result["text"]
+        classification_result = (
+            document_classifier.classify(
+                extraction_result["text"]
+            )
         )
     except ValueError as exception:
         raise HTTPException(
@@ -127,21 +182,29 @@ async def analyze_document(
     )
 
     return {
-        "filename": file.filename,
+        "filename": filename,
         "pageCount": extraction_result["page_count"],
-        "characterCount": extraction_result["character_count"],
+        "characterCount":
+            extraction_result["character_count"],
         "hasText": True,
         "requiresOcr": False,
         "classificationAvailable": True,
-        "predictedType": formatted["predictedType"],
-        "documentType": formatted["documentType"],
-        "confidence": formatted["confidence"],
+        "predictedType":
+            formatted["predictedType"],
+        "documentType":
+            formatted["documentType"],
+        "confidence":
+            formatted["confidence"],
         "classificationAccepted":
             formatted["classificationAccepted"],
-        "reviewRequired": formatted["reviewRequired"],
-        "modelVersion": formatted["modelVersion"],
-        "probabilities": formatted["probabilities"],
-        "text": extraction_result["text"],
+        "reviewRequired":
+            formatted["reviewRequired"],
+        "modelVersion":
+            formatted["modelVersion"],
+        "probabilities":
+            formatted["probabilities"],
+        "text":
+            extraction_result["text"],
     }
 
 
@@ -171,6 +234,14 @@ async def read_and_validate_pdf(
 
     file_bytes = await file.read()
 
+    validate_pdf_bytes(file_bytes)
+
+    return file_bytes
+
+
+def validate_pdf_bytes(
+    file_bytes: bytes
+) -> None:
     if not file_bytes:
         raise HTTPException(
             status_code=400,
@@ -189,30 +260,41 @@ async def read_and_validate_pdf(
             detail="Содержимое файла не является PDF",
         )
 
-    return file_bytes
-
 
 def format_classification_result(
     result: dict
 ) -> dict:
     predicted_type = result["document_type"]
+
     confidence = round(
         result["confidence"],
         4,
     )
 
-    accepted = confidence >= CONFIDENCE_THRESHOLD
+    accepted = (
+        confidence >= CONFIDENCE_THRESHOLD
+    )
 
     return {
-        "predictedType": predicted_type,
+        "predictedType":
+            predicted_type,
         "documentType":
-            predicted_type if accepted else None,
-        "confidence": confidence,
-        "classificationAccepted": accepted,
-        "reviewRequired": not accepted,
-        "modelVersion": result["model_version"],
+            predicted_type
+            if accepted
+            else None,
+        "confidence":
+            confidence,
+        "classificationAccepted":
+            accepted,
+        "reviewRequired":
+            not accepted,
+        "modelVersion":
+            result["model_version"],
         "probabilities": {
-            label: round(probability, 4)
+            label: round(
+                probability,
+                4,
+            )
             for label, probability
             in result["probabilities"].items()
         },
