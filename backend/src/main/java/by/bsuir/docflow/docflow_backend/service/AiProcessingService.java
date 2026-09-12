@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,9 +44,7 @@ public class AiProcessingService {
                 .findById(documentId)
                 .orElseThrow(
                         () -> new DocumentNotFoundException(
-                                "Документ с id "
-                                        + documentId
-                                        + " не найден"
+                                "Документ с ID " + documentId + " не найден"
                         )
                 );
 
@@ -59,7 +58,7 @@ public class AiProcessingService {
                 document.getFile().getMimeType()
         )) {
             throw new IllegalStateException(
-                    "На данном этапе AI-анализ поддерживает только PDF-файлы"
+                    "AI-анализ пока поддерживает только PDF-файлы"
             );
         }
 
@@ -69,28 +68,6 @@ public class AiProcessingService {
 
         AiAnalyzeResponse aiResponse =
                 aiClient.analyze(filePath);
-
-        AiProcessingResult processingResult =
-                new AiProcessingResult();
-
-        processingResult.setDocument(document);
-
-        DocumentType predictedType =
-                parseDocumentType(
-                        aiResponse.getPredictedType()
-                );
-
-        processingResult.setPredictedType(
-                predictedType
-        );
-
-        if (aiResponse.getConfidence() != null) {
-            processingResult.setConfidence(
-                    BigDecimal.valueOf(
-                            aiResponse.getConfidence()
-                    )
-            );
-        }
 
         boolean classificationAccepted =
                 Boolean.TRUE.equals(
@@ -107,98 +84,128 @@ public class AiProcessingService {
                         aiResponse.getRequiresOcr()
                 );
 
-        processingResult.setClassificationAccepted(
+        AiProcessingResult result =
+                new AiProcessingResult();
+
+        result.setDocument(document);
+
+        DocumentType predictedType =
+                parseDocumentType(
+                        aiResponse.getPredictedType()
+                );
+
+        result.setPredictedType(
+                predictedType
+        );
+
+        if (aiResponse.getConfidence() != null) {
+            result.setConfidence(
+                    BigDecimal
+                            .valueOf(
+                                    aiResponse.getConfidence()
+                            )
+                            .setScale(
+                                    5,
+                                    RoundingMode.HALF_UP
+                            )
+            );
+        }
+
+        result.setClassificationAccepted(
                 classificationAccepted
         );
 
-        processingResult.setReviewRequired(
+        result.setReviewRequired(
                 reviewRequired
         );
 
-        processingResult.setRecognizedText(
+        result.setRecognizedText(
                 aiResponse.getText()
         );
 
-        /*
-         * OCR ещё не реализован.
-         * Поэтому факт необходимости OCR и факт его использования
-         * храним отдельно.
-         */
-        processingResult.setOcrUsed(false);
+        result.setOcrUsed(false);
 
-        processingResult.setModelVersion(
+        result.setModelVersion(
                 aiResponse.getModelVersion()
         );
 
-        processingResult.setProbabilities(
+        result.setProbabilities(
                 probabilitiesToJson(
                         aiResponse.getProbabilities()
                 )
         );
 
+        AiProcessingStatus processingStatus;
+
         if (requiresOcr) {
-            processingResult.setProcessingStatus(
-                    AiProcessingStatus.OCR_REQUIRED
-            );
+            processingStatus =
+                    AiProcessingStatus.OCR_REQUIRED;
         } else {
-            processingResult.setProcessingStatus(
-                    AiProcessingStatus.SUCCESS
-            );
+            processingStatus =
+                    AiProcessingStatus.SUCCESS;
         }
+
+        result.setProcessingStatus(
+                processingStatus
+        );
 
         AiProcessingResult savedResult =
-                aiProcessingResultRepository.save(
-                        processingResult
-                );
+                aiProcessingResultRepository
+                        .save(result);
 
         /*
-         * Тип основного документа сохраняем автоматически
-         * только при достаточной уверенности модели.
+         * Бизнес-логика изменения состояния документа
+         * после обработки AI-сервисом.
          */
-        if (classificationAccepted
-                && predictedType != null) {
+        if (requiresOcr) {
 
-            document.setDocumentType(
-                    predictedType
-            );
-        }
-
-        /*
-         * Документ с низкой уверенностью модели или документ,
-         * которому требуется OCR, должен быть проверен человеком.
-         */
-        if (reviewRequired || requiresOcr) {
             document.setStatus(
                     DocumentStatus.REVIEW_REQUIRED
             );
+
+        } else if (
+                reviewRequired
+                        || !classificationAccepted
+        ) {
+
+            document.setStatus(
+                    DocumentStatus.REVIEW_REQUIRED
+            );
+
+        } else if (
+                classificationAccepted
+                        && aiResponse.getDocumentType() != null
+        ) {
+
+            DocumentType acceptedType =
+                    parseDocumentType(
+                            aiResponse.getDocumentType()
+                    );
+
+            document.setDocumentType(
+                    acceptedType
+            );
+
+            document.setStatus(
+                    DocumentStatus.VERIFIED
+            );
         }
 
-        documentRepository.save(document);
-
-        String acceptedDocumentType = null;
-
-        if (classificationAccepted
-                && predictedType != null) {
-
-            acceptedDocumentType =
-                    predictedType.name();
-        }
+        documentRepository.save(
+                document
+        );
 
         return new AiProcessingResponse(
                 savedResult.getId(),
                 document.getId(),
-                predictedType == null
-                        ? null
-                        : predictedType.name(),
-                acceptedDocumentType,
+                aiResponse.getPredictedType(),
+                aiResponse.getDocumentType(),
                 aiResponse.getConfidence(),
                 classificationAccepted,
                 reviewRequired,
                 requiresOcr,
                 aiResponse.getModelVersion(),
-                savedResult
-                        .getProcessingStatus()
-                        .name(),
+                processingStatus.name(),
                 aiResponse.getProbabilities(),
                 aiResponse.getText()
         );
@@ -213,7 +220,9 @@ public class AiProcessingService {
 
         try {
             return DocumentType.valueOf(
-                    value.trim()
+                    value
+                            .trim()
+                            .toUpperCase()
             );
         } catch (IllegalArgumentException exception) {
             throw new IllegalStateException(
@@ -227,20 +236,22 @@ public class AiProcessingService {
     private String probabilitiesToJson(
             Map<String, Double> probabilities
     ) {
-        if (probabilities == null
-                || probabilities.isEmpty()) {
-
-            return null;
+        if (
+                probabilities == null
+                        || probabilities.isEmpty()
+        ) {
+            return "{}";
         }
 
         return probabilities
                 .entrySet()
                 .stream()
-                .map(entry ->
-                        "\""
-                                + entry.getKey()
-                                + "\":"
-                                + entry.getValue()
+                .map(
+                        entry ->
+                                "\""
+                                        + entry.getKey()
+                                        + "\":"
+                                        + entry.getValue()
                 )
                 .collect(
                         Collectors.joining(
