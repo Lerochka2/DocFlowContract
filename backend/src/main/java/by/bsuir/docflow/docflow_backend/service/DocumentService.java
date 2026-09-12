@@ -1,10 +1,13 @@
 package by.bsuir.docflow.docflow_backend.service;
 
+import by.bsuir.docflow.docflow_backend.dto.document.DocumentDetailsResponse;
+import by.bsuir.docflow.docflow_backend.dto.document.DocumentSummaryResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
 import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.StoredFile;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
+import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import by.bsuir.docflow.docflow_backend.repository.StoredFileRepository;
@@ -20,6 +23,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -151,6 +155,82 @@ public class DocumentService {
 
             throw exception;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<DocumentSummaryResponse> getAllDocuments() {
+
+        return documentRepository
+                .findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(document -> new DocumentSummaryResponse(
+                        document.getId(),
+                        document.getFile().getOriginalName(),
+                        document.getDocumentType() == null
+                                ? null
+                                : document.getDocumentType().name(),
+                        document.getStatus().name(),
+                        document.getDocumentNumber(),
+                        document.getCreatedAt(),
+                        document.getCreatedBy().getFullName()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentDetailsResponse getDocument(Long id) {
+
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() ->
+                        new DocumentNotFoundException(
+                                "Документ с id " + id + " не найден"
+                        )
+                );
+
+        AppUser verifiedBy = document.getVerifiedBy();
+
+        return new DocumentDetailsResponse(
+                document.getId(),
+
+                document.getFile().getId(),
+                document.getFile().getOriginalName(),
+                document.getFile().getMimeType(),
+                document.getFile().getSizeBytes(),
+                document.getFile().getSha256Checksum(),
+
+                document.getDocumentType() == null
+                        ? null
+                        : document.getDocumentType().name(),
+
+                document.getStatus().name(),
+                document.getDocumentNumber(),
+                document.getDocumentDate(),
+
+                document.getAmount(),
+                document.getCurrency(),
+                document.getSubject(),
+
+                document.getValidFrom(),
+                document.getValidTo(),
+
+                document.getReferencedContractNumber(),
+                document.getReferencedContractDate(),
+
+                document.getCreatedBy().getId(),
+                document.getCreatedBy().getFullName(),
+
+                verifiedBy == null
+                        ? null
+                        : verifiedBy.getId(),
+
+                verifiedBy == null
+                        ? null
+                        : verifiedBy.getFullName(),
+
+                document.getVerifiedAt(),
+                document.getCreatedAt(),
+                document.getUpdatedAt()
+        );
     }
 
     private void validateFile(MultipartFile file) {

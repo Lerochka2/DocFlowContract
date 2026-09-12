@@ -1,5 +1,7 @@
 package by.bsuir.docflow.docflow_backend.controller;
 
+import by.bsuir.docflow.docflow_backend.dto.document.DocumentDetailsResponse;
+import by.bsuir.docflow.docflow_backend.dto.document.DocumentSummaryResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
 import by.bsuir.docflow.docflow_backend.service.DocumentService;
 import org.springframework.http.HttpStatus;
@@ -7,11 +9,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -49,5 +55,17 @@ public class DocumentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping
+    public List<DocumentSummaryResponse> getAllDocuments() {
+        return documentService.getAllDocuments();
+    }
+
+    @GetMapping("/{id}")
+    public DocumentDetailsResponse getDocument(
+            @PathVariable Long id
+    ) {
+        return documentService.getDocument(id);
     }
 }

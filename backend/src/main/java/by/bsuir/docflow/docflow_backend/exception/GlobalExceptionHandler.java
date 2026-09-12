@@ -21,4 +21,16 @@ public class GlobalExceptionHandler {
                         "message", exception.getMessage()
                 ));
     }
+
+    @ExceptionHandler(DocumentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDocumentNotFound(
+            DocumentNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", "DOCUMENT_NOT_FOUND",
+                        "message", exception.getMessage()
+                ));
+    }
 }
