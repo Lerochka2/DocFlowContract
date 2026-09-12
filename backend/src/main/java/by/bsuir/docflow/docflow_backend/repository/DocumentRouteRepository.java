@@ -1,6 +1,7 @@
 package by.bsuir.docflow.docflow_backend.repository;
 
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
+import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -17,5 +18,11 @@ public interface DocumentRouteRepository
     Optional<DocumentRoute>
     findFirstByDocumentIdOrderByCreatedAtDesc(
             Long documentId
+    );
+
+    Optional<DocumentRoute>
+    findFirstByDocumentIdAndRoutingStatusOrderByCreatedAtDesc(
+            Long documentId,
+            RoutingStatus routingStatus
     );
 }

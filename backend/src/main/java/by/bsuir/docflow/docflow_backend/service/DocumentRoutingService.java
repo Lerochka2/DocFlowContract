@@ -7,6 +7,9 @@ import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingTarget;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class DocumentRoutingService {
@@ -16,10 +19,14 @@ public class DocumentRoutingService {
     public DocumentRoutingService(
             DocumentRouteRepository documentRouteRepository
     ) {
-        this.documentRouteRepository = documentRouteRepository;
+        this.documentRouteRepository =
+                documentRouteRepository;
     }
 
-    public DocumentRoute route(Document document) {
+    @Transactional
+    public DocumentRoute route(
+            Document document
+    ) {
 
         if (document == null) {
             throw new IllegalArgumentException(
@@ -42,20 +49,63 @@ public class DocumentRoutingService {
         String routingReason =
                 determineReason(documentType);
 
-        DocumentRoute route =
+        Optional<DocumentRoute> activeRoute =
+                documentRouteRepository
+                        .findFirstByDocumentIdAndRoutingStatusOrderByCreatedAtDesc(
+                                document.getId(),
+                                RoutingStatus.ROUTED
+                        );
+
+        if (activeRoute.isPresent()) {
+
+            DocumentRoute currentRoute =
+                    activeRoute.get();
+
+            boolean sameDocumentType =
+                    currentRoute.getDocumentType()
+                            == documentType;
+
+            boolean sameTarget =
+                    currentRoute.getRoutingTarget()
+                            == routingTarget;
+
+            if (sameDocumentType && sameTarget) {
+                return currentRoute;
+            }
+
+            currentRoute.setRoutingStatus(
+                    RoutingStatus.CANCELLED
+            );
+
+            documentRouteRepository.save(
+                    currentRoute
+            );
+        }
+
+        DocumentRoute newRoute =
                 new DocumentRoute();
 
-        route.setDocument(document);
-        route.setDocumentType(documentType);
-        route.setRoutingTarget(routingTarget);
-        route.setRoutingStatus(
+        newRoute.setDocument(document);
+
+        newRoute.setDocumentType(
+                documentType
+        );
+
+        newRoute.setRoutingTarget(
+                routingTarget
+        );
+
+        newRoute.setRoutingStatus(
                 RoutingStatus.ROUTED
         );
-        route.setRoutingReason(
+
+        newRoute.setRoutingReason(
                 routingReason
         );
 
-        return documentRouteRepository.save(route);
+        return documentRouteRepository.save(
+                newRoute
+        );
     }
 
     private RoutingTarget determineTarget(
@@ -63,7 +113,6 @@ public class DocumentRoutingService {
     ) {
 
         return switch (documentType) {
-
             case CONTRACT ->
                     RoutingTarget.CONTRACT_MANAGER;
 
@@ -83,7 +132,6 @@ public class DocumentRoutingService {
     ) {
 
         return switch (documentType) {
-
             case CONTRACT ->
                     "Основной договор направлен менеджеру по договорам";
 
