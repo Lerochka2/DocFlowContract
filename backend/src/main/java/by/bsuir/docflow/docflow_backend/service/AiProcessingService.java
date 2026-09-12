@@ -26,25 +26,34 @@ public class AiProcessingService {
     private final DocumentRepository documentRepository;
     private final AiProcessingResultRepository aiProcessingResultRepository;
     private final AiClient aiClient;
+    private final DocumentRoutingService documentRoutingService;
 
     public AiProcessingService(
             DocumentRepository documentRepository,
             AiProcessingResultRepository aiProcessingResultRepository,
-            AiClient aiClient
+            AiClient aiClient,
+            DocumentRoutingService documentRoutingService
     ) {
         this.documentRepository = documentRepository;
-        this.aiProcessingResultRepository = aiProcessingResultRepository;
+        this.aiProcessingResultRepository =
+                aiProcessingResultRepository;
         this.aiClient = aiClient;
+        this.documentRoutingService =
+                documentRoutingService;
     }
 
     @Transactional
-    public AiProcessingResponse analyze(Long documentId) {
+    public AiProcessingResponse analyze(
+            Long documentId
+    ) {
 
         Document document = documentRepository
                 .findById(documentId)
                 .orElseThrow(
                         () -> new DocumentNotFoundException(
-                                "Документ с ID " + documentId + " не найден"
+                                "Документ с ID "
+                                        + documentId
+                                        + " не найден"
                         )
                 );
 
@@ -153,10 +162,6 @@ public class AiProcessingService {
                 aiProcessingResultRepository
                         .save(result);
 
-        /*
-         * Бизнес-логика изменения состояния документа
-         * после обработки AI-сервисом.
-         */
         if (requiresOcr) {
 
             document.setStatus(
@@ -189,11 +194,18 @@ public class AiProcessingService {
             document.setStatus(
                     DocumentStatus.VERIFIED
             );
+
+            documentRepository.save(document);
+
+            /*
+             * Автоматизированная маршрутизация выполняется
+             * серверной бизнес-логикой после успешной
+             * интеллектуальной классификации.
+             */
+            documentRoutingService.route(document);
         }
 
-        documentRepository.save(
-                document
-        );
+        documentRepository.save(document);
 
         return new AiProcessingResponse(
                 savedResult.getId(),
@@ -214,6 +226,7 @@ public class AiProcessingService {
     private DocumentType parseDocumentType(
             String value
     ) {
+
         if (value == null || value.isBlank()) {
             return null;
         }
@@ -236,6 +249,7 @@ public class AiProcessingService {
     private String probabilitiesToJson(
             Map<String, Double> probabilities
     ) {
+
         if (
                 probabilities == null
                         || probabilities.isEmpty()
