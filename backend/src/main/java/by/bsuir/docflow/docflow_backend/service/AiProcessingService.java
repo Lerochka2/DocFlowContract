@@ -191,21 +191,31 @@ public class AiProcessingService {
                     acceptedType
             );
 
-            document.setStatus(
-                    DocumentStatus.VERIFIED
-            );
+            if (acceptedType == DocumentType.CONTRACT) {
 
-            documentRepository.save(document);
+                document.setStatus(
+                        DocumentStatus.VERIFIED
+                );
 
-            /*
-             * Автоматизированная маршрутизация выполняется
-             * серверной бизнес-логикой после успешной
-             * интеллектуальной классификации.
-             */
-            documentRoutingService.route(document);
+                documentRepository.save(
+                        document
+                );
+
+                documentRoutingService.route(
+                        document
+                );
+
+            } else {
+
+                document.setStatus(
+                        DocumentStatus.LINK_REQUIRED
+                );
+            }
         }
 
-        documentRepository.save(document);
+        documentRepository.save(
+                document
+        );
 
         return new AiProcessingResponse(
                 savedResult.getId(),
