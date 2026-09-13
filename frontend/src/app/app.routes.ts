@@ -23,6 +23,10 @@ import {
 } from './pages/review/review';
 
 import {
+  RoutingWorkspace
+} from './pages/routing/routing';
+
+import {
   SedWorkspace
 } from './pages/sed/sed';
 
@@ -61,6 +65,10 @@ export const routes: Routes = [
       {
         path: 'review',
         component: ReviewQueue
+      },
+      {
+        path: 'routing',
+        component: RoutingWorkspace
       },
       {
         path: 'sed',

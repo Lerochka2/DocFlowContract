@@ -1,0 +1,501 @@
+<section class="routing-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        АВТОМАТИЗИРОВАННАЯ МАРШРУТИЗАЦИЯ
+      </span>
+
+      <h1>
+        Маршрутизация документов
+      </h1>
+
+      <p>
+        Контроль автоматически сформированных маршрутов
+        на основе результата интеллектуальной классификации документов.
+      </p>
+
+    </div>
+
+
+    <button
+      class="refresh-button"
+      type="button"
+      [disabled]="loading"
+      (click)="loadRoutingWorkspace()"
+    >
+      @if (loading) {
+        Обновляем...
+      } @else {
+        Обновить
+      }
+    </button>
+
+  </header>
+
+
+  <section class="statistics">
+
+    <article class="stat-card">
+
+      <div class="stat-icon all">
+        ↗
+      </div>
+
+      <div>
+
+        <span>
+          Всего маршрутов
+        </span>
+
+        <strong>
+          {{ documents.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon manager">
+        M
+      </div>
+
+      <div>
+
+        <span>
+          Менеджер по договорам
+        </span>
+
+        <strong>
+          {{ contractManagerCount }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon lawyer">
+        Ю
+      </div>
+
+      <div>
+
+        <span>
+          Юрист
+        </span>
+
+        <strong>
+          {{ lawyerCount }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon routed">
+        ✓
+      </div>
+
+      <div>
+
+        <span>
+          Успешно определены
+        </span>
+
+        <strong>
+          {{ routedCount }}
+        </strong>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <section class="route-rules">
+
+    <div class="rule-title">
+
+      <span>
+        Логика маршрутизации
+      </span>
+
+      <strong>
+        Тип документа → получатель
+      </strong>
+
+    </div>
+
+
+    <div class="rule">
+
+      <span class="rule-type">
+        Договор
+      </span>
+
+      <span class="arrow">
+        →
+      </span>
+
+      <span class="rule-target manager">
+        Менеджер по договорам
+      </span>
+
+    </div>
+
+
+    <div class="rule">
+
+      <span class="rule-type">
+        Доп. соглашение — изменение
+      </span>
+
+      <span class="arrow">
+        →
+      </span>
+
+      <span class="rule-target lawyer">
+        Юрист
+      </span>
+
+    </div>
+
+
+    <div class="rule">
+
+      <span class="rule-type">
+        Продление / приложение
+      </span>
+
+      <span class="arrow">
+        →
+      </span>
+
+      <span class="rule-target manager">
+        Менеджер по договорам
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <section class="filters">
+
+    <label class="search-field">
+
+      <svg viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M16 16l5 5"/>
+      </svg>
+
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Поиск по документу, номеру, предмету или маршруту..."
+      />
+
+    </label>
+
+
+    <label class="filter-field">
+
+      <span>
+        Получатель
+      </span>
+
+      <select
+        [(ngModel)]="targetFilter"
+      >
+        <option value="ALL">
+          Все маршруты
+        </option>
+
+        <option value="CONTRACT_MANAGER">
+          Менеджер по договорам
+        </option>
+
+        <option value="LAWYER">
+          Юрист
+        </option>
+      </select>
+
+    </label>
+
+
+    <button
+      class="reset-button"
+      type="button"
+      (click)="resetFilters()"
+    >
+      Сбросить
+    </button>
+
+  </section>
+
+
+  @if (loading) {
+
+    <section class="state-card">
+
+      <div class="loader"></div>
+
+      <strong>
+        Загружаем маршруты
+      </strong>
+
+      <span>
+        Получаем документы и результаты автоматической маршрутизации...
+      </span>
+
+    </section>
+
+  } @else if (errorMessage) {
+
+    <section class="state-card error">
+
+      <div class="state-icon">
+        !
+      </div>
+
+      <strong>
+        Не удалось загрузить маршруты
+      </strong>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="loadRoutingWorkspace()"
+      >
+        Повторить
+      </button>
+
+    </section>
+
+  } @else if (filteredDocuments.length === 0) {
+
+    <section class="state-card empty">
+
+      <div class="state-icon success">
+        ✓
+      </div>
+
+      <strong>
+        Маршруты не найдены
+      </strong>
+
+      <span>
+        Для выбранных условий нет документов
+        с сформированным маршрутом.
+      </span>
+
+    </section>
+
+  } @else {
+
+    <div class="table-header">
+
+      <span>
+        Документ
+      </span>
+
+      <span>
+        Класс
+      </span>
+
+      <span>
+        Получатель
+      </span>
+
+      <span>
+        Маршрутизация
+      </span>
+
+      <span>
+        Статус документа
+      </span>
+
+      <span></span>
+
+    </div>
+
+
+    <section class="routing-list">
+
+      @for (
+        document of filteredDocuments;
+        track document.documentId
+      ) {
+
+        <article class="route-card">
+
+          <div class="document-cell">
+
+            <div class="file-icon">
+              PDF
+            </div>
+
+            <div class="document-info">
+
+              <span class="document-id">
+                ДОКУМЕНТ #{{ document.documentId }}
+              </span>
+
+              <strong
+                class="file-name"
+                [title]="document.originalName || 'Документ'"
+              >
+                {{ document.originalName || 'Документ' }}
+              </strong>
+
+              <span class="document-number">
+                {{
+                  document.documentNumber
+                    ? '№ ' + document.documentNumber
+                    : 'Без номера'
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="type-cell">
+
+            <span>
+              Тип документа
+            </span>
+
+            <strong>
+              {{ getDocumentTypeLabel(document.documentType) }}
+            </strong>
+
+          </div>
+
+
+          <div class="target-cell">
+
+            <span
+              [class]="
+                'target-icon ' +
+                getTargetClass(
+                  document.routing?.routingTarget || null
+                )
+              "
+            >
+              @if (
+                document.routing?.routingTarget
+                  === 'LAWYER'
+              ) {
+                Ю
+              } @else {
+                M
+              }
+            </span>
+
+            <div>
+
+              <span>
+                Получатель
+              </span>
+
+              <strong>
+                {{
+                  getRoutingTargetLabel(
+                    document.routing?.routingTarget || null
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="routing-cell">
+
+            <span class="routing-status">
+              <i></i>
+
+              {{
+                getRoutingStatusLabel(
+                  document.routing?.routingStatus || null
+                )
+              }}
+            </span>
+
+            <span class="routing-date">
+              {{
+                formatDateTime(
+                  document.routing?.routedAt || null
+                )
+              }}
+            </span>
+
+            @if (document.routing?.routingReason) {
+
+              <span
+                class="routing-reason"
+                [title]="document.routing?.routingReason || ''"
+              >
+                {{ document.routing?.routingReason }}
+              </span>
+
+            }
+
+          </div>
+
+
+          <div class="document-status-cell">
+
+            <span>
+              {{
+                getDocumentStatusLabel(
+                  document.status
+                )
+              }}
+            </span>
+
+          </div>
+
+
+          <div class="action-cell">
+
+            <button
+              type="button"
+              (click)="
+                openDocument(
+                  document.documentId
+                )
+              "
+            >
+              Открыть
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </section>
+
+  }
+
+</section>
