@@ -189,6 +189,7 @@
 
       </div>
 
+
       <a
         class="nav-item"
         (click)="logout()"
@@ -213,26 +214,261 @@
 
     <header class="topbar">
 
-      <div class="search">
+      <div
+        class="global-search"
+        (click)="$event.stopPropagation()"
+      >
 
-        <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="7"/>
-          <path d="M16 16l5 5"/>
-        </svg>
+        <div
+          [class]="
+            searchOpen
+              ? 'search active'
+              : 'search'
+          "
+        >
 
-        <input
-          type="text"
-          placeholder="Поиск по документам, контрагентам, номерам, тексту..."
-        />
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="M16 16l5 5"/>
+          </svg>
 
 
-        @if (
-          uiPreferencesService.showSearchShortcut()
-        ) {
+          <input
+            #globalSearchInput
+            type="text"
+            autocomplete="off"
+            [(ngModel)]="searchQuery"
+            placeholder="Поиск по документам, номерам и предмету..."
+            (input)="onSearchInput()"
+            (focus)="onSearchFocus()"
+            (keydown.enter)="onSearchEnter()"
+          />
 
-          <span class="search-shortcut">
-            Ctrl K
-          </span>
+
+          @if (searchQuery) {
+
+            <button
+              class="search-clear"
+              type="button"
+              title="Очистить поиск"
+              (click)="clearSearch()"
+            >
+              ×
+            </button>
+
+          }
+
+
+          @if (
+            uiPreferencesService.showSearchShortcut()
+            &&
+            !searchQuery
+          ) {
+
+            <span class="search-shortcut">
+              Ctrl K
+            </span>
+
+          }
+
+        </div>
+
+
+        @if (searchOpen) {
+
+          <div class="search-dropdown">
+
+            <div class="search-dropdown-header">
+
+              <span>
+                Результаты поиска
+              </span>
+
+              @if (!searchLoading) {
+
+                <strong>
+                  {{ searchResults.length }}
+                </strong>
+
+              }
+
+            </div>
+
+
+            @if (searchLoading) {
+
+              <div class="search-state">
+
+                <span class="search-loader"></span>
+
+                <div>
+
+                  <strong>
+                    Ищем документы
+                  </strong>
+
+                  <span>
+                    Поиск по рабочему пространству DocFlow...
+                  </span>
+
+                </div>
+
+              </div>
+
+            } @else if (searchErrorMessage) {
+
+              <div class="search-state error">
+
+                <span class="search-state-icon">
+                  !
+                </span>
+
+                <div>
+
+                  <strong>
+                    Ошибка поиска
+                  </strong>
+
+                  <span>
+                    {{ searchErrorMessage }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            } @else if (searchResults.length === 0) {
+
+              <div class="search-state empty">
+
+                <span class="search-state-icon">
+                  ?
+                </span>
+
+                <div>
+
+                  <strong>
+                    Ничего не найдено
+                  </strong>
+
+                  <span>
+                    Попробуйте другой номер, название
+                    или предмет документа.
+                  </span>
+
+                </div>
+
+              </div>
+
+            } @else {
+
+              <div class="search-results">
+
+                @for (
+                  document of searchResults;
+                  track document.documentId
+                ) {
+
+                  <button
+                    class="search-result"
+                    type="button"
+                    (click)="openSearchResult(document)"
+                  >
+
+                    <span class="result-file-icon">
+                      PDF
+                    </span>
+
+
+                    <span class="result-content">
+
+                      <span class="result-top">
+
+                        <strong>
+                          {{
+                            document.originalName
+                            || 'Документ'
+                          }}
+                        </strong>
+
+                        <span
+                          [class]="
+                            'result-status ' +
+                            getStatusClass(
+                              document.status
+                            )
+                          "
+                        >
+                          {{
+                            getStatusLabel(
+                              document.status
+                            )
+                          }}
+                        </span>
+
+                      </span>
+
+
+                      <span class="result-meta">
+
+                        <span>
+                          {{
+                            getDocumentTypeLabel(
+                              document.documentType
+                            )
+                          }}
+                        </span>
+
+                        <i></i>
+
+                        <span>
+                          {{
+                            document.documentNumber
+                              ? '№ ' + document.documentNumber
+                              : 'Без номера'
+                          }}
+                        </span>
+
+                      </span>
+
+
+                      @if (document.subject) {
+
+                        <span class="result-subject">
+                          {{ document.subject }}
+                        </span>
+
+                      }
+
+                    </span>
+
+
+                    <span class="result-arrow">
+                      →
+                    </span>
+
+                  </button>
+
+                }
+
+              </div>
+
+
+              <div class="search-footer">
+
+                <span>
+                  Enter — открыть первый результат
+                </span>
+
+                <span>
+                  Esc — закрыть
+                </span>
+
+              </div>
+
+            }
+
+          </div>
 
         }
 
