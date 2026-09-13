@@ -1,0 +1,311 @@
+<section class="documents-page">
+
+  <header class="page-heading">
+
+    <div>
+
+      <span class="eyebrow">
+        РАБОЧЕЕ ПРОСТРАНСТВО
+      </span>
+
+      <h1>
+        Документы
+      </h1>
+
+      <p>
+        Просматривайте, ищите и фильтруйте документы,
+        загруженные в DocFlow.
+      </p>
+
+    </div>
+
+    <button
+      class="upload-button"
+      type="button"
+    >
+      <span>+</span>
+      Загрузить документ
+    </button>
+
+  </header>
+
+
+  <section class="filter-panel">
+
+    <form
+      class="filters"
+      (ngSubmit)="loadDocuments()"
+    >
+
+      <div class="search-field">
+
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M16 16l5 5"/>
+        </svg>
+
+        <input
+          type="text"
+          name="query"
+          [(ngModel)]="query"
+          placeholder="Название, номер или предмет документа"
+        />
+
+      </div>
+
+
+      <select
+        name="type"
+        [(ngModel)]="selectedType"
+      >
+        <option value="">
+          Все типы
+        </option>
+
+        <option value="CONTRACT">
+          Договор
+        </option>
+
+        <option value="APPENDIX">
+          Приложение
+        </option>
+
+        <option value="AMENDMENT_CHANGE">
+          Доп. соглашение — изменение
+        </option>
+
+        <option value="AMENDMENT_PROLONGATION">
+          Доп. соглашение — продление
+        </option>
+      </select>
+
+
+      <select
+        name="status"
+        [(ngModel)]="selectedStatus"
+      >
+        <option value="">
+          Все статусы
+        </option>
+
+        <option value="UPLOADED">
+          Загружен
+        </option>
+
+        <option value="AI_PROCESSING">
+          AI-анализ
+        </option>
+
+        <option value="REVIEW_REQUIRED">
+          Требует проверки
+        </option>
+
+        <option value="LINK_REQUIRED">
+          Требует привязки
+        </option>
+
+        <option value="LINKED">
+          Связан с договором
+        </option>
+
+        <option value="VERIFIED">
+          Проверен
+        </option>
+
+        <option value="READY_FOR_SED">
+          Готов к отправке
+        </option>
+
+        <option value="SENT_TO_SED">
+          Отправлен в СЭД
+        </option>
+
+        <option value="PROCESSING_FAILED">
+          Ошибка обработки
+        </option>
+
+        <option value="SED_ERROR">
+          Ошибка СЭД
+        </option>
+      </select>
+
+
+      <button
+        class="apply-button"
+        type="submit"
+      >
+        Применить
+      </button>
+
+      <button
+        class="reset-button"
+        type="button"
+        (click)="resetFilters()"
+      >
+        Сбросить
+      </button>
+
+    </form>
+
+  </section>
+
+
+  <section class="documents-panel">
+
+    <div class="panel-heading">
+
+      <div>
+        <h2>
+          Все документы
+        </h2>
+
+        <span>
+          Найдено: {{ documents.length }}
+        </span>
+      </div>
+
+      <span class="ai-label">
+        <i></i>
+        Данные из DocFlow
+      </span>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="state-message">
+        Загружаем документы...
+      </div>
+
+    } @else if (errorMessage) {
+
+      <div class="state-message error">
+
+        <strong>
+          Не удалось загрузить документы
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+        <button
+          type="button"
+          (click)="loadDocuments()"
+        >
+          Повторить
+        </button>
+
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <div class="documents-table">
+
+          <div class="document-row table-head">
+            <span>Документ</span>
+            <span>Тип</span>
+            <span>Статус</span>
+            <span>Номер</span>
+            <span>Дата</span>
+            <span>Сумма</span>
+          </div>
+
+
+          @for (
+            document of documents;
+            track document.documentId
+          ) {
+
+            <div class="document-row">
+
+              <div class="document-main">
+
+                <span class="pdf-icon">
+                  PDF
+                </span>
+
+                <div>
+
+                  <strong>
+                    {{ getDocumentName(document) }}
+                  </strong>
+
+                  <small>
+                    ID {{ document.documentId }}
+                  </small>
+
+                  @if (document.subject) {
+                    <span class="subject">
+                      {{ document.subject }}
+                    </span>
+                  }
+
+                </div>
+
+              </div>
+
+
+              <span class="document-type">
+                {{ getDocumentTypeLabel(document.documentType) }}
+              </span>
+
+
+              <span
+                [class]="
+                  'status ' +
+                  getStatusClass(document.status)
+                "
+              >
+                {{ getStatusLabel(document.status) }}
+              </span>
+
+
+              <span>
+                {{ document.documentNumber || '—' }}
+              </span>
+
+
+              <span>
+                {{ getDate(document) }}
+              </span>
+
+
+              <span class="amount">
+                {{ getAmount(document) }}
+              </span>
+
+            </div>
+
+          } @empty {
+
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                ⌕
+              </div>
+
+              <strong>
+                Документы не найдены
+              </strong>
+
+              <span>
+                Измените параметры поиска или сбросьте фильтры.
+              </span>
+
+            </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+</section>

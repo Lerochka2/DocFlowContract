@@ -11,6 +11,10 @@ import {
 } from './pages/dashboard/dashboard';
 
 import {
+  Documents
+} from './pages/documents/documents';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -33,6 +37,10 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: Dashboard
+      },
+      {
+        path: 'documents',
+        component: Documents
       },
       {
         path: '',
