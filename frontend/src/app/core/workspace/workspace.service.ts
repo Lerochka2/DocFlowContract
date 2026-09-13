@@ -11,6 +11,12 @@ import {
   Observable
 } from 'rxjs';
 
+export type DocumentTypeCode =
+  | 'CONTRACT'
+  | 'AMENDMENT_CHANGE'
+  | 'AMENDMENT_PROLONGATION'
+  | 'APPENDIX';
+
 export interface WorkspaceDashboard {
   totalDocuments: number;
   uploaded: number;
@@ -143,6 +149,18 @@ export interface DocumentLinkResponse {
   routingTarget: string;
   routingStatus: string;
   linkedAt: string;
+}
+
+export interface ManualReviewRequest {
+  documentType: DocumentTypeCode;
+}
+
+export interface ManualReviewResponse {
+  documentId: number;
+  documentType: string;
+  documentStatus: string;
+  routingTarget: string | null;
+  routingStatus: string | null;
 }
 
 export interface SedPreparationResponse {
@@ -279,6 +297,21 @@ export class WorkspaceService {
 
     return this.http.put<DocumentMetadata>(
       `${this.documentsApiUrl}/${documentId}/metadata`,
+      request
+    );
+  }
+
+  reviewDocument(
+    documentId: number,
+    documentType: DocumentTypeCode
+  ): Observable<ManualReviewResponse> {
+
+    const request: ManualReviewRequest = {
+      documentType
+    };
+
+    return this.http.post<ManualReviewResponse>(
+      `${this.documentsApiUrl}/${documentId}/review`,
       request
     );
   }

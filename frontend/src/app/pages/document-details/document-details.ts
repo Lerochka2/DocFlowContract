@@ -26,6 +26,7 @@ import {
   DocumentMetadata,
   DocumentMetadataRequest,
   DocumentSummary,
+  DocumentTypeCode,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
 
@@ -47,12 +48,17 @@ export class DocumentDetails implements OnInit {
   contractCandidates: ContractCandidate[] = [];
   selectedContractDocumentId: number | null = null;
 
+  selectedReviewDocumentType:
+    DocumentTypeCode | null = null;
+
   loading = true;
   deleting = false;
 
   editingMetadata = false;
   loadingMetadata = false;
   savingMetadata = false;
+
+  reviewingDocument = false;
 
   loadingCandidates = false;
   linkingDocument = false;
@@ -65,6 +71,9 @@ export class DocumentDetails implements OnInit {
 
   metadataErrorMessage = '';
   metadataSuccessMessage = '';
+
+  reviewErrorMessage = '';
+  reviewSuccessMessage = '';
 
   linkErrorMessage = '';
   linkSuccessMessage = '';
@@ -133,6 +142,10 @@ export class DocumentDetails implements OnInit {
 
           this.loading = false;
 
+          this.updateReviewState(
+            document
+          );
+
           this.updateLinkCandidates(
             document
           );
@@ -186,6 +199,10 @@ export class DocumentDetails implements OnInit {
           this.document =
             document;
 
+          this.updateReviewState(
+            document
+          );
+
           this.updateLinkCandidates(
             document
           );
@@ -198,6 +215,151 @@ export class DocumentDetails implements OnInit {
           this.loadDocument();
         }
       });
+  }
+
+  private updateReviewState(
+    document: DocumentSummary
+  ): void {
+
+    if (
+      document.status
+      !== 'REVIEW_REQUIRED'
+    ) {
+
+      this.selectedReviewDocumentType =
+        null;
+
+      return;
+    }
+
+    if (
+      this.isDocumentTypeCode(
+        document.ai?.predictedType
+      )
+    ) {
+
+      this.selectedReviewDocumentType =
+        document.ai!.predictedType as DocumentTypeCode;
+
+      return;
+    }
+
+    if (
+      this.isDocumentTypeCode(
+        document.documentType
+      )
+    ) {
+
+      this.selectedReviewDocumentType =
+        document.documentType;
+
+      return;
+    }
+
+    this.selectedReviewDocumentType =
+      null;
+  }
+
+  reviewDocument(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canReviewDocument
+      ||
+      this.selectedReviewDocumentType === null
+      ||
+      this.reviewingDocument
+    ) {
+      return;
+    }
+
+    const selectedTypeLabel =
+      this.getDocumentTypeLabel(
+        this.selectedReviewDocumentType
+      );
+
+    const confirmed =
+      window.confirm(
+        `Подтвердить тип документа «${selectedTypeLabel}»?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.reviewingDocument = true;
+
+    this.reviewErrorMessage = '';
+    this.reviewSuccessMessage = '';
+
+    this.workspaceService
+      .reviewDocument(
+        this.documentId,
+        this.selectedReviewDocumentType
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.reviewingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: response => {
+
+          if (
+            response.documentType
+            === 'CONTRACT'
+          ) {
+
+            this.reviewSuccessMessage =
+              'Тип документа подтверждён. Договор проверен и маршрутизирован.';
+
+          } else {
+
+            this.reviewSuccessMessage =
+              'Тип документа подтверждён. Теперь необходимо выбрать основной договор.';
+          }
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.reviewErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось подтвердить тип документа.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get canReviewDocument(): boolean {
+
+    return this.document?.status
+      === 'REVIEW_REQUIRED';
+  }
+
+  private isDocumentTypeCode(
+    value: string | null | undefined
+  ): value is DocumentTypeCode {
+
+    return value === 'CONTRACT'
+      || value === 'AMENDMENT_CHANGE'
+      || value === 'AMENDMENT_PROLONGATION'
+      || value === 'APPENDIX';
   }
 
   private updateLinkCandidates(

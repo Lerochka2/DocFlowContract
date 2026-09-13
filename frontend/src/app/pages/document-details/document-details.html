@@ -168,6 +168,15 @@
     }
 
 
+    @if (reviewSuccessMessage) {
+
+      <div class="metadata-message success">
+        {{ reviewSuccessMessage }}
+      </div>
+
+    }
+
+
     @if (linkSuccessMessage) {
 
       <div class="metadata-message success">
@@ -583,7 +592,7 @@
           <div class="ai-type">
 
             <span>
-              Определённый класс
+              Предсказанный класс
             </span>
 
             <strong>
@@ -647,6 +656,98 @@
             <span>
               Для этого документа отсутствует результат классификации.
             </span>
+
+          </div>
+
+        }
+
+
+        @if (canReviewDocument) {
+
+          <div class="review-box">
+
+            <div class="review-heading">
+
+              <span class="review-icon">
+                !
+              </span>
+
+              <div>
+
+                <strong>
+                  Требуется ручная проверка
+                </strong>
+
+                <span>
+                  Уверенность AI ниже установленного порога. Проверьте тип документа перед продолжением процесса.
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <label class="review-select">
+
+              <span>
+                Подтверждённый тип документа
+              </span>
+
+              <select
+                name="reviewDocumentType"
+                [(ngModel)]="selectedReviewDocumentType"
+              >
+
+                <option [ngValue]="null">
+                  Выберите тип
+                </option>
+
+                <option value="CONTRACT">
+                  Договор
+                </option>
+
+                <option value="AMENDMENT_CHANGE">
+                  Доп. соглашение — изменение
+                </option>
+
+                <option value="AMENDMENT_PROLONGATION">
+                  Доп. соглашение — продление
+                </option>
+
+                <option value="APPENDIX">
+                  Приложение
+                </option>
+
+              </select>
+
+            </label>
+
+
+            @if (reviewErrorMessage) {
+
+              <div class="review-error">
+                {{ reviewErrorMessage }}
+              </div>
+
+            }
+
+
+            <button
+              class="review-button"
+              type="button"
+              [disabled]="
+                selectedReviewDocumentType === null
+                ||
+                reviewingDocument
+              "
+              (click)="reviewDocument()"
+            >
+              @if (reviewingDocument) {
+                Подтверждаем...
+              } @else {
+                Подтвердить тип документа
+              }
+            </button>
 
           </div>
 
