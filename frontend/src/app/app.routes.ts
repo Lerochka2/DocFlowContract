@@ -19,6 +19,10 @@ import {
 } from './pages/document-details/document-details';
 
 import {
+  ReviewQueue
+} from './pages/review/review';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -49,6 +53,10 @@ export const routes: Routes = [
       {
         path: 'documents/:id',
         component: DocumentDetails
+      },
+      {
+        path: 'review',
+        component: ReviewQueue
       },
       {
         path: '',

@@ -1,0 +1,304 @@
+<section class="review-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        КОНТРОЛЬ AI-КЛАССИФИКАЦИИ
+      </span>
+
+      <h1>
+        Ручная проверка
+      </h1>
+
+      <p>
+        Документы, для которых уверенность AI оказалась ниже
+        установленного порога и требуется подтверждение пользователя.
+      </p>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <div class="queue-counter">
+
+        <span>
+          Требуют проверки
+        </span>
+
+        <strong>
+          {{ documents.length }}
+        </strong>
+
+      </div>
+
+
+      <button
+        class="refresh-button"
+        type="button"
+        [disabled]="loading"
+        (click)="loadQueue()"
+      >
+        @if (loading) {
+          Обновляем...
+        } @else {
+          Обновить
+        }
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <section class="info-banner">
+
+    <div class="banner-icon">
+      AI
+    </div>
+
+    <div>
+
+      <strong>
+        Почему документы попадают сюда?
+      </strong>
+
+      <span>
+        Если уверенность модели ниже 80%, DocFlow не принимает
+        классификацию автоматически. Пользователь должен проверить
+        предложенный AI тип документа и подтвердить или исправить его.
+      </span>
+
+    </div>
+
+  </section>
+
+
+  @if (loading) {
+
+    <section class="state-card">
+
+      <div class="loader"></div>
+
+      <strong>
+        Загружаем очередь проверки
+      </strong>
+
+      <span>
+        Получаем документы и результаты AI-классификации...
+      </span>
+
+    </section>
+
+  } @else if (errorMessage) {
+
+    <section class="state-card error">
+
+      <div class="state-icon">
+        !
+      </div>
+
+      <strong>
+        Не удалось загрузить документы
+      </strong>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="loadQueue()"
+      >
+        Повторить
+      </button>
+
+    </section>
+
+  } @else if (documents.length === 0) {
+
+    <section class="state-card empty">
+
+      <div class="state-icon">
+        ✓
+      </div>
+
+      <strong>
+        Очередь проверки пуста
+      </strong>
+
+      <span>
+        Сейчас нет документов с низкой уверенностью AI.
+        Все классификации обработаны.
+      </span>
+
+    </section>
+
+  } @else {
+
+    <div class="queue-heading">
+
+      <span>
+        Документ
+      </span>
+
+      <span>
+        AI-классификация
+      </span>
+
+      <span>
+        Уверенность
+      </span>
+
+      <span>
+        Действие
+      </span>
+
+    </div>
+
+
+    <section class="review-list">
+
+      @for (
+        document of documents;
+        track document.documentId
+      ) {
+
+        <article class="review-card">
+
+          <div class="document-cell">
+
+            <div class="file-icon">
+              PDF
+            </div>
+
+            <div class="document-info">
+
+              <div class="document-topline">
+
+                <span>
+                  ДОКУМЕНТ #{{ document.documentId }}
+                </span>
+
+                <span class="review-status">
+                  Требует проверки
+                </span>
+
+              </div>
+
+              <strong
+                class="file-name"
+                [title]="document.originalName || 'Документ'"
+              >
+                {{ document.originalName || 'Документ' }}
+              </strong>
+
+              <div class="document-meta">
+
+                <span>
+                  {{
+                    document.documentNumber
+                      ? '№ ' + document.documentNumber
+                      : 'Без номера'
+                  }}
+                </span>
+
+                <i></i>
+
+                <span>
+                  {{ formatDate(document.documentDate) }}
+                </span>
+
+              </div>
+
+
+              @if (document.subject) {
+
+                <p class="subject">
+                  {{ document.subject }}
+                </p>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="classification-cell">
+
+            <span>
+              Предсказанный класс
+            </span>
+
+            <strong>
+              {{
+                getDocumentTypeLabel(
+                  document.ai?.predictedType || null
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="confidence-cell">
+
+            <div class="confidence-value">
+
+              <strong>
+                {{ getConfidence(document) }}
+              </strong>
+
+              <span>
+                порог 80%
+              </span>
+
+            </div>
+
+            <div class="confidence-track">
+
+              <i
+                [style.width.%]="
+                  getConfidencePercent(document)
+                "
+              ></i>
+
+              <b></b>
+
+            </div>
+
+            <span class="confidence-warning">
+              Требуется подтверждение
+            </span>
+
+          </div>
+
+
+          <div class="action-cell">
+
+            <button
+              type="button"
+              (click)="
+                openDocument(
+                  document.documentId
+                )
+              "
+            >
+              Открыть на проверку
+              <span>→</span>
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </section>
+
+  }
+
+</section>
