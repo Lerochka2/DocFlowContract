@@ -160,6 +160,15 @@
     }
 
 
+    @if (linkSuccessMessage) {
+
+      <div class="metadata-message success">
+        {{ linkSuccessMessage }}
+      </div>
+
+    }
+
+
     <section class="overview-grid">
 
       <article class="panel main-info">
@@ -752,6 +761,181 @@
               Открыть договор →
             </button>
 
+          } @else if (
+            document.status === 'LINK_REQUIRED'
+          ) {
+
+            <div class="link-required-box">
+
+              <strong>
+                Требуется основной договор
+              </strong>
+
+              <span>
+                Выберите договор, к которому относится этот документ.
+              </span>
+
+            </div>
+
+
+            @if (loadingCandidates) {
+
+              <div class="candidate-state">
+                Загружаем доступные договоры...
+              </div>
+
+            } @else if (linkErrorMessage) {
+
+              <div class="link-error">
+                {{ linkErrorMessage }}
+              </div>
+
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="loadContractCandidates()"
+              >
+                Повторить
+              </button>
+
+            } @else if (contractCandidates.length > 0) {
+
+              <label class="contract-select">
+
+                <span>
+                  Основной договор
+                </span>
+
+                <select
+                  name="contractCandidate"
+                  [(ngModel)]="selectedContractDocumentId"
+                >
+
+                  <option [ngValue]="null">
+                    Выберите договор
+                  </option>
+
+                  @for (
+                    candidate of contractCandidates;
+                    track candidate.contractDocumentId
+                  ) {
+
+                    <option
+                      [ngValue]="candidate.contractDocumentId"
+                    >
+                      {{
+                        candidate.documentNumber
+                          ? '№ ' + candidate.documentNumber
+                          : 'ID ' + candidate.contractDocumentId
+                      }}
+                      —
+                      {{ formatDate(candidate.documentDate) }}
+                    </option>
+
+                  }
+
+                </select>
+
+              </label>
+
+
+              @if (selectedContractCandidate) {
+
+                <div class="candidate-preview">
+
+                  <div>
+
+                    <span>
+                      Договор
+                    </span>
+
+                    <strong>
+                      {{
+                        selectedContractCandidate.documentNumber
+                          ? '№ ' + selectedContractCandidate.documentNumber
+                          : 'ID ' + selectedContractCandidate.contractDocumentId
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Дата
+                    </span>
+
+                    <strong>
+                      {{ formatDate(selectedContractCandidate.documentDate) }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="candidate-subject">
+
+                    <span>
+                      Предмет
+                    </span>
+
+                    <strong>
+                      {{ selectedContractCandidate.subject || '—' }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Статус
+                    </span>
+
+                    <strong>
+                      {{ getStatusLabel(selectedContractCandidate.status) }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              }
+
+
+              <button
+                class="link-button"
+                type="button"
+                [disabled]="
+                  selectedContractDocumentId === null
+                  ||
+                  linkingDocument
+                "
+                (click)="linkToContract()"
+              >
+                @if (linkingDocument) {
+                  Привязываем...
+                } @else {
+                  Привязать к договору
+                }
+              </button>
+
+            } @else {
+
+              <div class="empty-section compact">
+
+                <strong>
+                  Подходящие договоры не найдены
+                </strong>
+
+                <span>
+                  Сначала необходимо добавить и проверить основной договор.
+                </span>
+
+              </div>
+
+            }
+
           } @else {
 
             <div class="empty-section compact">
@@ -761,7 +945,7 @@
               </strong>
 
               <span>
-                Этот документ пока не связан с базовым договором.
+                Для этого документа связь с основным договором не создана.
               </span>
 
             </div>

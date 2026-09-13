@@ -327,9 +327,6 @@
   background: #fbfcfe;
   font: inherit;
   font-size: 13px;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
 }
 
 .form-field input,
@@ -574,6 +571,136 @@
   line-height: 1.45;
 }
 
+.link-required-box {
+  margin-top: 22px;
+  padding: 12px 13px;
+  border-radius: 9px;
+  color: #856522;
+  background: #fff7e6;
+}
+
+.link-required-box strong,
+.link-required-box span {
+  display: block;
+}
+
+.link-required-box strong {
+  font-size: 13px;
+}
+
+.link-required-box span {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.contract-select {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.contract-select > span {
+  color: #7d899a;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.contract-select select {
+  width: 100%;
+  height: 41px;
+  padding: 0 9px;
+  border: 1px solid #dce3ed;
+  border-radius: 8px;
+  outline: 0;
+  color: #49566b;
+  background: #ffffff;
+  font: inherit;
+  font-size: 12px;
+}
+
+.contract-select select:focus {
+  border-color: #7898df;
+  box-shadow: 0 0 0 3px rgba(67, 107, 211, 0.08);
+}
+
+.candidate-preview {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 13px;
+  padding: 12px;
+  border: 1px solid #edf0f4;
+  border-radius: 9px;
+  background: #fafbfc;
+}
+
+.candidate-preview > div {
+  min-width: 0;
+}
+
+.candidate-preview span,
+.candidate-preview strong {
+  display: block;
+}
+
+.candidate-preview span {
+  margin-bottom: 4px;
+  color: #98a0ad;
+  font-size: 10px;
+}
+
+.candidate-preview strong {
+  color: #4a566a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.candidate-subject {
+  grid-column: 1 / -1;
+}
+
+.link-button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 13px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #4d70d5;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.link-button:hover:not(:disabled) {
+  background: #4265c8;
+}
+
+.link-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.candidate-state {
+  margin-top: 16px;
+  color: #7d899a;
+  font-size: 12px;
+}
+
+.link-error {
+  margin-top: 15px;
+  padding: 10px 11px;
+  border-radius: 8px;
+  color: #a24e49;
+  background: #fff1ef;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .empty-section {
   margin: 20px 21px;
   padding: 18px;
@@ -704,7 +831,8 @@
   }
 
   .info-grid,
-  .metadata-form {
+  .metadata-form,
+  .candidate-preview {
     grid-template-columns: 1fr;
   }
 
@@ -712,7 +840,8 @@
   .form-field.wide,
   .reference-divider.wide,
   .form-error.wide,
-  .form-actions.wide {
+  .form-actions.wide,
+  .candidate-subject {
     grid-column: auto;
   }
 }

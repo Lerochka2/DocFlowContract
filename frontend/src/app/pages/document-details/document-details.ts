@@ -22,6 +22,7 @@ import {
 } from 'rxjs';
 
 import {
+  ContractCandidate,
   DocumentMetadata,
   DocumentMetadataRequest,
   DocumentSummary,
@@ -43,16 +44,27 @@ export class DocumentDetails implements OnInit {
 
   metadataForm: DocumentMetadataRequest | null = null;
 
+  contractCandidates: ContractCandidate[] = [];
+  selectedContractDocumentId: number | null = null;
+
   loading = true;
   deleting = false;
+
   editingMetadata = false;
   loadingMetadata = false;
   savingMetadata = false;
 
+  loadingCandidates = false;
+  linkingDocument = false;
+
   errorMessage = '';
   deleteErrorMessage = '';
+
   metadataErrorMessage = '';
   metadataSuccessMessage = '';
+
+  linkErrorMessage = '';
+  linkSuccessMessage = '';
 
   private documentId: number | null = null;
 
@@ -115,6 +127,20 @@ export class DocumentDetails implements OnInit {
 
           this.loading = false;
 
+          if (
+            document.status === 'LINK_REQUIRED'
+            &&
+            !document.link
+          ) {
+
+            this.loadContractCandidates();
+
+          } else {
+
+            this.contractCandidates = [];
+            this.selectedContractDocumentId = null;
+          }
+
           this.changeDetectorRef
             .markForCheck();
         },
@@ -145,6 +171,185 @@ export class DocumentDetails implements OnInit {
             .markForCheck();
         }
       });
+  }
+
+  loadContractCandidates(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.loadingCandidates
+    ) {
+      return;
+    }
+
+    this.loadingCandidates = true;
+    this.linkErrorMessage = '';
+
+    this.workspaceService
+      .getLinkCandidates(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingCandidates = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: candidates => {
+
+          this.contractCandidates =
+            candidates;
+
+          if (
+            candidates.length === 1
+          ) {
+
+            this.selectedContractDocumentId =
+              candidates[0].contractDocumentId;
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.contractCandidates = [];
+
+          this.linkErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось получить список доступных договоров.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  linkToContract(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.selectedContractDocumentId === null
+      ||
+      this.linkingDocument
+    ) {
+      return;
+    }
+
+    const candidate =
+      this.selectedContractCandidate;
+
+    const contractLabel =
+      candidate?.documentNumber
+        ? `договором № ${candidate.documentNumber}`
+        : `договором ID ${this.selectedContractDocumentId}`;
+
+    const confirmed =
+      window.confirm(
+        `Привязать документ к ${contractLabel}?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.linkingDocument = true;
+    this.linkErrorMessage = '';
+    this.linkSuccessMessage = '';
+
+    this.workspaceService
+      .linkDocument(
+        this.documentId,
+        this.selectedContractDocumentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.linkingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.linkSuccessMessage =
+            'Документ успешно привязан к основному договору.';
+
+          this.workspaceService
+            .getDocumentSummary(
+              this.documentId!
+            )
+            .subscribe({
+
+              next: document => {
+
+                this.document =
+                  document;
+
+                this.contractCandidates = [];
+                this.selectedContractDocumentId = null;
+
+                this.changeDetectorRef
+                  .markForCheck();
+              },
+
+              error: () => {
+
+                this.loadDocument();
+              }
+            });
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.linkErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось привязать документ к договору.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get selectedContractCandidate(): ContractCandidate | null {
+
+    if (
+      this.selectedContractDocumentId === null
+    ) {
+      return null;
+    }
+
+    return this.contractCandidates
+      .find(
+        candidate =>
+          candidate.contractDocumentId
+          === this.selectedContractDocumentId
+      )
+      ?? null;
   }
 
   startMetadataEditing(): void {

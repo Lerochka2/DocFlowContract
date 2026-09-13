@@ -121,6 +121,30 @@ export interface DocumentMetadataRequest {
   referencedContractDate: string | null;
 }
 
+export interface ContractCandidate {
+  contractDocumentId: number;
+  documentNumber: string | null;
+  documentDate: string | null;
+  subject: string | null;
+  status: string | null;
+}
+
+export interface DocumentLinkRequest {
+  contractDocumentId: number;
+}
+
+export interface DocumentLinkResponse {
+  linkId: number;
+  childDocumentId: number;
+  childDocumentType: string;
+  contractDocumentId: number;
+  contractDocumentType: string;
+  childDocumentStatus: string;
+  routingTarget: string;
+  routingStatus: string;
+  linkedAt: string;
+}
+
 export interface DocumentUploadResponse {
   documentId: number;
   fileId: number;
@@ -234,6 +258,30 @@ export class WorkspaceService {
 
     return this.http.put<DocumentMetadata>(
       `${this.documentsApiUrl}/${documentId}/metadata`,
+      request
+    );
+  }
+
+  getLinkCandidates(
+    documentId: number
+  ): Observable<ContractCandidate[]> {
+
+    return this.http.get<ContractCandidate[]>(
+      `${this.documentsApiUrl}/${documentId}/link-candidates`
+    );
+  }
+
+  linkDocument(
+    documentId: number,
+    contractDocumentId: number
+  ): Observable<DocumentLinkResponse> {
+
+    const request: DocumentLinkRequest = {
+      contractDocumentId
+    };
+
+    return this.http.post<DocumentLinkResponse>(
+      `${this.documentsApiUrl}/${documentId}/link`,
       request
     );
   }
