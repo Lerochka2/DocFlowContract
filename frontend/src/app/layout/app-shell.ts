@@ -40,9 +40,24 @@ import {
 } from '../core/settings/ui-preferences.service';
 
 import {
+  WorkspaceDashboard,
   WorkspaceDocument,
   WorkspaceService
 } from '../core/workspace/workspace.service';
+
+interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  count: number;
+  type:
+    | 'review'
+    | 'link'
+    | 'sed'
+    | 'error';
+  route: string;
+  actionLabel: string;
+}
 
 @Component({
   selector: 'app-shell',
@@ -77,6 +92,13 @@ export class AppShell
   searchOpen = false;
   searchErrorMessage = '';
 
+  notifications:
+    SystemNotification[] = [];
+
+  notificationsOpen = false;
+  notificationsLoading = false;
+  notificationsErrorMessage = '';
+
   private readonly searchSubject =
     new Subject<string>();
 
@@ -105,6 +127,7 @@ export class AppShell
 
     this.loadCurrentUser();
     this.initializeSearch();
+    this.loadNotifications();
   }
 
   ngOnDestroy(): void {
@@ -130,6 +153,8 @@ export class AppShell
       return;
     }
 
+    this.notificationsOpen = false;
+
     this.searchOpen = true;
     this.searchLoading = true;
     this.searchErrorMessage = '';
@@ -140,6 +165,8 @@ export class AppShell
   }
 
   onSearchFocus(): void {
+
+    this.notificationsOpen = false;
 
     if (
       this.searchQuery.trim().length >= 2
@@ -188,6 +215,104 @@ export class AppShell
         this.searchResults[0]
       );
     }
+  }
+
+  toggleNotifications(): void {
+
+    this.searchOpen = false;
+
+    this.notificationsOpen =
+      !this.notificationsOpen;
+
+    if (this.notificationsOpen) {
+      this.loadNotifications();
+    }
+  }
+
+  loadNotifications(): void {
+
+    if (this.notificationsLoading) {
+      return;
+    }
+
+    this.notificationsLoading = true;
+    this.notificationsErrorMessage = '';
+
+    this.workspaceService
+      .getDashboard()
+      .pipe(
+        finalize(
+          () => {
+
+            this.notificationsLoading = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: dashboard => {
+
+          this.notifications =
+            this.buildNotifications(
+              dashboard
+            );
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: () => {
+
+          this.notificationsErrorMessage =
+            'Не удалось обновить уведомления.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  openNotification(
+    notification: SystemNotification
+  ): void {
+
+    this.notificationsOpen = false;
+
+    void this.router.navigate(
+      [
+        notification.route
+      ]
+    );
+  }
+
+  get notificationCount(): number {
+
+    return this.notifications
+      .reduce(
+        (
+          total,
+          notification
+        ) =>
+          total
+          + notification.count,
+        0
+      );
+  }
+
+  get notificationBadge(): string {
+
+    if (
+      this.notificationCount > 99
+    ) {
+      return '99+';
+    }
+
+    return String(
+      this.notificationCount
+    );
   }
 
   getDocumentTypeLabel(
@@ -352,6 +477,8 @@ export class AppShell
 
       event.preventDefault();
 
+      this.notificationsOpen = false;
+
       this.globalSearchInput
         ?.nativeElement
         .focus();
@@ -369,6 +496,7 @@ export class AppShell
     if (event.key === 'Escape') {
 
       this.searchOpen = false;
+      this.notificationsOpen = false;
 
       this.globalSearchInput
         ?.nativeElement
@@ -382,6 +510,7 @@ export class AppShell
   onDocumentClick(): void {
 
     this.searchOpen = false;
+    this.notificationsOpen = false;
   }
 
   private initializeSearch(): void {
@@ -492,5 +621,100 @@ export class AppShell
           );
         }
       });
+  }
+
+  private buildNotifications(
+    dashboard: WorkspaceDashboard
+  ): SystemNotification[] {
+
+    const notifications:
+      SystemNotification[] = [];
+
+    if (
+      dashboard.reviewRequired > 0
+    ) {
+
+      notifications.push({
+        id: 'review-required',
+        title: 'Требуется ручная проверка',
+        message:
+          'AI не смог автоматически подтвердить классификацию.',
+        count:
+          dashboard.reviewRequired,
+        type: 'review',
+        route: '/review',
+        actionLabel: 'Перейти к проверке'
+      });
+    }
+
+    if (
+      dashboard.linkRequired > 0
+    ) {
+
+      notifications.push({
+        id: 'link-required',
+        title: 'Нужна привязка к договору',
+        message:
+          'Есть документы, для которых необходимо выбрать основной договор.',
+        count:
+          dashboard.linkRequired,
+        type: 'link',
+        route: '/documents',
+        actionLabel: 'Открыть документы'
+      });
+    }
+
+    if (
+      dashboard.readyForSed > 0
+    ) {
+
+      notifications.push({
+        id: 'ready-for-sed',
+        title: 'Готовы к отправке в СЭД',
+        message:
+          'Документы прошли проверки и ожидают регистрации в корпоративной СЭД.',
+        count:
+          dashboard.readyForSed,
+        type: 'sed',
+        route: '/sed',
+        actionLabel: 'Перейти в СЭД'
+      });
+    }
+
+    if (
+      dashboard.processingFailed > 0
+    ) {
+
+      notifications.push({
+        id: 'processing-failed',
+        title: 'Ошибка обработки',
+        message:
+          'Некоторые документы не удалось обработать автоматически.',
+        count:
+          dashboard.processingFailed,
+        type: 'error',
+        route: '/documents',
+        actionLabel: 'Проверить документы'
+      });
+    }
+
+    if (
+      dashboard.sedError > 0
+    ) {
+
+      notifications.push({
+        id: 'sed-error',
+        title: 'Ошибка отправки в СЭД',
+        message:
+          'Есть документы с ошибкой регистрации во внешней СЭД.',
+        count:
+          dashboard.sedError,
+        type: 'error',
+        route: '/sed',
+        actionLabel: 'Открыть СЭД'
+      });
+    }
+
+    return notifications;
   }
 }

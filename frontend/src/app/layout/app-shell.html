@@ -477,19 +477,225 @@
 
       <div class="topbar-actions">
 
-        <button
-          class="notification-button"
-          type="button"
+        <div
+          class="notifications"
+          (click)="$event.stopPropagation()"
         >
 
-          <svg viewBox="0 0 24 24">
-            <path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
-            <path d="M10 21h4"/>
-          </svg>
+          <button
+            class="notification-button"
+            type="button"
+            title="Уведомления"
+            [class.active]="notificationsOpen"
+            (click)="toggleNotifications()"
+          >
 
-          <span class="notification-dot"></span>
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+              <path d="M10 21h4"/>
+            </svg>
 
-        </button>
+
+            @if (notificationCount > 0) {
+
+              <span class="notification-badge">
+                {{ notificationBadge }}
+              </span>
+
+            }
+
+          </button>
+
+
+          @if (notificationsOpen) {
+
+            <div class="notifications-dropdown">
+
+              <div class="notifications-header">
+
+                <div>
+
+                  <strong>
+                    Уведомления
+                  </strong>
+
+                  <span>
+                    Актуальные задачи DocFlow
+                  </span>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  [disabled]="notificationsLoading"
+                  (click)="loadNotifications()"
+                >
+                  ↻
+                </button>
+
+              </div>
+
+
+              @if (notificationsLoading) {
+
+                <div class="notification-state">
+
+                  <span class="notification-loader"></span>
+
+                  <div>
+
+                    <strong>
+                      Обновляем
+                    </strong>
+
+                    <span>
+                      Проверяем текущее состояние документов...
+                    </span>
+
+                  </div>
+
+                </div>
+
+              } @else if (notificationsErrorMessage) {
+
+                <div class="notification-state error">
+
+                  <span class="notification-state-icon">
+                    !
+                  </span>
+
+                  <div>
+
+                    <strong>
+                      Не удалось обновить
+                    </strong>
+
+                    <span>
+                      {{ notificationsErrorMessage }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              } @else if (notifications.length === 0) {
+
+                <div class="notification-state empty">
+
+                  <span class="notification-state-icon success">
+                    ✓
+                  </span>
+
+                  <div>
+
+                    <strong>
+                      Всё в порядке
+                    </strong>
+
+                    <span>
+                      Сейчас нет документов, требующих вашего внимания.
+                    </span>
+
+                  </div>
+
+                </div>
+
+              } @else {
+
+                <div class="notification-list">
+
+                  @for (
+                    notification of notifications;
+                    track notification.id
+                  ) {
+
+                    <button
+                      class="notification-item"
+                      type="button"
+                      (click)="openNotification(notification)"
+                    >
+
+                      <span
+                        [class]="
+                          'notification-icon ' +
+                          notification.type
+                        "
+                      >
+
+                        @switch (notification.type) {
+
+                          @case ('review') {
+                            ✓
+                          }
+
+                          @case ('link') {
+                            ⛓
+                          }
+
+                          @case ('sed') {
+                            S
+                          }
+
+                          @default {
+                            !
+                          }
+                        }
+
+                      </span>
+
+
+                      <span class="notification-content">
+
+                        <span class="notification-title">
+
+                          <strong>
+                            {{ notification.title }}
+                          </strong>
+
+                          <b>
+                            {{ notification.count }}
+                          </b>
+
+                        </span>
+
+                        <span class="notification-message">
+                          {{ notification.message }}
+                        </span>
+
+                        <span class="notification-action">
+                          {{ notification.actionLabel }}
+                          →
+                        </span>
+
+                      </span>
+
+                    </button>
+
+                  }
+
+                </div>
+
+
+                <div class="notifications-footer">
+
+                  <span>
+                    Всего требует внимания
+                  </span>
+
+                  <strong>
+                    {{ notificationCount }}
+                  </strong>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
 
 
         <div class="current-user">
