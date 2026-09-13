@@ -16,6 +16,10 @@ import {
   CurrentUserResponse
 } from '../core/auth/auth.service';
 
+import {
+  UiPreferencesService
+} from '../core/settings/ui-preferences.service';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -34,7 +38,8 @@ export class AppShell implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    readonly uiPreferencesService: UiPreferencesService
   ) {
   }
 

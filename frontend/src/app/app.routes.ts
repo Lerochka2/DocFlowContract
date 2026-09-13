@@ -35,6 +35,10 @@ import {
 } from './pages/sed/sed';
 
 import {
+  SettingsWorkspace
+} from './pages/settings/settings';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -81,6 +85,10 @@ export const routes: Routes = [
       {
         path: 'sed',
         component: SedWorkspace
+      },
+      {
+        path: 'settings',
+        component: SettingsWorkspace
       },
       {
         path: '',
