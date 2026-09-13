@@ -7,6 +7,9 @@ import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
 import by.bsuir.docflow.docflow_backend.service.AiProcessingService;
 import by.bsuir.docflow.docflow_backend.service.DocumentDeletionService;
 import by.bsuir.docflow.docflow_backend.service.DocumentService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -95,6 +99,45 @@ public class DocumentController {
                 .getDocument(id);
     }
 
+    @GetMapping("/{id}/file")
+    public ResponseEntity<Resource> getDocumentFile(
+            @PathVariable Long id
+    ) {
+
+        DocumentService.DocumentFile documentFile =
+                documentService
+                        .getDocumentFile(id);
+
+        MediaType mediaType =
+                resolveMediaType(
+                        documentFile.mimeType()
+                );
+
+        ContentDisposition contentDisposition =
+                ContentDisposition
+                        .inline()
+                        .filename(
+                                documentFile.originalName(),
+                                StandardCharsets.UTF_8
+                        )
+                        .build();
+
+        return ResponseEntity
+                .ok()
+                .contentType(mediaType)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        contentDisposition.toString()
+                )
+                .header(
+                        "X-Content-Type-Options",
+                        "nosniff"
+                )
+                .body(
+                        documentFile.resource()
+                );
+    }
+
     @PostMapping("/{id}/analyze")
     public AiProcessingResponse analyzeDocument(
             @PathVariable Long id
@@ -115,5 +158,35 @@ public class DocumentController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    private MediaType resolveMediaType(
+            String mimeType
+    ) {
+
+        if (
+                mimeType == null
+                        ||
+                        mimeType.isBlank()
+        ) {
+
+            return MediaType
+                    .APPLICATION_OCTET_STREAM;
+        }
+
+        try {
+
+            return MediaType
+                    .parseMediaType(
+                            mimeType
+                    );
+
+        } catch (
+                IllegalArgumentException exception
+        ) {
+
+            return MediaType
+                    .APPLICATION_OCTET_STREAM;
+        }
     }
 }

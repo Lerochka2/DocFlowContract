@@ -1,6 +1,7 @@
 import {
   ChangeDetectorRef,
   Component,
+  OnDestroy,
   OnInit
 } from '@angular/core';
 
@@ -9,6 +10,7 @@ import {
 } from '@angular/forms';
 
 import {
+  HttpClient,
   HttpErrorResponse
 } from '@angular/common/http';
 
@@ -16,6 +18,11 @@ import {
   ActivatedRoute,
   Router
 } from '@angular/router';
+
+import {
+  DomSanitizer,
+  SafeResourceUrl
+} from '@angular/platform-browser';
 
 import {
   finalize
@@ -39,7 +46,7 @@ import {
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'
 })
-export class DocumentDetails implements OnInit {
+export class DocumentDetails implements OnInit, OnDestroy {
 
   document: DocumentSummary | null = null;
 
@@ -66,6 +73,12 @@ export class DocumentDetails implements OnInit {
   preparingForSed = false;
   sendingToSed = false;
 
+  previewLoading = false;
+  previewErrorMessage = '';
+  previewObjectUrl: string | null = null;
+  previewResourceUrl: SafeResourceUrl | null = null;
+  previewMimeType = '';
+
   errorMessage = '';
   deleteErrorMessage = '';
 
@@ -87,6 +100,8 @@ export class DocumentDetails implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly workspaceService: WorkspaceService,
+    private readonly http: HttpClient,
+    private readonly sanitizer: DomSanitizer,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {
   }
@@ -117,6 +132,10 @@ export class DocumentDetails implements OnInit {
       parsedId;
 
     this.loadDocument();
+  }
+
+  ngOnDestroy(): void {
+    this.releasePreviewUrl();
   }
 
   loadDocument(): void {
@@ -150,6 +169,8 @@ export class DocumentDetails implements OnInit {
             document
           );
 
+          this.loadDocumentPreview();
+
           this.changeDetectorRef
             .markForCheck();
         },
@@ -180,6 +201,193 @@ export class DocumentDetails implements OnInit {
             .markForCheck();
         }
       });
+  }
+
+  loadDocumentPreview(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.previewLoading
+    ) {
+      return;
+    }
+
+    this.releasePreviewUrl();
+
+    this.previewLoading = true;
+    this.previewErrorMessage = '';
+    this.previewMimeType = '';
+
+    this.http
+      .get(
+        `http://localhost:8080/api/documents/${this.documentId}/file`,
+        {
+          responseType: 'blob'
+        }
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.previewLoading = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: blob => {
+
+          let mimeType =
+            blob.type;
+
+          if (
+            !mimeType
+            ||
+            mimeType
+              === 'application/octet-stream'
+          ) {
+
+            mimeType =
+              this.inferMimeTypeFromName(
+                this.document?.originalName
+              );
+          }
+
+          this.previewMimeType =
+            mimeType;
+
+          const objectUrl =
+            URL.createObjectURL(
+              blob
+            );
+
+          this.previewObjectUrl =
+            objectUrl;
+
+          if (
+            mimeType === 'application/pdf'
+          ) {
+
+            this.previewResourceUrl =
+              this.sanitizer
+                .bypassSecurityTrustResourceUrl(
+                  objectUrl
+                );
+
+          } else {
+
+            this.previewResourceUrl =
+              null;
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          if (error.status === 404) {
+
+            this.previewErrorMessage =
+              'Исходный файл документа не найден.';
+
+          } else if (error.status === 0) {
+
+            this.previewErrorMessage =
+              'Не удалось подключиться к серверу для просмотра файла.';
+
+          } else {
+
+            this.previewErrorMessage =
+              'Не удалось загрузить предпросмотр документа.';
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get isPdfPreview(): boolean {
+
+    return this.previewMimeType
+      === 'application/pdf';
+  }
+
+  get isImagePreview(): boolean {
+
+    return this.previewMimeType
+      .startsWith(
+        'image/'
+      );
+  }
+
+  openPreviewInNewTab(): void {
+
+    if (!this.previewObjectUrl) {
+      return;
+    }
+
+    window.open(
+      this.previewObjectUrl,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  }
+
+  private releasePreviewUrl(): void {
+
+    if (
+      this.previewObjectUrl
+    ) {
+
+      URL.revokeObjectURL(
+        this.previewObjectUrl
+      );
+    }
+
+    this.previewObjectUrl = null;
+    this.previewResourceUrl = null;
+  }
+
+  private inferMimeTypeFromName(
+    fileName: string | null | undefined
+  ): string {
+
+    if (!fileName) {
+      return '';
+    }
+
+    const normalized =
+      fileName.toLowerCase();
+
+    if (
+      normalized.endsWith('.pdf')
+    ) {
+      return 'application/pdf';
+    }
+
+    if (
+      normalized.endsWith('.jpg')
+      ||
+      normalized.endsWith('.jpeg')
+    ) {
+      return 'image/jpeg';
+    }
+
+    if (
+      normalized.endsWith('.png')
+    ) {
+      return 'image/png';
+    }
+
+    return '';
   }
 
   private refreshDocumentSummary(): void {

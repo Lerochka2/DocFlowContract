@@ -12,11 +12,14 @@ import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import by.bsuir.docflow.docflow_backend.repository.StoredFileRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -441,6 +444,103 @@ public class DocumentService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public DocumentFile getDocumentFile(
+            Long id
+    ) {
+
+        Document document =
+                documentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new DocumentNotFoundException(
+                                                "Документ с id "
+                                                        + id
+                                                        + " не найден"
+                                        )
+                        );
+
+        StoredFile storedFile =
+                document.getFile();
+
+        if (
+                storedFile == null
+                        ||
+                        storedFile.getStoragePath() == null
+                        ||
+                        storedFile.getStoragePath().isBlank()
+        ) {
+
+            throw new IllegalStateException(
+                    "У документа отсутствует исходный файл"
+            );
+        }
+
+        Path filePath =
+                Paths.get(
+                                storedFile.getStoragePath()
+                        )
+                        .toAbsolutePath()
+                        .normalize();
+
+        if (
+                !filePath.startsWith(
+                        storageRoot
+                )
+        ) {
+
+            throw new IllegalStateException(
+                    "Недопустимый путь к файлу документа"
+            );
+        }
+
+        if (
+                !Files.exists(filePath)
+                        ||
+                        !Files.isRegularFile(filePath)
+        ) {
+
+            throw new IllegalStateException(
+                    "Файл документа не найден в хранилище"
+            );
+        }
+
+        try {
+
+            Resource resource =
+                    new UrlResource(
+                            filePath.toUri()
+                    );
+
+            if (
+                    !resource.exists()
+                            ||
+                            !resource.isReadable()
+            ) {
+
+                throw new IllegalStateException(
+                        "Файл документа недоступен для чтения"
+                );
+            }
+
+            return new DocumentFile(
+                    resource,
+                    storedFile.getOriginalName(),
+                    storedFile.getMimeType()
+            );
+
+        } catch (
+                MalformedURLException exception
+        ) {
+
+            throw new IllegalStateException(
+                    "Не удалось открыть файл документа",
+                    exception
+            );
+        }
+    }
+
     private void validateFile(
             MultipartFile file
     ) {
@@ -637,5 +737,12 @@ public class DocumentService {
                     exception
             );
         }
+    }
+
+    public record DocumentFile(
+            Resource resource,
+            String originalName,
+            String mimeType
+    ) {
     }
 }

@@ -90,7 +90,6 @@
           {{ getStatusLabel(document.status) }}
         </span>
 
-
         <button
           class="delete-document-button"
           type="button"
@@ -102,13 +101,11 @@
           "
           (click)="deleteDocument()"
         >
-
           @if (deleting) {
             Удаляем...
           } @else {
             Удалить документ
           }
-
         </button>
 
       </div>
@@ -195,215 +192,79 @@
     }
 
 
-    <section class="overview-grid">
+    <section class="document-workspace">
 
-      <article class="panel main-info">
+      <div class="document-data-column">
 
-        <div class="panel-heading">
+        <article class="panel main-info">
 
-          <div>
+          <div class="panel-heading">
 
-            <span class="section-eyebrow">
-              ОСНОВНЫЕ ДАННЫЕ
-            </span>
+            <div>
 
-            <h2>
-              Информация о документе
-            </h2>
+              <span class="section-eyebrow">
+                ОСНОВНЫЕ ДАННЫЕ
+              </span>
+
+              <h2>
+                Информация о документе
+              </h2>
+
+            </div>
+
+
+            @if (!editingMetadata) {
+
+              <button
+                class="edit-button"
+                type="button"
+                [disabled]="
+                  loadingMetadata
+                  ||
+                  !canEditMetadata
+                "
+                [title]="
+                  canEditMetadata
+                    ? 'Редактировать реквизиты'
+                    : metadataEditRestrictionMessage
+                "
+                (click)="startMetadataEditing()"
+              >
+                @if (loadingMetadata) {
+                  Загрузка...
+                } @else {
+                  Редактировать
+                }
+              </button>
+
+            }
 
           </div>
 
 
-          @if (!editingMetadata) {
+          @if (
+            editingMetadata
+            &&
+            metadataForm
+          ) {
 
-            <button
-              class="edit-button"
-              type="button"
-              [disabled]="
-                loadingMetadata
-                ||
-                !canEditMetadata
-              "
-              [title]="
-                canEditMetadata
-                  ? 'Редактировать реквизиты'
-                  : metadataEditRestrictionMessage
-              "
-              (click)="startMetadataEditing()"
+            <form
+              class="metadata-form"
+              (ngSubmit)="saveMetadata()"
             >
-              @if (loadingMetadata) {
-                Загрузка...
-              } @else {
-                Редактировать реквизиты
-              }
-            </button>
-
-          }
-
-        </div>
-
-
-        @if (
-          editingMetadata
-          &&
-          metadataForm
-        ) {
-
-          <form
-            class="metadata-form"
-            (ngSubmit)="saveMetadata()"
-          >
-
-            <label class="form-field">
-
-              <span>
-                Номер документа
-              </span>
-
-              <input
-                type="text"
-                name="documentNumber"
-                [(ngModel)]="metadataForm.documentNumber"
-                maxlength="100"
-                placeholder="Например, 57/26"
-              />
-
-            </label>
-
-
-            <label class="form-field">
-
-              <span>
-                Дата документа
-              </span>
-
-              <input
-                type="date"
-                name="documentDate"
-                [(ngModel)]="metadataForm.documentDate"
-              />
-
-            </label>
-
-
-            <label class="form-field">
-
-              <span>
-                Сумма
-              </span>
-
-              <input
-                type="number"
-                name="amount"
-                [(ngModel)]="metadataForm.amount"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-              />
-
-            </label>
-
-
-            <label class="form-field">
-
-              <span>
-                Валюта
-              </span>
-
-              <select
-                name="currency"
-                [(ngModel)]="metadataForm.currency"
-              >
-
-                <option [ngValue]="null">
-                  Не указана
-                </option>
-
-                <option value="BYN">
-                  BYN
-                </option>
-
-                <option value="USD">
-                  USD
-                </option>
-
-                <option value="EUR">
-                  EUR
-                </option>
-
-              </select>
-
-            </label>
-
-
-            <label class="form-field wide">
-
-              <span>
-                Предмет документа
-              </span>
-
-              <textarea
-                name="subject"
-                [(ngModel)]="metadataForm.subject"
-                rows="4"
-                maxlength="1000"
-                placeholder="Предмет договора или соглашения"
-              ></textarea>
-
-            </label>
-
-
-            <label class="form-field">
-
-              <span>
-                Действует с
-              </span>
-
-              <input
-                type="date"
-                name="validFrom"
-                [(ngModel)]="metadataForm.validFrom"
-              />
-
-            </label>
-
-
-            <label class="form-field">
-
-              <span>
-                Действует до
-              </span>
-
-              <input
-                type="date"
-                name="validTo"
-                [(ngModel)]="metadataForm.validTo"
-              />
-
-            </label>
-
-
-            @if (
-              document.documentType !== 'CONTRACT'
-            ) {
-
-              <div class="reference-divider wide">
-                Реквизиты основного договора
-              </div>
-
 
               <label class="form-field">
 
                 <span>
-                  Номер основного договора
+                  Номер документа
                 </span>
 
                 <input
                   type="text"
-                  name="referencedContractNumber"
-                  [(ngModel)]="metadataForm.referencedContractNumber"
+                  name="documentNumber"
+                  [(ngModel)]="metadataForm.documentNumber"
                   maxlength="100"
-                  placeholder="Номер договора"
+                  placeholder="Например, 57/26"
                 />
 
               </label>
@@ -412,860 +273,1197 @@
               <label class="form-field">
 
                 <span>
-                  Дата основного договора
+                  Дата документа
                 </span>
 
                 <input
                   type="date"
-                  name="referencedContractDate"
-                  [(ngModel)]="metadataForm.referencedContractDate"
+                  name="documentDate"
+                  [(ngModel)]="metadataForm.documentDate"
                 />
 
               </label>
 
-            }
 
-
-            @if (metadataErrorMessage) {
-
-              <div class="form-error wide">
-                {{ metadataErrorMessage }}
-              </div>
-
-            }
-
-
-            <div class="form-actions wide">
-
-              <button
-                class="save-button"
-                type="submit"
-                [disabled]="savingMetadata"
-              >
-                @if (savingMetadata) {
-                  Сохраняем...
-                } @else {
-                  Сохранить
-                }
-              </button>
-
-
-              <button
-                class="cancel-button"
-                type="button"
-                [disabled]="savingMetadata"
-                (click)="cancelMetadataEditing()"
-              >
-                Отмена
-              </button>
-
-            </div>
-
-          </form>
-
-        } @else {
-
-          <div class="info-grid">
-
-            <div class="info-item">
-
-              <span>
-                Тип документа
-              </span>
-
-              <strong>
-                {{ getDocumentTypeLabel(document.documentType) }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-              <span>
-                Номер
-              </span>
-
-              <strong>
-                {{ document.documentNumber || '—' }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-              <span>
-                Дата документа
-              </span>
-
-              <strong>
-                {{ formatDate(document.documentDate) }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-              <span>
-                Сумма
-              </span>
-
-              <strong>
-                {{ getAmount() }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item wide">
-
-              <span>
-                Предмет документа
-              </span>
-
-              <strong>
-                {{ document.subject || '—' }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-              <span>
-                Действует с
-              </span>
-
-              <strong>
-                {{ formatDate(document.validFrom) }}
-              </strong>
-
-            </div>
-
-
-            <div class="info-item">
-
-              <span>
-                Действует до
-              </span>
-
-              <strong>
-                {{ formatDate(document.validTo) }}
-              </strong>
-
-            </div>
-
-          </div>
-
-        }
-
-      </article>
-
-
-      <article class="panel ai-panel">
-
-        <div class="panel-heading">
-
-          <div>
-
-            <span class="section-eyebrow">
-              ИНТЕЛЛЕКТУАЛЬНЫЙ АНАЛИЗ
-            </span>
-
-            <h2>
-              AI-классификация
-            </h2>
-
-          </div>
-
-          <span class="ai-badge">
-            AI
-          </span>
-
-        </div>
-
-
-        @if (document.ai) {
-
-          <div class="ai-type">
-
-            <span>
-              Предсказанный класс
-            </span>
-
-            <strong>
-              {{ getDocumentTypeLabel(document.ai.predictedType) }}
-            </strong>
-
-          </div>
-
-
-          <div class="confidence-block">
-
-            <div class="confidence-header">
-
-              <span>
-                Уверенность модели
-              </span>
-
-              <strong>
-                {{ getConfidence() }}
-              </strong>
-
-            </div>
-
-            <div class="confidence-track">
-
-              <i
-                [style.width.%]="getConfidencePercent()"
-              ></i>
-
-            </div>
-
-          </div>
-
-
-          <div class="ai-status">
-
-            <span class="status-dot"></span>
-
-            <div>
-
-              <span>
-                Статус обработки
-              </span>
-
-              <strong>
-                {{ getAiStatusLabel(document.ai.processingStatus) }}
-              </strong>
-
-            </div>
-
-          </div>
-
-        } @else {
-
-          <div class="empty-section">
-
-            <strong>
-              AI-анализ ещё не выполнен
-            </strong>
-
-            <span>
-              Для этого документа отсутствует результат классификации.
-            </span>
-
-          </div>
-
-        }
-
-
-        @if (canReviewDocument) {
-
-          <div class="review-box">
-
-            <div class="review-heading">
-
-              <span class="review-icon">
-                !
-              </span>
-
-              <div>
-
-                <strong>
-                  Требуется ручная проверка
-                </strong>
+              <label class="form-field">
 
                 <span>
-                  Уверенность AI ниже установленного порога. Проверьте тип документа перед продолжением процесса.
+                  Сумма
                 </span>
 
-              </div>
-
-            </div>
-
-
-            <label class="review-select">
-
-              <span>
-                Подтверждённый тип документа
-              </span>
-
-              <select
-                name="reviewDocumentType"
-                [(ngModel)]="selectedReviewDocumentType"
-              >
-
-                <option [ngValue]="null">
-                  Выберите тип
-                </option>
-
-                <option value="CONTRACT">
-                  Договор
-                </option>
-
-                <option value="AMENDMENT_CHANGE">
-                  Доп. соглашение — изменение
-                </option>
-
-                <option value="AMENDMENT_PROLONGATION">
-                  Доп. соглашение — продление
-                </option>
-
-                <option value="APPENDIX">
-                  Приложение
-                </option>
-
-              </select>
-
-            </label>
-
-
-            @if (reviewErrorMessage) {
-
-              <div class="review-error">
-                {{ reviewErrorMessage }}
-              </div>
-
-            }
-
-
-            <button
-              class="review-button"
-              type="button"
-              [disabled]="
-                selectedReviewDocumentType === null
-                ||
-                reviewingDocument
-              "
-              (click)="reviewDocument()"
-            >
-              @if (reviewingDocument) {
-                Подтверждаем...
-              } @else {
-                Подтвердить тип документа
-              }
-            </button>
-
-          </div>
-
-        }
-
-      </article>
-
-    </section>
-
-
-    <section class="workflow-grid">
-
-      <article class="panel workflow-card">
-
-        <div class="workflow-icon route">
-          ↗
-        </div>
-
-        <div class="workflow-content">
-
-          <span class="section-eyebrow">
-            МАРШРУТИЗАЦИЯ
-          </span>
-
-          <h2>
-            Маршрут документа
-          </h2>
-
-
-          @if (document.routing) {
-
-            <div class="workflow-main-value">
-              {{ getRoutingTargetLabel(document.routing.routingTarget) }}
-            </div>
-
-            <dl>
-
-              <div>
-                <dt>Статус</dt>
-                <dd>
-                  {{ getRoutingStatusLabel(document.routing.routingStatus) }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Причина</dt>
-                <dd>
-                  {{ document.routing.routingReason || '—' }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Дата маршрутизации</dt>
-                <dd>
-                  {{ formatDateTime(document.routing.routedAt) }}
-                </dd>
-              </div>
-
-            </dl>
-
-          } @else {
-
-            <div class="empty-section compact">
-
-              <strong>
-                Маршрут ещё не сформирован
-              </strong>
-
-              <span>
-                Нет данных о маршрутизации документа.
-              </span>
-
-            </div>
-
-          }
-
-        </div>
-
-      </article>
-
-
-      <article class="panel workflow-card">
-
-        <div class="workflow-icon link">
-          ⛓
-        </div>
-
-        <div class="workflow-content">
-
-          <span class="section-eyebrow">
-            СВЯЗИ ДОКУМЕНТА
-          </span>
-
-          <h2>
-            Привязка к договору
-          </h2>
-
-
-          @if (document.link) {
-
-            <div class="workflow-main-value">
-              {{
-                document.link.contractDocumentNumber
-                  ? 'Договор № ' + document.link.contractDocumentNumber
-                  : 'Договор ID ' + document.link.contractDocumentId
-              }}
-            </div>
-
-            <dl>
-
-              <div>
-                <dt>ID договора</dt>
-                <dd>
-                  {{ document.link.contractDocumentId }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Дата договора</dt>
-                <dd>
-                  {{ formatDate(document.link.contractDocumentDate) }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Дата привязки</dt>
-                <dd>
-                  {{ formatDateTime(document.link.linkedAt) }}
-                </dd>
-              </div>
-
-            </dl>
-
-            <button
-              class="secondary-button"
-              type="button"
-              (click)="openLinkedContract()"
-            >
-              Открыть договор →
-            </button>
-
-          } @else if (
-            document.status === 'LINK_REQUIRED'
-          ) {
-
-            <div class="link-required-box">
-
-              <strong>
-                Требуется основной договор
-              </strong>
-
-              <span>
-                Выберите договор, к которому относится этот документ.
-              </span>
-
-            </div>
-
-
-            @if (loadingCandidates) {
-
-              <div class="candidate-state">
-                Загружаем доступные договоры...
-              </div>
-
-            } @else if (linkErrorMessage) {
-
-              <div class="link-error">
-                {{ linkErrorMessage }}
-              </div>
-
-              <button
-                class="secondary-button"
-                type="button"
-                (click)="loadContractCandidates()"
-              >
-                Повторить
-              </button>
-
-            } @else if (
-              contractCandidates.length > 0
-            ) {
-
-              <label class="contract-select">
+                <input
+                  type="number"
+                  name="amount"
+                  [(ngModel)]="metadataForm.amount"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+
+              </label>
+
+
+              <label class="form-field">
 
                 <span>
-                  Основной договор
+                  Валюта
                 </span>
 
                 <select
-                  name="contractCandidate"
-                  [(ngModel)]="selectedContractDocumentId"
+                  name="currency"
+                  [(ngModel)]="metadataForm.currency"
                 >
 
                   <option [ngValue]="null">
-                    Выберите договор
+                    Не указана
                   </option>
 
-                  @for (
-                    candidate of contractCandidates;
-                    track candidate.contractDocumentId
-                  ) {
+                  <option value="BYN">
+                    BYN
+                  </option>
 
-                    <option
-                      [ngValue]="candidate.contractDocumentId"
-                    >
-                      {{
-                        candidate.documentNumber
-                          ? '№ ' + candidate.documentNumber
-                          : 'ID ' + candidate.contractDocumentId
-                      }}
-                      —
-                      {{ formatDate(candidate.documentDate) }}
-                    </option>
+                  <option value="USD">
+                    USD
+                  </option>
 
-                  }
+                  <option value="EUR">
+                    EUR
+                  </option>
 
                 </select>
 
               </label>
 
 
-              @if (selectedContractCandidate) {
+              <label class="form-field wide">
 
-                <div class="candidate-preview">
+                <span>
+                  Предмет документа
+                </span>
 
-                  <div>
+                <textarea
+                  name="subject"
+                  [(ngModel)]="metadataForm.subject"
+                  rows="4"
+                  maxlength="1000"
+                  placeholder="Предмет договора или соглашения"
+                ></textarea>
 
-                    <span>
-                      Договор
-                    </span>
-
-                    <strong>
-                      {{
-                        selectedContractCandidate.documentNumber
-                          ? '№ ' + selectedContractCandidate.documentNumber
-                          : 'ID ' + selectedContractCandidate.contractDocumentId
-                      }}
-                    </strong>
-
-                  </div>
+              </label>
 
 
-                  <div>
+              <label class="form-field">
 
-                    <span>
-                      Дата
-                    </span>
+                <span>
+                  Действует с
+                </span>
 
-                    <strong>
-                      {{ formatDate(selectedContractCandidate.documentDate) }}
-                    </strong>
+                <input
+                  type="date"
+                  name="validFrom"
+                  [(ngModel)]="metadataForm.validFrom"
+                />
 
-                  </div>
-
-
-                  <div class="candidate-subject">
-
-                    <span>
-                      Предмет
-                    </span>
-
-                    <strong>
-                      {{ selectedContractCandidate.subject || '—' }}
-                    </strong>
-
-                  </div>
+              </label>
 
 
-                  <div>
+              <label class="form-field">
 
-                    <span>
-                      Статус
-                    </span>
+                <span>
+                  Действует до
+                </span>
 
-                    <strong>
-                      {{ getStatusLabel(selectedContractCandidate.status) }}
-                    </strong>
+                <input
+                  type="date"
+                  name="validTo"
+                  [(ngModel)]="metadataForm.validTo"
+                />
 
-                  </div>
+              </label>
 
+
+              @if (
+                document.documentType !== 'CONTRACT'
+              ) {
+
+                <div class="reference-divider wide">
+                  Реквизиты основного договора
+                </div>
+
+
+                <label class="form-field">
+
+                  <span>
+                    Номер основного договора
+                  </span>
+
+                  <input
+                    type="text"
+                    name="referencedContractNumber"
+                    [(ngModel)]="metadataForm.referencedContractNumber"
+                    maxlength="100"
+                    placeholder="Номер договора"
+                  />
+
+                </label>
+
+
+                <label class="form-field">
+
+                  <span>
+                    Дата основного договора
+                  </span>
+
+                  <input
+                    type="date"
+                    name="referencedContractDate"
+                    [(ngModel)]="metadataForm.referencedContractDate"
+                  />
+
+                </label>
+
+              }
+
+
+              @if (metadataErrorMessage) {
+
+                <div class="form-error wide">
+                  {{ metadataErrorMessage }}
+                </div>
+
+              }
+
+
+              <div class="form-actions wide">
+
+                <button
+                  class="save-button"
+                  type="submit"
+                  [disabled]="savingMetadata"
+                >
+                  @if (savingMetadata) {
+                    Сохраняем...
+                  } @else {
+                    Сохранить
+                  }
+                </button>
+
+
+                <button
+                  class="cancel-button"
+                  type="button"
+                  [disabled]="savingMetadata"
+                  (click)="cancelMetadataEditing()"
+                >
+                  Отмена
+                </button>
+
+              </div>
+
+            </form>
+
+          } @else {
+
+            <div class="info-grid">
+
+              <div class="info-item">
+
+                <span>
+                  Тип документа
+                </span>
+
+                <strong>
+                  {{ getDocumentTypeLabel(document.documentType) }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item">
+
+                <span>
+                  Номер
+                </span>
+
+                <strong>
+                  {{ document.documentNumber || '—' }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item">
+
+                <span>
+                  Дата документа
+                </span>
+
+                <strong>
+                  {{ formatDate(document.documentDate) }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item">
+
+                <span>
+                  Сумма
+                </span>
+
+                <strong>
+                  {{ getAmount() }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item wide">
+
+                <span>
+                  Предмет документа
+                </span>
+
+                <strong>
+                  {{ document.subject || '—' }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item">
+
+                <span>
+                  Действует с
+                </span>
+
+                <strong>
+                  {{ formatDate(document.validFrom) }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-item">
+
+                <span>
+                  Действует до
+                </span>
+
+                <strong>
+                  {{ formatDate(document.validTo) }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          }
+
+        </article>
+
+
+        <article class="panel ai-panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <span class="section-eyebrow">
+                ИНТЕЛЛЕКТУАЛЬНЫЙ АНАЛИЗ
+              </span>
+
+              <h2>
+                AI-классификация
+              </h2>
+
+            </div>
+
+            <span class="ai-badge">
+              AI
+            </span>
+
+          </div>
+
+
+          @if (document.ai) {
+
+            <div class="ai-summary-grid">
+
+              <div class="ai-type">
+
+                <span>
+                  Предсказанный класс
+                </span>
+
+                <strong>
+                  {{ getDocumentTypeLabel(document.ai.predictedType) }}
+                </strong>
+
+              </div>
+
+
+              <div class="confidence-block">
+
+                <div class="confidence-header">
+
+                  <span>
+                    Уверенность модели
+                  </span>
+
+                  <strong>
+                    {{ getConfidence() }}
+                  </strong>
+
+                </div>
+
+                <div class="confidence-track">
+
+                  <i
+                    [style.width.%]="getConfidencePercent()"
+                  ></i>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="ai-status">
+
+              <span class="status-dot"></span>
+
+              <div>
+
+                <span>
+                  Статус обработки
+                </span>
+
+                <strong>
+                  {{ getAiStatusLabel(document.ai.processingStatus) }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          } @else {
+
+            <div class="empty-section">
+
+              <strong>
+                AI-анализ ещё не выполнен
+              </strong>
+
+              <span>
+                Для этого документа отсутствует результат классификации.
+              </span>
+
+            </div>
+
+          }
+
+
+          @if (canReviewDocument) {
+
+            <div class="review-box">
+
+              <div class="review-heading">
+
+                <span class="review-icon">
+                  !
+                </span>
+
+                <div>
+
+                  <strong>
+                    Требуется ручная проверка
+                  </strong>
+
+                  <span>
+                    Уверенность AI ниже установленного порога.
+                    Проверьте тип документа перед продолжением процесса.
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <label class="review-select">
+
+                <span>
+                  Подтверждённый тип документа
+                </span>
+
+                <select
+                  name="reviewDocumentType"
+                  [(ngModel)]="selectedReviewDocumentType"
+                >
+
+                  <option [ngValue]="null">
+                    Выберите тип
+                  </option>
+
+                  <option value="CONTRACT">
+                    Договор
+                  </option>
+
+                  <option value="AMENDMENT_CHANGE">
+                    Доп. соглашение — изменение
+                  </option>
+
+                  <option value="AMENDMENT_PROLONGATION">
+                    Доп. соглашение — продление
+                  </option>
+
+                  <option value="APPENDIX">
+                    Приложение
+                  </option>
+
+                </select>
+
+              </label>
+
+
+              @if (reviewErrorMessage) {
+
+                <div class="review-error">
+                  {{ reviewErrorMessage }}
                 </div>
 
               }
 
 
               <button
-                class="link-button"
+                class="review-button"
                 type="button"
                 [disabled]="
-                  selectedContractDocumentId === null
+                  selectedReviewDocumentType === null
                   ||
-                  linkingDocument
+                  reviewingDocument
                 "
-                (click)="linkToContract()"
+                (click)="reviewDocument()"
               >
-                @if (linkingDocument) {
-                  Привязываем...
+                @if (reviewingDocument) {
+                  Подтверждаем...
                 } @else {
-                  Привязать к договору
+                  Подтвердить тип документа
                 }
               </button>
+
+            </div>
+
+          }
+
+        </article>
+
+      </div>
+
+
+      <article class="panel preview-panel">
+
+        <div class="preview-heading">
+
+          <div>
+
+            <span class="section-eyebrow">
+              ИСХОДНЫЙ ФАЙЛ
+            </span>
+
+            <h2>
+              Просмотр документа
+            </h2>
+
+          </div>
+
+
+          <div class="preview-actions">
+
+            <button
+              class="preview-refresh-button"
+              type="button"
+              [disabled]="previewLoading"
+              (click)="loadDocumentPreview()"
+              title="Обновить предпросмотр"
+            >
+              ↻
+            </button>
+
+            <button
+              class="preview-open-button"
+              type="button"
+              [disabled]="!previewObjectUrl"
+              (click)="openPreviewInNewTab()"
+            >
+              Открыть отдельно ↗
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="preview-file-info">
+
+          <span class="preview-file-icon">
+            @if (isPdfPreview) {
+              PDF
+            } @else if (isImagePreview) {
+              IMG
+            } @else {
+              FILE
+            }
+          </span>
+
+          <div>
+
+            <strong>
+              {{ document.originalName || 'Документ' }}
+            </strong>
+
+            <span>
+              Оригинальный файл из хранилища DocFlow
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="preview-stage">
+
+          @if (previewLoading) {
+
+            <div class="preview-state">
+
+              <span class="preview-loader"></span>
+
+              <strong>
+                Загружаем документ
+              </strong>
+
+              <span>
+                Получаем исходный файл из защищённого хранилища.
+              </span>
+
+            </div>
+
+          } @else if (previewErrorMessage) {
+
+            <div class="preview-state error">
+
+              <strong>
+                Предпросмотр недоступен
+              </strong>
+
+              <span>
+                {{ previewErrorMessage }}
+              </span>
+
+              <button
+                type="button"
+                (click)="loadDocumentPreview()"
+              >
+                Повторить
+              </button>
+
+            </div>
+
+          } @else if (
+            isPdfPreview
+            &&
+            previewResourceUrl
+          ) {
+
+            <iframe
+              class="pdf-preview"
+              [src]="previewResourceUrl"
+              title="Предпросмотр PDF-документа"
+            ></iframe>
+
+          } @else if (
+            isImagePreview
+            &&
+            previewObjectUrl
+          ) {
+
+            <div class="image-preview-wrapper">
+
+              <img
+                class="image-preview"
+                [src]="previewObjectUrl"
+                [alt]="document.originalName || 'Документ'"
+              />
+
+            </div>
+
+          } @else {
+
+            <div class="preview-state">
+
+              <strong>
+                Формат не поддерживает встроенный просмотр
+              </strong>
+
+              <span>
+                Откройте исходный файл в отдельной вкладке.
+              </span>
+
+            </div>
+
+          }
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <section class="workflow-section">
+
+      <div class="workflow-section-heading">
+
+        <div>
+
+          <span class="section-eyebrow">
+            ЖИЗНЕННЫЙ ЦИКЛ
+          </span>
+
+          <h2>
+            Обработка документа
+          </h2>
+
+        </div>
+
+        <span class="workflow-description">
+          Маршрут, связи и передача документа в корпоративную СЭД
+        </span>
+
+      </div>
+
+
+      <div class="workflow-grid">
+
+        <article class="panel workflow-card">
+
+          <div class="workflow-icon route">
+            ↗
+          </div>
+
+          <div class="workflow-content">
+
+            <span class="section-eyebrow">
+              МАРШРУТИЗАЦИЯ
+            </span>
+
+            <h2>
+              Маршрут документа
+            </h2>
+
+
+            @if (document.routing) {
+
+              <div class="workflow-main-value">
+                {{ getRoutingTargetLabel(document.routing.routingTarget) }}
+              </div>
+
+              <dl>
+
+                <div>
+                  <dt>Статус</dt>
+
+                  <dd>
+                    {{ getRoutingStatusLabel(document.routing.routingStatus) }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Причина</dt>
+
+                  <dd>
+                    {{ document.routing.routingReason || '—' }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Дата маршрутизации</dt>
+
+                  <dd>
+                    {{ formatDateTime(document.routing.routedAt) }}
+                  </dd>
+                </div>
+
+              </dl>
 
             } @else {
 
               <div class="empty-section compact">
 
                 <strong>
-                  Подходящие договоры не найдены
+                  Маршрут ещё не сформирован
                 </strong>
 
                 <span>
-                  Сначала необходимо добавить и проверить основной договор.
+                  Нет данных о маршрутизации документа.
                 </span>
 
               </div>
 
             }
 
-          } @else {
+          </div>
 
-            <div class="empty-section compact">
-
-              <strong>
-                Привязка отсутствует
-              </strong>
-
-              <span>
-                Для этого документа связь с основным договором не создана.
-              </span>
-
-            </div>
-
-          }
+        </article>
 
 
-          @if (
-            document.linkedDocumentsCount > 0
-          ) {
+        <article class="panel workflow-card">
 
-            <div class="linked-count">
+          <div class="workflow-icon link">
+            ⛓
+          </div>
 
-              <span>
-                Связанных документов
-              </span>
+          <div class="workflow-content">
 
-              <strong>
-                {{ document.linkedDocumentsCount }}
-              </strong>
+            <span class="section-eyebrow">
+              СВЯЗИ ДОКУМЕНТА
+            </span>
 
-            </div>
-
-          }
-
-        </div>
-
-      </article>
+            <h2>
+              Привязка к договору
+            </h2>
 
 
-      <article class="panel workflow-card">
+            @if (document.link) {
 
-        <div class="workflow-icon sed">
-          S
-        </div>
+              <div class="workflow-main-value">
+                {{
+                  document.link.contractDocumentNumber
+                    ? 'Договор № ' + document.link.contractDocumentNumber
+                    : 'Договор ID ' + document.link.contractDocumentId
+                }}
+              </div>
 
-        <div class="workflow-content">
+              <dl>
 
-          <span class="section-eyebrow">
-            КОРПОРАТИВНАЯ СЭД
-          </span>
+                <div>
+                  <dt>ID договора</dt>
 
-          <h2>
-            Отправка в СЭД
-          </h2>
+                  <dd>
+                    {{ document.link.contractDocumentId }}
+                  </dd>
+                </div>
 
+                <div>
+                  <dt>Дата договора</dt>
 
-          @if (document.sed) {
+                  <dd>
+                    {{ formatDate(document.link.contractDocumentDate) }}
+                  </dd>
+                </div>
 
-            <div class="sed-success-box">
+                <div>
+                  <dt>Дата привязки</dt>
 
-              <span class="sed-success-icon">
-                ✓
-              </span>
+                  <dd>
+                    {{ formatDateTime(document.link.linkedAt) }}
+                  </dd>
+                </div>
 
-              <div>
+              </dl>
 
-                <span>
-                  Результат отправки
-                </span>
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="openLinkedContract()"
+              >
+                Открыть договор →
+              </button>
+
+            } @else if (
+              document.status === 'LINK_REQUIRED'
+            ) {
+
+              <div class="link-required-box">
 
                 <strong>
-                  {{ getSedStatusLabel(document.sed.dispatchStatus) }}
+                  Требуется основной договор
                 </strong>
 
+                <span>
+                  Выберите договор, к которому относится этот документ.
+                </span>
+
               </div>
 
-            </div>
+
+              @if (loadingCandidates) {
+
+                <div class="candidate-state">
+                  Загружаем доступные договоры...
+                </div>
+
+              } @else if (linkErrorMessage) {
+
+                <div class="link-error">
+                  {{ linkErrorMessage }}
+                </div>
+
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="loadContractCandidates()"
+                >
+                  Повторить
+                </button>
+
+              } @else if (
+                contractCandidates.length > 0
+              ) {
+
+                <label class="contract-select">
+
+                  <span>
+                    Основной договор
+                  </span>
+
+                  <select
+                    name="contractCandidate"
+                    [(ngModel)]="selectedContractDocumentId"
+                  >
+
+                    <option [ngValue]="null">
+                      Выберите договор
+                    </option>
+
+                    @for (
+                      candidate of contractCandidates;
+                      track candidate.contractDocumentId
+                    ) {
+
+                      <option
+                        [ngValue]="candidate.contractDocumentId"
+                      >
+                        {{
+                          candidate.documentNumber
+                            ? '№ ' + candidate.documentNumber
+                            : 'ID ' + candidate.contractDocumentId
+                        }}
+                        —
+                        {{ formatDate(candidate.documentDate) }}
+                      </option>
+
+                    }
+
+                  </select>
+
+                </label>
 
 
-            <dl>
+                @if (selectedContractCandidate) {
 
-              <div>
-                <dt>ID в СЭД</dt>
-                <dd class="external-id">
-                  {{ document.sed.externalDocumentId || '—' }}
-                </dd>
-              </div>
+                  <div class="candidate-preview">
 
-              <div>
-                <dt>Ответ СЭД</dt>
-                <dd>
-                  {{ document.sed.responseMessage || '—' }}
-                </dd>
-              </div>
+                    <div>
 
-              <div>
-                <dt>Дата отправки</dt>
-                <dd>
-                  {{ formatDateTime(document.sed.sentAt) }}
-                </dd>
-              </div>
+                      <span>
+                        Договор
+                      </span>
 
-            </dl>
+                      <strong>
+                        {{
+                          selectedContractCandidate.documentNumber
+                            ? '№ ' + selectedContractCandidate.documentNumber
+                            : 'ID ' + selectedContractCandidate.contractDocumentId
+                        }}
+                      </strong>
 
-            <div class="sed-locked-note">
-              Документ зафиксирован в истории и больше не может быть удалён.
-            </div>
+                    </div>
 
-          } @else {
 
-            <div
-              [class]="
-                canSendToSed
-                  ? 'sed-readiness ready'
-                  : (
-                      canPrepareForSed
-                        ? 'sed-readiness available'
-                        : 'sed-readiness pending'
-                    )
-              "
-            >
+                    <div>
 
-              <span class="readiness-dot"></span>
+                      <span>
+                        Дата
+                      </span>
 
-              <div>
+                      <strong>
+                        {{ formatDate(selectedContractCandidate.documentDate) }}
+                      </strong>
 
-                <strong>
-                  @if (canSendToSed) {
-                    Готов к отправке
-                  } @else if (canPrepareForSed) {
-                    Готов к подготовке
+                    </div>
+
+
+                    <div class="candidate-subject">
+
+                      <span>
+                        Предмет
+                      </span>
+
+                      <strong>
+                        {{ selectedContractCandidate.subject || '—' }}
+                      </strong>
+
+                    </div>
+
+
+                    <div>
+
+                      <span>
+                        Статус
+                      </span>
+
+                      <strong>
+                        {{ getStatusLabel(selectedContractCandidate.status) }}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+                }
+
+
+                <button
+                  class="link-button"
+                  type="button"
+                  [disabled]="
+                    selectedContractDocumentId === null
+                    ||
+                    linkingDocument
+                  "
+                  (click)="linkToContract()"
+                >
+                  @if (linkingDocument) {
+                    Привязываем...
                   } @else {
-                    Пока не готов
+                    Привязать к договору
                   }
+                </button>
+
+              } @else {
+
+                <div class="empty-section compact">
+
+                  <strong>
+                    Подходящие договоры не найдены
+                  </strong>
+
+                  <span>
+                    Сначала необходимо добавить и проверить основной договор.
+                  </span>
+
+                </div>
+
+              }
+
+            } @else {
+
+              <div class="empty-section compact">
+
+                <strong>
+                  Привязка отсутствует
                 </strong>
 
                 <span>
-                  {{ sedActionHint }}
+                  Для этого документа связь с основным договором не создана.
                 </span>
 
               </div>
 
-            </div>
+            }
 
 
-            @if (sedErrorMessage) {
+            @if (
+              document.linkedDocumentsCount > 0
+            ) {
 
-              <div class="link-error">
-                {{ sedErrorMessage }}
+              <div class="linked-count">
+
+                <span>
+                  Связанных документов
+                </span>
+
+                <strong>
+                  {{ document.linkedDocumentsCount }}
+                </strong>
+
               </div>
 
             }
 
+          </div>
 
-            @if (canPrepareForSed) {
+        </article>
 
-              <button
-                class="sed-prepare-button"
-                type="button"
-                [disabled]="preparingForSed"
-                (click)="prepareForSed()"
-              >
-                @if (preparingForSed) {
-                  Проверяем документ...
-                } @else {
-                  Подготовить к отправке в СЭД
-                }
-              </button>
 
-              <div class="sed-help">
-                Система проверит реквизиты, маршрут и связь с основным договором.
+        <article class="panel workflow-card">
+
+          <div class="workflow-icon sed">
+            S
+          </div>
+
+          <div class="workflow-content">
+
+            <span class="section-eyebrow">
+              КОРПОРАТИВНАЯ СЭД
+            </span>
+
+            <h2>
+              Отправка в СЭД
+            </h2>
+
+
+            @if (document.sed) {
+
+              <div class="sed-success-box">
+
+                <span class="sed-success-icon">
+                  ✓
+                </span>
+
+                <div>
+
+                  <span>
+                    Результат отправки
+                  </span>
+
+                  <strong>
+                    {{ getSedStatusLabel(document.sed.dispatchStatus) }}
+                  </strong>
+
+                </div>
+
               </div>
 
-            } @else if (canSendToSed) {
 
-              <button
-                class="sed-send-button"
-                type="button"
-                [disabled]="sendingToSed"
-                (click)="sendToSed()"
-              >
-                @if (sendingToSed) {
-                  Отправляем...
-                } @else {
-                  Отправить в СЭД
-                }
-              </button>
+              <dl>
 
-              <div class="sed-help">
-                После отправки документ будет зарегистрирован в корпоративной СЭД.
+                <div>
+                  <dt>ID в СЭД</dt>
+
+                  <dd class="external-id">
+                    {{ document.sed.externalDocumentId || '—' }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Ответ СЭД</dt>
+
+                  <dd>
+                    {{ document.sed.responseMessage || '—' }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Дата отправки</dt>
+
+                  <dd>
+                    {{ formatDateTime(document.sed.sentAt) }}
+                  </dd>
+                </div>
+
+              </dl>
+
+              <div class="sed-locked-note">
+                Документ зафиксирован в истории и больше не может быть удалён.
               </div>
+
+            } @else {
+
+              <div
+                [class]="
+                  canSendToSed
+                    ? 'sed-readiness ready'
+                    : (
+                        canPrepareForSed
+                          ? 'sed-readiness available'
+                          : 'sed-readiness pending'
+                      )
+                "
+              >
+
+                <span class="readiness-dot"></span>
+
+                <div>
+
+                  <strong>
+                    @if (canSendToSed) {
+                      Готов к отправке
+                    } @else if (canPrepareForSed) {
+                      Готов к подготовке
+                    } @else {
+                      Пока не готов
+                    }
+                  </strong>
+
+                  <span>
+                    {{ sedActionHint }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              @if (sedErrorMessage) {
+
+                <div class="link-error">
+                  {{ sedErrorMessage }}
+                </div>
+
+              }
+
+
+              @if (canPrepareForSed) {
+
+                <button
+                  class="sed-prepare-button"
+                  type="button"
+                  [disabled]="preparingForSed"
+                  (click)="prepareForSed()"
+                >
+                  @if (preparingForSed) {
+                    Проверяем документ...
+                  } @else {
+                    Подготовить к отправке в СЭД
+                  }
+                </button>
+
+                <div class="sed-help">
+                  Система проверит реквизиты, маршрут и связь с основным договором.
+                </div>
+
+              } @else if (canSendToSed) {
+
+                <button
+                  class="sed-send-button"
+                  type="button"
+                  [disabled]="sendingToSed"
+                  (click)="sendToSed()"
+                >
+                  @if (sendingToSed) {
+                    Отправляем...
+                  } @else {
+                    Отправить в СЭД
+                  }
+                </button>
+
+                <div class="sed-help">
+                  После отправки документ будет зарегистрирован в корпоративной СЭД.
+                </div>
+
+              }
 
             }
 
-          }
+          </div>
 
-        </div>
+        </article>
 
-      </article>
+      </div>
 
     </section>
 

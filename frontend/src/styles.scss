@@ -28,7 +28,8 @@ body {
     Helvetica,
     Arial,
     sans-serif;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -38,10 +39,38 @@ input,
 textarea,
 select {
   font-family: inherit;
+  font-size: 14px;
 }
 
 button {
   -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+select {
+  line-height: 1.45;
+}
+
+p {
+  line-height: 1.55;
+}
+
+small {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+label {
+  line-height: 1.4;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: #1f2a3e;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -49,8 +78,8 @@ a {
 }
 
 ::selection {
-  color: #1f4eaf;
-  background: #dce8ff;
+  color: #5147a9;
+  background: #e8e3ff;
 }
 
 ::-webkit-scrollbar {
