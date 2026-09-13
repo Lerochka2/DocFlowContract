@@ -23,6 +23,10 @@ import {
 } from './pages/review/review';
 
 import {
+  SedWorkspace
+} from './pages/sed/sed';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -57,6 +61,10 @@ export const routes: Routes = [
       {
         path: 'review',
         component: ReviewQueue
+      },
+      {
+        path: 'sed',
+        component: SedWorkspace
       },
       {
         path: '',

@@ -1,0 +1,479 @@
+<section class="sed-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        КОРПОРАТИВНАЯ СЭД
+      </span>
+
+      <h1>
+        Отправка документов
+      </h1>
+
+      <p>
+        Контроль документов, подготовленных к регистрации
+        в корпоративной системе электронного документооборота,
+        и история успешно выполненных отправок.
+      </p>
+
+    </div>
+
+
+    <button
+      class="refresh-button"
+      type="button"
+      [disabled]="loading"
+      (click)="loadSedWorkspace()"
+    >
+      @if (loading) {
+        Обновляем...
+      } @else {
+        Обновить
+      }
+    </button>
+
+  </header>
+
+
+  <section class="statistics">
+
+    <article class="stat-card total">
+
+      <div class="stat-icon">
+        S
+      </div>
+
+      <div>
+
+        <span>
+          Всего в разделе
+        </span>
+
+        <strong>
+          {{ totalDocuments }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card ready">
+
+      <div class="stat-icon">
+        →
+      </div>
+
+      <div>
+
+        <span>
+          Готовы к отправке
+        </span>
+
+        <strong>
+          {{ readyDocuments.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card sent">
+
+      <div class="stat-icon">
+        ✓
+      </div>
+
+      <div>
+
+        <span>
+          Отправлены
+        </span>
+
+        <strong>
+          {{ sentDocuments.length }}
+        </strong>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  @if (loading) {
+
+    <section class="state-card">
+
+      <div class="loader"></div>
+
+      <strong>
+        Загружаем данные СЭД
+      </strong>
+
+      <span>
+        Получаем готовые документы и историю отправки...
+      </span>
+
+    </section>
+
+  } @else if (errorMessage) {
+
+    <section class="state-card error">
+
+      <div class="state-icon">
+        !
+      </div>
+
+      <strong>
+        Не удалось загрузить раздел
+      </strong>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="loadSedWorkspace()"
+      >
+        Повторить
+      </button>
+
+    </section>
+
+  } @else {
+
+    <section class="sed-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-eyebrow">
+            ОЧЕРЕДЬ ОТПРАВКИ
+          </span>
+
+          <h2>
+            Готовы к отправке
+          </h2>
+
+          <p>
+            Документы прошли необходимые проверки
+            и могут быть зарегистрированы в СЭД.
+          </p>
+
+        </div>
+
+        <span class="section-count ready">
+          {{ readyDocuments.length }}
+        </span>
+
+      </div>
+
+
+      @if (readyDocuments.length === 0) {
+
+        <div class="empty-block">
+
+          <div class="empty-icon">
+            ✓
+          </div>
+
+          <div>
+
+            <strong>
+              Очередь отправки пуста
+            </strong>
+
+            <span>
+              Сейчас нет документов со статусом «Готов к отправке».
+            </span>
+
+          </div>
+
+        </div>
+
+      } @else {
+
+        <div class="document-list">
+
+          @for (
+            document of readyDocuments;
+            track document.documentId
+          ) {
+
+            <article class="document-card ready-card">
+
+              <div class="file-block">
+
+                <div class="file-icon">
+                  PDF
+                </div>
+
+                <div class="file-info">
+
+                  <div class="document-id">
+                    ДОКУМЕНТ #{{ document.documentId }}
+                  </div>
+
+                  <strong
+                    class="file-name"
+                    [title]="document.originalName || 'Документ'"
+                  >
+                    {{ document.originalName || 'Документ' }}
+                  </strong>
+
+                  <div class="document-meta">
+
+                    <span>
+                      {{ getDocumentTypeLabel(document.documentType) }}
+                    </span>
+
+                    <i></i>
+
+                    <span>
+                      {{
+                        document.documentNumber
+                          ? '№ ' + document.documentNumber
+                          : 'Без номера'
+                      }}
+                    </span>
+
+                    <i></i>
+
+                    <span>
+                      {{ formatDate(document.documentDate) }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="data-block">
+
+                <span>
+                  Маршрут
+                </span>
+
+                <strong>
+                  {{
+                    getRoutingTargetLabel(
+                      document.routing?.routingTarget || null
+                    )
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="status-block ready">
+
+                <span class="status-dot"></span>
+
+                <div>
+
+                  <span>
+                    Статус
+                  </span>
+
+                  <strong>
+                    Готов к отправке
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <button
+                class="primary-action"
+                type="button"
+                (click)="openDocument(document.documentId)"
+              >
+                Открыть и отправить
+                <span>→</span>
+              </button>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+
+    <section class="sed-section history-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-eyebrow">
+            ИСТОРИЯ РЕГИСТРАЦИИ
+          </span>
+
+          <h2>
+            Отправлены в СЭД
+          </h2>
+
+          <p>
+            Документы, уже зарегистрированные
+            во внешней системе электронного документооборота.
+          </p>
+
+        </div>
+
+        <span class="section-count sent">
+          {{ sentDocuments.length }}
+        </span>
+
+      </div>
+
+
+      @if (sentDocuments.length === 0) {
+
+        <div class="empty-block">
+
+          <div class="empty-icon neutral">
+            S
+          </div>
+
+          <div>
+
+            <strong>
+              История пока пуста
+            </strong>
+
+            <span>
+              После первой отправки документ появится здесь.
+            </span>
+
+          </div>
+
+        </div>
+
+      } @else {
+
+        <div class="history-table">
+
+          <div class="history-header">
+
+            <span>
+              Документ
+            </span>
+
+            <span>
+              ID в СЭД
+            </span>
+
+            <span>
+              Результат
+            </span>
+
+            <span>
+              Дата отправки
+            </span>
+
+            <span></span>
+
+          </div>
+
+
+          @for (
+            document of sentDocuments;
+            track document.documentId
+          ) {
+
+            <div class="history-row">
+
+              <div class="history-document">
+
+                <div class="history-file-icon">
+                  PDF
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{
+                      document.documentNumber
+                        ? '№ ' + document.documentNumber
+                        : document.originalName || 'Документ'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{ getDocumentTypeLabel(document.documentType) }}
+                    · ID {{ document.documentId }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="external-id">
+
+                <strong>
+                  {{ document.sed?.externalDocumentId || '—' }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span class="sed-result">
+
+                  <i></i>
+
+                  {{
+                    getSedStatusLabel(
+                      document.sed?.dispatchStatus || null
+                    )
+                  }}
+
+                </span>
+
+              </div>
+
+
+              <div class="sent-date">
+                {{ formatDateTime(document.sed?.sentAt || null) }}
+              </div>
+
+
+              <div class="row-action">
+
+                <button
+                  type="button"
+                  (click)="openDocument(document.documentId)"
+                >
+                  Открыть
+                </button>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  }
+
+</section>
