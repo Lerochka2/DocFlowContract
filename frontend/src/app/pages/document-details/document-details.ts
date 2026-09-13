@@ -57,6 +57,9 @@ export class DocumentDetails implements OnInit {
   loadingCandidates = false;
   linkingDocument = false;
 
+  preparingForSed = false;
+  sendingToSed = false;
+
   errorMessage = '';
   deleteErrorMessage = '';
 
@@ -65,6 +68,9 @@ export class DocumentDetails implements OnInit {
 
   linkErrorMessage = '';
   linkSuccessMessage = '';
+
+  sedErrorMessage = '';
+  sedSuccessMessage = '';
 
   private documentId: number | null = null;
 
@@ -127,19 +133,9 @@ export class DocumentDetails implements OnInit {
 
           this.loading = false;
 
-          if (
-            document.status === 'LINK_REQUIRED'
-            &&
-            !document.link
-          ) {
-
-            this.loadContractCandidates();
-
-          } else {
-
-            this.contractCandidates = [];
-            this.selectedContractDocumentId = null;
-          }
+          this.updateLinkCandidates(
+            document
+          );
 
           this.changeDetectorRef
             .markForCheck();
@@ -171,6 +167,56 @@ export class DocumentDetails implements OnInit {
             .markForCheck();
         }
       });
+  }
+
+  private refreshDocumentSummary(): void {
+
+    if (this.documentId === null) {
+      return;
+    }
+
+    this.workspaceService
+      .getDocumentSummary(
+        this.documentId
+      )
+      .subscribe({
+
+        next: document => {
+
+          this.document =
+            document;
+
+          this.updateLinkCandidates(
+            document
+          );
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: () => {
+          this.loadDocument();
+        }
+      });
+  }
+
+  private updateLinkCandidates(
+    document: DocumentSummary
+  ): void {
+
+    if (
+      document.status === 'LINK_REQUIRED'
+      &&
+      !document.link
+    ) {
+
+      this.loadContractCandidates();
+
+      return;
+    }
+
+    this.contractCandidates = [];
+    this.selectedContractDocumentId = null;
   }
 
   loadContractCandidates(): void {
@@ -294,29 +340,7 @@ export class DocumentDetails implements OnInit {
           this.linkSuccessMessage =
             'Документ успешно привязан к основному договору.';
 
-          this.workspaceService
-            .getDocumentSummary(
-              this.documentId!
-            )
-            .subscribe({
-
-              next: document => {
-
-                this.document =
-                  document;
-
-                this.contractCandidates = [];
-                this.selectedContractDocumentId = null;
-
-                this.changeDetectorRef
-                  .markForCheck();
-              },
-
-              error: () => {
-
-                this.loadDocument();
-              }
-            });
+          this.refreshDocumentSummary();
         },
 
         error: (
@@ -333,6 +357,204 @@ export class DocumentDetails implements OnInit {
             .markForCheck();
         }
       });
+  }
+
+  prepareForSed(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canPrepareForSed
+      ||
+      this.preparingForSed
+    ) {
+      return;
+    }
+
+    this.preparingForSed = true;
+
+    this.sedErrorMessage = '';
+    this.sedSuccessMessage = '';
+
+    this.workspaceService
+      .prepareDocumentForSed(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.preparingForSed = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.sedSuccessMessage =
+            'Документ успешно подготовлен к отправке в СЭД.';
+
+          this.editingMetadata = false;
+          this.metadataForm = null;
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.sedErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось подготовить документ к отправке в СЭД.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  sendToSed(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canSendToSed
+      ||
+      this.sendingToSed
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        'Отправить документ в корпоративную СЭД?\n\n'
+        + 'После успешной отправки документ будет зафиксирован в истории, '
+        + 'а редактирование и удаление будут ограничены.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.sendingToSed = true;
+
+    this.sedErrorMessage = '';
+    this.sedSuccessMessage = '';
+
+    this.workspaceService
+      .sendDocumentToSed(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.sendingToSed = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: response => {
+
+          this.sedSuccessMessage =
+            response.externalDocumentId
+              ? `Документ успешно отправлен в СЭД. ID: ${response.externalDocumentId}.`
+              : 'Документ успешно отправлен в СЭД.';
+
+          this.editingMetadata = false;
+          this.metadataForm = null;
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.sedErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось отправить документ в СЭД.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get canPrepareForSed(): boolean {
+
+    if (!this.document) {
+      return false;
+    }
+
+    if (
+      this.document.documentType === 'CONTRACT'
+    ) {
+
+      return this.document.status
+        === 'VERIFIED';
+    }
+
+    return this.document.status
+      === 'LINKED';
+  }
+
+  get canSendToSed(): boolean {
+
+    return this.document?.status
+      === 'READY_FOR_SED';
+  }
+
+  get sedActionHint(): string {
+
+    if (!this.document) {
+      return '';
+    }
+
+    switch (
+      this.document.status
+    ) {
+
+      case 'UPLOADED':
+        return 'Сначала необходимо выполнить AI-анализ документа.';
+
+      case 'AI_PROCESSING':
+        return 'Дождитесь завершения AI-анализа.';
+
+      case 'REVIEW_REQUIRED':
+        return 'Перед отправкой документ необходимо проверить.';
+
+      case 'LINK_REQUIRED':
+        return 'Перед отправкой документ необходимо привязать к основному договору.';
+
+      case 'LINKED':
+        return 'Документ связан с договором и может быть подготовлен к отправке.';
+
+      case 'VERIFIED':
+        return 'Документ проверен и может быть подготовлен к отправке.';
+
+      case 'READY_FOR_SED':
+        return 'Все проверки пройдены. Документ готов к отправке в СЭД.';
+
+      case 'SENT_TO_SED':
+        return 'Документ уже отправлен в корпоративную СЭД.';
+
+      default:
+        return 'Документ пока не готов к отправке в СЭД.';
+    }
   }
 
   get selectedContractCandidate(): ContractCandidate | null {
@@ -355,8 +577,12 @@ export class DocumentDetails implements OnInit {
   startMetadataEditing(): void {
 
     if (
-      this.documentId === null ||
-      this.loadingMetadata ||
+      this.documentId === null
+      ||
+      !this.canEditMetadata
+      ||
+      this.loadingMetadata
+      ||
       this.savingMetadata
     ) {
       return;
@@ -412,6 +638,50 @@ export class DocumentDetails implements OnInit {
       });
   }
 
+  get canEditMetadata(): boolean {
+
+    if (!this.document) {
+      return false;
+    }
+
+    if (
+      this.document.status === 'READY_FOR_SED'
+      ||
+      this.document.status === 'SENT_TO_SED'
+      ||
+      this.document.sed !== null
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  get metadataEditRestrictionMessage(): string {
+
+    if (!this.document) {
+      return '';
+    }
+
+    if (
+      this.document.status === 'READY_FOR_SED'
+    ) {
+
+      return 'Документ уже подготовлен к отправке в СЭД.';
+    }
+
+    if (
+      this.document.status === 'SENT_TO_SED'
+      ||
+      this.document.sed !== null
+    ) {
+
+      return 'После отправки в СЭД реквизиты документа зафиксированы.';
+    }
+
+    return '';
+  }
+
   cancelMetadataEditing(): void {
 
     if (this.savingMetadata) {
@@ -429,8 +699,12 @@ export class DocumentDetails implements OnInit {
   saveMetadata(): void {
 
     if (
-      this.documentId === null ||
-      !this.metadataForm ||
+      this.documentId === null
+      ||
+      !this.metadataForm
+      ||
+      !this.canEditMetadata
+      ||
       this.savingMetadata
     ) {
       return;
@@ -440,7 +714,8 @@ export class DocumentDetails implements OnInit {
     this.metadataSuccessMessage = '';
 
     if (
-      this.metadataForm.amount !== null &&
+      this.metadataForm.amount !== null
+      &&
       this.metadataForm.amount < 0
     ) {
 
@@ -451,8 +726,10 @@ export class DocumentDetails implements OnInit {
     }
 
     if (
-      this.metadataForm.validFrom &&
-      this.metadataForm.validTo &&
+      this.metadataForm.validFrom
+      &&
+      this.metadataForm.validTo
+      &&
       this.metadataForm.validFrom
         > this.metadataForm.validTo
     ) {
@@ -477,7 +754,8 @@ export class DocumentDetails implements OnInit {
           this.metadataForm.documentDate || null,
 
         amount:
-          this.metadataForm.amount === null ||
+          this.metadataForm.amount === null
+          ||
           this.metadataForm.amount === undefined
             ? null
             : Number(
@@ -570,8 +848,10 @@ export class DocumentDetails implements OnInit {
   deleteDocument(): void {
 
     if (
-      !this.document ||
-      !this.canDeleteDocument ||
+      !this.document
+      ||
+      !this.canDeleteDocument
+      ||
       this.deleting
     ) {
       return;
@@ -906,7 +1186,8 @@ export class DocumentDetails implements OnInit {
         ?.confidence;
 
     if (
-      confidence === null ||
+      confidence === null
+      ||
       confidence === undefined
     ) {
       return '—';
@@ -927,7 +1208,8 @@ export class DocumentDetails implements OnInit {
         ?.confidence;
 
     if (
-      confidence === null ||
+      confidence === null
+      ||
       confidence === undefined
     ) {
       return 0;
@@ -963,7 +1245,9 @@ export class DocumentDetails implements OnInit {
 
     const match =
       /^(\d{4})-(\d{2})-(\d{2})$/
-        .exec(datePart);
+        .exec(
+          datePart
+        );
 
     if (!match) {
       return value;
@@ -981,11 +1265,15 @@ export class DocumentDetails implements OnInit {
     }
 
     const date =
-      this.formatDate(value);
+      this.formatDate(
+        value
+      );
 
     const timeMatch =
       /T(\d{2}):(\d{2})/
-        .exec(value);
+        .exec(
+          value
+        );
 
     if (!timeMatch) {
       return date;
@@ -1000,7 +1288,8 @@ export class DocumentDetails implements OnInit {
       this.document?.amount;
 
     if (
-      amount === null ||
+      amount === null
+      ||
       amount === undefined
     ) {
       return '—';
@@ -1013,7 +1302,9 @@ export class DocumentDetails implements OnInit {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2
         }
-      ).format(amount);
+      ).format(
+        amount
+      );
 
     return this.document?.currency
       ? `${formatted} ${this.document.currency}`

@@ -133,7 +133,11 @@
     }
 
 
-    @if (!canDeleteDocument && deleteRestrictionMessage) {
+    @if (
+      !canDeleteDocument
+      &&
+      deleteRestrictionMessage
+    ) {
 
       <div class="delete-restriction">
         {{ deleteRestrictionMessage }}
@@ -151,7 +155,11 @@
     }
 
 
-    @if (metadataErrorMessage && !editingMetadata) {
+    @if (
+      metadataErrorMessage
+      &&
+      !editingMetadata
+    ) {
 
       <div class="metadata-message error">
         {{ metadataErrorMessage }}
@@ -164,6 +172,15 @@
 
       <div class="metadata-message success">
         {{ linkSuccessMessage }}
+      </div>
+
+    }
+
+
+    @if (sedSuccessMessage) {
+
+      <div class="metadata-message success">
+        {{ sedSuccessMessage }}
       </div>
 
     }
@@ -193,7 +210,16 @@
             <button
               class="edit-button"
               type="button"
-              [disabled]="loadingMetadata"
+              [disabled]="
+                loadingMetadata
+                ||
+                !canEditMetadata
+              "
+              [title]="
+                canEditMetadata
+                  ? 'Редактировать реквизиты'
+                  : metadataEditRestrictionMessage
+              "
               (click)="startMetadataEditing()"
             >
               @if (loadingMetadata) {
@@ -209,7 +235,8 @@
 
 
         @if (
-          editingMetadata &&
+          editingMetadata
+          &&
           metadataForm
         ) {
 
@@ -798,7 +825,9 @@
                 Повторить
               </button>
 
-            } @else if (contractCandidates.length > 0) {
+            } @else if (
+              contractCandidates.length > 0
+            ) {
 
               <label class="contract-select">
 
@@ -995,15 +1024,32 @@
 
           @if (document.sed) {
 
-            <div class="workflow-main-value">
-              {{ getSedStatusLabel(document.sed.dispatchStatus) }}
+            <div class="sed-success-box">
+
+              <span class="sed-success-icon">
+                ✓
+              </span>
+
+              <div>
+
+                <span>
+                  Результат отправки
+                </span>
+
+                <strong>
+                  {{ getSedStatusLabel(document.sed.dispatchStatus) }}
+                </strong>
+
+              </div>
+
             </div>
+
 
             <dl>
 
               <div>
                 <dt>ID в СЭД</dt>
-                <dd>
+                <dd class="external-id">
                   {{ document.sed.externalDocumentId || '—' }}
                 </dd>
               </div>
@@ -1024,19 +1070,95 @@
 
             </dl>
 
+            <div class="sed-locked-note">
+              Документ зафиксирован в истории и больше не может быть удалён.
+            </div>
+
           } @else {
 
-            <div class="empty-section compact">
+            <div
+              [class]="
+                canSendToSed
+                  ? 'sed-readiness ready'
+                  : (
+                      canPrepareForSed
+                        ? 'sed-readiness available'
+                        : 'sed-readiness pending'
+                    )
+              "
+            >
 
-              <strong>
-                Документ ещё не отправлялся
-              </strong>
+              <span class="readiness-dot"></span>
 
-              <span>
-                История отправки в корпоративную СЭД отсутствует.
-              </span>
+              <div>
+
+                <strong>
+                  @if (canSendToSed) {
+                    Готов к отправке
+                  } @else if (canPrepareForSed) {
+                    Готов к подготовке
+                  } @else {
+                    Пока не готов
+                  }
+                </strong>
+
+                <span>
+                  {{ sedActionHint }}
+                </span>
+
+              </div>
 
             </div>
+
+
+            @if (sedErrorMessage) {
+
+              <div class="link-error">
+                {{ sedErrorMessage }}
+              </div>
+
+            }
+
+
+            @if (canPrepareForSed) {
+
+              <button
+                class="sed-prepare-button"
+                type="button"
+                [disabled]="preparingForSed"
+                (click)="prepareForSed()"
+              >
+                @if (preparingForSed) {
+                  Проверяем документ...
+                } @else {
+                  Подготовить к отправке в СЭД
+                }
+              </button>
+
+              <div class="sed-help">
+                Система проверит реквизиты, маршрут и связь с основным договором.
+              </div>
+
+            } @else if (canSendToSed) {
+
+              <button
+                class="sed-send-button"
+                type="button"
+                [disabled]="sendingToSed"
+                (click)="sendToSed()"
+              >
+                @if (sendingToSed) {
+                  Отправляем...
+                } @else {
+                  Отправить в СЭД
+                }
+              </button>
+
+              <div class="sed-help">
+                После отправки документ будет зарегистрирован в корпоративной СЭД.
+              </div>
+
+            }
 
           }
 

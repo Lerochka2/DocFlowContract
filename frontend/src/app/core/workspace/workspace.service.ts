@@ -145,6 +145,27 @@ export interface DocumentLinkResponse {
   linkedAt: string;
 }
 
+export interface SedPreparationResponse {
+  documentId: number;
+  documentType: string;
+  status: string;
+  documentNumber: string | null;
+  documentDate: string | null;
+  subject: string | null;
+  routingTarget: string;
+}
+
+export interface SedDispatchResponse {
+  dispatchId: number;
+  documentId: number;
+  documentType: string | null;
+  documentStatus: string | null;
+  dispatchStatus: string;
+  externalDocumentId: string | null;
+  responseMessage: string | null;
+  sentAt: string | null;
+}
+
 export interface DocumentUploadResponse {
   documentId: number;
   fileId: number;
@@ -283,6 +304,35 @@ export class WorkspaceService {
     return this.http.post<DocumentLinkResponse>(
       `${this.documentsApiUrl}/${documentId}/link`,
       request
+    );
+  }
+
+  prepareDocumentForSed(
+    documentId: number
+  ): Observable<SedPreparationResponse> {
+
+    return this.http.post<SedPreparationResponse>(
+      `${this.documentsApiUrl}/${documentId}/prepare-for-sed`,
+      null
+    );
+  }
+
+  sendDocumentToSed(
+    documentId: number
+  ): Observable<SedDispatchResponse> {
+
+    return this.http.post<SedDispatchResponse>(
+      `${this.documentsApiUrl}/${documentId}/send-to-sed`,
+      null
+    );
+  }
+
+  getSedDispatchHistory(
+    documentId: number
+  ): Observable<SedDispatchResponse[]> {
+
+    return this.http.get<SedDispatchResponse[]>(
+      `${this.documentsApiUrl}/${documentId}/sed-dispatches`
     );
   }
 
