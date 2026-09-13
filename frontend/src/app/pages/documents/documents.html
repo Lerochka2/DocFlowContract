@@ -58,6 +58,7 @@
         name="type"
         [(ngModel)]="selectedType"
       >
+
         <option value="">
           Все типы
         </option>
@@ -77,6 +78,7 @@
         <option value="AMENDMENT_PROLONGATION">
           Доп. соглашение — продление
         </option>
+
       </select>
 
 
@@ -84,6 +86,7 @@
         name="status"
         [(ngModel)]="selectedStatus"
       >
+
         <option value="">
           Все статусы
         </option>
@@ -127,6 +130,7 @@
         <option value="SED_ERROR">
           Ошибка СЭД
         </option>
+
       </select>
 
 
@@ -155,6 +159,7 @@
     <div class="panel-heading">
 
       <div>
+
         <h2>
           Все документы
         </h2>
@@ -162,6 +167,7 @@
         <span>
           Найдено: {{ documents.length }}
         </span>
+
       </div>
 
       <span class="ai-label">
@@ -220,7 +226,13 @@
             track document.documentId
           ) {
 
-            <div class="document-row">
+            <div
+              class="document-row clickable-row"
+              role="button"
+              tabindex="0"
+              (click)="openDocument(document.documentId)"
+              (keydown.enter)="openDocument(document.documentId)"
+            >
 
               <div class="document-main">
 
@@ -239,9 +251,11 @@
                   </small>
 
                   @if (document.subject) {
+
                     <span class="subject">
                       {{ document.subject }}
                     </span>
+
                   }
 
                 </div>

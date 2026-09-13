@@ -13,6 +13,10 @@ import {
 } from '@angular/common/http';
 
 import {
+  Router
+} from '@angular/router';
+
+import {
   WorkspaceDocument,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
@@ -39,6 +43,7 @@ export class Documents implements OnInit {
 
   constructor(
     private readonly workspaceService: WorkspaceService,
+    private readonly router: Router,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {
   }
@@ -101,6 +106,18 @@ export class Documents implements OnInit {
     this.selectedStatus = '';
 
     this.loadDocuments();
+  }
+
+  openDocument(
+    documentId: number
+  ): void {
+
+    void this.router.navigate(
+      [
+        '/documents',
+        documentId
+      ]
+    );
   }
 
   getDocumentTypeLabel(

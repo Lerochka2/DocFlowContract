@@ -15,6 +15,10 @@ import {
 } from './pages/documents/documents';
 
 import {
+  DocumentDetails
+} from './pages/document-details/document-details';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -41,6 +45,10 @@ export const routes: Routes = [
       {
         path: 'documents',
         component: Documents
+      },
+      {
+        path: 'documents/:id',
+        component: DocumentDetails
       },
       {
         path: '',

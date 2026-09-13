@@ -40,13 +40,70 @@ export interface WorkspaceDocument {
   updatedAt: string | null;
 }
 
+export interface DocumentAiSummary {
+  resultId: number;
+  predictedType: string | null;
+  confidence: number | null;
+  processingStatus: string | null;
+}
+
+export interface DocumentRoutingSummary {
+  routeId: number;
+  routingTarget: string | null;
+  routingStatus: string | null;
+  routingReason: string | null;
+  routedAt: string | null;
+}
+
+export interface DocumentLinkSummary {
+  linkId: number;
+  contractDocumentId: number;
+  contractDocumentNumber: string | null;
+  contractDocumentDate: string | null;
+  linkedAt: string | null;
+}
+
+export interface DocumentSedSummary {
+  dispatchId: number;
+  dispatchStatus: string | null;
+  externalDocumentId: string | null;
+  responseMessage: string | null;
+  sentAt: string | null;
+}
+
+export interface DocumentSummary {
+  documentId: number;
+  fileId: number | null;
+  originalName: string | null;
+  documentType: string | null;
+  status: string | null;
+
+  documentNumber: string | null;
+  documentDate: string | null;
+  amount: number | null;
+  currency: string | null;
+  subject: string | null;
+  validFrom: string | null;
+  validTo: string | null;
+
+  ai: DocumentAiSummary | null;
+  routing: DocumentRoutingSummary | null;
+  link: DocumentLinkSummary | null;
+  sed: DocumentSedSummary | null;
+
+  linkedDocumentsCount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
 
-  private readonly apiUrl =
+  private readonly workspaceApiUrl =
     'http://localhost:8080/api/workspace';
+
+  private readonly documentsApiUrl =
+    'http://localhost:8080/api/documents';
 
   constructor(
     private readonly http: HttpClient
@@ -56,7 +113,7 @@ export class WorkspaceService {
   getDashboard(): Observable<WorkspaceDashboard> {
 
     return this.http.get<WorkspaceDashboard>(
-      `${this.apiUrl}/dashboard`
+      `${this.workspaceApiUrl}/dashboard`
     );
   }
 
@@ -94,10 +151,19 @@ export class WorkspaceService {
     }
 
     return this.http.get<WorkspaceDocument[]>(
-      `${this.apiUrl}/documents`,
+      `${this.workspaceApiUrl}/documents`,
       {
         params
       }
+    );
+  }
+
+  getDocumentSummary(
+    documentId: number
+  ): Observable<DocumentSummary> {
+
+    return this.http.get<DocumentSummary>(
+      `${this.documentsApiUrl}/${documentId}/summary`
     );
   }
 }

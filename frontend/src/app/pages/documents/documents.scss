@@ -237,8 +237,23 @@
   border-bottom: 0;
 }
 
-.document-row:not(.table-head):hover {
-  background: #fafbfd;
+.clickable-row {
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.clickable-row:hover {
+  background: #f8faff;
+}
+
+.clickable-row:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid #7695df;
+  outline-offset: -2px;
+  background: #f8faff;
 }
 
 .table-head {
