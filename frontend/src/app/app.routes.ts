@@ -19,6 +19,10 @@ import {
 } from './pages/document-details/document-details';
 
 import {
+  AiAnalysisWorkspace
+} from './pages/ai-analysis/ai-analysis';
+
+import {
   ReviewQueue
 } from './pages/review/review';
 
@@ -61,6 +65,10 @@ export const routes: Routes = [
       {
         path: 'documents/:id',
         component: DocumentDetails
+      },
+      {
+        path: 'ai-analysis',
+        component: AiAnalysisWorkspace
       },
       {
         path: 'review',
