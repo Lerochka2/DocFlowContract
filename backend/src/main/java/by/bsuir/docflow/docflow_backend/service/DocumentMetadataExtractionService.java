@@ -21,54 +21,49 @@ public class DocumentMetadataExtractionService {
 
     private static final String DATE_FRAGMENT =
             "(?:\\d{1,2}[./-]\\d{1,2}[./-]\\d{4}"
-                    + "|\\d{1,2}\\s+(?:"
+                    + "|[«\"']?\\d{1,2}[»\"']?\\s+(?:"
                     + RUSSIAN_MONTHS
-                    + ")\\s+\\d{4})";
+                    + ")\\s+\\d{4}(?:\\s*г\\.?)?)";
 
-    private static final Pattern DOCUMENT_NUMBER_PATTERN =
+    private static final Pattern DOCUMENT_HEADER_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:договор|дополнительное\\s+соглашение|"
-                            + "соглашение|приложение)"
-                            + ".{0,160}?"
-                            + "(?:№|N\\s*[OoОоº°]?|#)"
-                            + "\\s*"
-                            + "([A-ZА-ЯЁ0-9][A-ZА-ЯЁ0-9./_-]{0,99})"
-            );
-
-    private static final Pattern DOCUMENT_NUMBER_SLASH_PATTERN =
-            Pattern.compile(
-                    "(?iu)(?:договор|дополнительное\\s+соглашение|"
-                            + "соглашение|приложение)"
-                            + ".{0,160}?"
-                            + "\\b(\\d{1,10}\\s*/\\s*\\d{1,10})\\b"
-            );
-
-    private static final Pattern GENERIC_DOCUMENT_NUMBER_PATTERN =
-            Pattern.compile(
-                    "(?iu)(?:№|N\\s*[OoОоº°]?|#)"
-                            + "\\s*"
-                            + "([A-ZА-ЯЁ0-9][A-ZА-ЯЁ0-9./_-]{0,99})"
-            );
-
-    private static final Pattern DOCUMENT_DATE_PATTERN =
-            Pattern.compile(
-                    "(?iu)\\b(?:договор|дополнительное\\s+соглашение|"
-                            + "соглашение|приложение)\\b"
-                            + ".{0,180}?\\b("
-                            + DATE_FRAGMENT
+                    "(?iuU)\\b(?:"
+                            + "дополнительное\\s+соглашение"
+                            + "|договор"
+                            + "|соглашение"
+                            + "|приложение"
                             + ")\\b"
             );
 
-    private static final Pattern FIRST_DATE_PATTERN =
+    private static final Pattern HEADER_DOCUMENT_NUMBER_PATTERN =
             Pattern.compile(
-                    "(?iu)\\b("
+                    "(?iuU)(?:"
+                            + "№"
+                            + "|#"
+                            + "|\\bN(?:[OoОоº°])?\\b"
+                            + ")"
+                            + "\\s*"
+                            + "([\\p{L}0-9][\\p{L}0-9./_-]{0,99})"
+            );
+
+    private static final Pattern HEADER_DOCUMENT_NUMBER_SLASH_PATTERN =
+            Pattern.compile(
+                    "(?iuU)\\b"
+                            + "(\\d{1,10}\\s*/\\s*\\d{1,10})"
+                            + "\\b"
+                            + "(?!\\s*/\\s*\\d)"
+            );
+
+    private static final Pattern HEADER_DATE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)("
                             + DATE_FRAGMENT
-                            + ")\\b"
+                            + ")"
             );
 
     private static final Pattern AMOUNT_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:общая\\s+стоимость|стоимость|сумма)"
+                    "(?iuU)(?:общая\\s+стоимость|стоимость|сумма)"
                             + ".{0,120}?"
                             + "(?:составляет|в\\s+размере|равна|:)"
                             + "\\s*"
@@ -78,7 +73,7 @@ public class DocumentMetadataExtractionService {
 
     private static final Pattern SUBJECT_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:оказать\\s+услуги\\s+по"
+                    "(?iuU)(?:оказать\\s+услуги\\s+по"
                             + "|выполнить\\s+работы\\s+по"
                             + "|предметом\\s+(?:настоящего\\s+)?договора"
                             + "\\s+является)"
@@ -90,7 +85,7 @@ public class DocumentMetadataExtractionService {
 
     private static final Pattern VALID_FROM_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:вступает\\s+в\\s+силу\\s+с"
+                    "(?iuU)(?:вступает\\s+в\\s+силу\\s+с"
                             + "|действует\\s+с"
                             + "|срок\\s+действия.{0,60}?\\sс)"
                             + "\\s+("
@@ -100,7 +95,7 @@ public class DocumentMetadataExtractionService {
 
     private static final Pattern VALID_TO_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:действует\\s+до"
+                    "(?iuU)(?:действует\\s+до"
                             + "|срок\\s+действия.{0,80}?до)"
                             + "\\s+("
                             + DATE_FRAGMENT
@@ -109,10 +104,10 @@ public class DocumentMetadataExtractionService {
 
     private static final Pattern REFERENCED_CONTRACT_PATTERN =
             Pattern.compile(
-                    "(?iu)(?:к|по)\\s+"
+                    "(?iuU)(?:к|по)\\s+"
                             + "(?:основному\\s+)?договору\\s*"
-                            + "(?:№|N\\s*[OoОоº°]?|#)?\\s*"
-                            + "([A-ZА-ЯЁ0-9][A-ZА-ЯЁ0-9./_-]{0,99})"
+                            + "(?:(?:№|#|\\bN(?:[OoОоº°])?\\b)\\s*)?"
+                            + "([\\p{L}0-9][\\p{L}0-9./_-]{0,99})"
                             + "(?:\\s+от\\s+("
                             + DATE_FRAGMENT
                             + "))?"
@@ -120,19 +115,19 @@ public class DocumentMetadataExtractionService {
 
     private static final Pattern BYN_PATTERN =
             Pattern.compile(
-                    "(?iu)\\bBYN\\b"
+                    "(?iuU)\\bBYN\\b"
                             + "|белорусск\\w*\\s+рубл\\w*"
             );
 
     private static final Pattern USD_PATTERN =
             Pattern.compile(
-                    "(?iu)\\bUSD\\b"
+                    "(?iuU)\\bUSD\\b"
                             + "|доллар\\w*\\s+США"
             );
 
     private static final Pattern EUR_PATTERN =
             Pattern.compile(
-                    "(?iu)\\bEUR\\b"
+                    "(?iuU)\\bEUR\\b"
                             + "|\\bевро\\b"
             );
 
@@ -170,14 +165,19 @@ public class DocumentMetadataExtractionService {
                         recognizedText
                 );
 
+        String header =
+                findDocumentHeaderWindow(
+                        text
+                );
+
         fillDocumentNumber(
                 document,
-                text
+                header
         );
 
         fillDocumentDate(
                 document,
-                text
+                header
         );
 
         fillAmountAndCurrency(
@@ -201,41 +201,60 @@ public class DocumentMetadataExtractionService {
         );
     }
 
-    private void fillDocumentNumber(
-            Document document,
+    private String findDocumentHeaderWindow(
             String text
     ) {
 
-        if (!isBlank(
-                document.getDocumentNumber()
-        )) {
+        Matcher matcher =
+                DOCUMENT_HEADER_PATTERN
+                        .matcher(text);
+
+        if (!matcher.find()) {
+            return null;
+        }
+
+        int start =
+                matcher.start();
+
+        int end =
+                Math.min(
+                        text.length(),
+                        start + 350
+                );
+
+        return text.substring(
+                start,
+                end
+        );
+    }
+
+    private void fillDocumentNumber(
+            Document document,
+            String header
+    ) {
+
+        if (
+                !isBlank(
+                        document.getDocumentNumber()
+                )
+                        || header == null
+                        || header.isBlank()
+        ) {
             return;
         }
 
         String number =
-                findValue(
-                        DOCUMENT_NUMBER_PATTERN,
-                        text,
-                        1
+                findPlausibleDocumentNumber(
+                        HEADER_DOCUMENT_NUMBER_PATTERN,
+                        header
                 );
 
         if (number == null) {
 
             number =
-                    findValue(
-                            DOCUMENT_NUMBER_SLASH_PATTERN,
-                            text,
-                            1
-                    );
-        }
-
-        if (number == null) {
-
-            number =
-                    findValue(
-                            GENERIC_DOCUMENT_NUMBER_PATTERN,
-                            text,
-                            1
+                    findPlausibleDocumentNumber(
+                            HEADER_DOCUMENT_NUMBER_SLASH_PATTERN,
+                            header
                     );
         }
 
@@ -256,29 +275,23 @@ public class DocumentMetadataExtractionService {
 
     private void fillDocumentDate(
             Document document,
-            String text
+            String header
     ) {
 
-        if (document.getDocumentDate() != null) {
+        if (
+                document.getDocumentDate() != null
+                        || header == null
+                        || header.isBlank()
+        ) {
             return;
         }
 
         LocalDate date =
                 findDate(
-                        DOCUMENT_DATE_PATTERN,
-                        text,
+                        HEADER_DATE_PATTERN,
+                        header,
                         1
                 );
-
-        if (date == null) {
-
-            date =
-                    findDate(
-                            FIRST_DATE_PATTERN,
-                            text,
-                            1
-                    );
-        }
 
         if (date != null) {
 
@@ -433,38 +446,91 @@ public class DocumentMetadataExtractionService {
                 REFERENCED_CONTRACT_PATTERN
                         .matcher(text);
 
-        if (!matcher.find()) {
-            return;
-        }
+        while (matcher.find()) {
 
-        if (isBlank(
-                document.getReferencedContractNumber()
-        )) {
-
-            document.setReferencedContractNumber(
+            String referencedNumber =
                     cleanValue(
                             matcher.group(1)
-                    )
-            );
-        }
-
-        if (
-                document.getReferencedContractDate() == null
-                        && matcher.group(2) != null
-        ) {
-
-            LocalDate referencedDate =
-                    parseDate(
-                            matcher.group(2)
                     );
 
-            if (referencedDate != null) {
+            if (!isPlausibleDocumentNumber(
+                    referencedNumber
+            )) {
+                continue;
+            }
 
-                document.setReferencedContractDate(
-                        referencedDate
+            if (isBlank(
+                    document.getReferencedContractNumber()
+            )) {
+
+                document.setReferencedContractNumber(
+                        referencedNumber
                 );
             }
+
+            if (
+                    document.getReferencedContractDate() == null
+                            && matcher.group(2) != null
+            ) {
+
+                LocalDate referencedDate =
+                        parseDate(
+                                matcher.group(2)
+                        );
+
+                if (referencedDate != null) {
+
+                    document.setReferencedContractDate(
+                            referencedDate
+                    );
+                }
+            }
+
+            return;
         }
+    }
+
+    private String findPlausibleDocumentNumber(
+            Pattern pattern,
+            String text
+    ) {
+
+        Matcher matcher =
+                pattern.matcher(text);
+
+        while (matcher.find()) {
+
+            String value =
+                    cleanValue(
+                            matcher.group(1)
+                    );
+
+            if (isPlausibleDocumentNumber(
+                    value
+            )) {
+
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isPlausibleDocumentNumber(
+            String value
+    ) {
+
+        if (
+                value == null
+                        || value.isBlank()
+                        || value.length() > 100
+        ) {
+            return false;
+        }
+
+        return value.matches(
+                ".*\\d.*"
+        );
     }
 
     private String findValue(
@@ -520,8 +586,35 @@ public class DocumentMetadataExtractionService {
                         .toLowerCase(
                                 Locale.ROOT
                         )
-                        .replace('/', '.')
-                        .replace('-', '.');
+                        .replace(
+                                "«",
+                                ""
+                        )
+                        .replace(
+                                "»",
+                                ""
+                        )
+                        .replace(
+                                "\"",
+                                ""
+                        )
+                        .replace(
+                                "'",
+                                ""
+                        )
+                        .replaceAll(
+                                "(?iuU)\\s*г\\.?\\s*$",
+                                ""
+                        )
+                        .trim()
+                        .replace(
+                                '/',
+                                '.'
+                        )
+                        .replace(
+                                '-',
+                                '.'
+                        );
 
         if (normalized.matches(
                 "\\d{1,2}\\.\\d{1,2}\\.\\d{4}"
@@ -548,13 +641,13 @@ public class DocumentMetadataExtractionService {
 
         Matcher russianDate =
                 Pattern.compile(
-                        "(?iu)(\\d{1,2})\\s+("
+                        "(?iuU)(\\d{1,2})\\s+("
                                 + RUSSIAN_MONTHS
                                 + ")\\s+(\\d{4})"
                 )
                 .matcher(normalized);
 
-        if (!russianDate.find()) {
+        if (!russianDate.matches()) {
             return null;
         }
 
@@ -606,9 +699,18 @@ public class DocumentMetadataExtractionService {
 
         String normalized =
                 value
-                        .replace("\u00A0", "")
-                        .replaceAll("\\s+", "")
-                        .replace(',', '.');
+                        .replace(
+                                "\u00A0",
+                                ""
+                        )
+                        .replaceAll(
+                                "\\s+",
+                                ""
+                        )
+                        .replace(
+                                ',',
+                                '.'
+                        );
 
         try {
 

@@ -11,8 +11,13 @@ import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AiProcessingResultRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,6 +34,7 @@ public class AiProcessingService {
     private final DocumentRoutingService documentRoutingService;
     private final DocumentMetadataExtractionService
             documentMetadataExtractionService;
+    private final TransactionTemplate requiresNewTransactionTemplate;
 
     public AiProcessingService(
             DocumentRepository documentRepository,
@@ -36,7 +42,8 @@ public class AiProcessingService {
             AiClient aiClient,
             DocumentRoutingService documentRoutingService,
             DocumentMetadataExtractionService
-                    documentMetadataExtractionService
+                    documentMetadataExtractionService,
+            PlatformTransactionManager transactionManager
     ) {
         this.documentRepository =
                 documentRepository;
@@ -52,6 +59,17 @@ public class AiProcessingService {
 
         this.documentMetadataExtractionService =
                 documentMetadataExtractionService;
+
+        this.requiresNewTransactionTemplate =
+                new TransactionTemplate(
+                        transactionManager
+                );
+
+        this.requiresNewTransactionTemplate
+                .setPropagationBehavior(
+                        TransactionDefinition
+                                .PROPAGATION_REQUIRES_NEW
+                );
     }
 
     @Transactional
@@ -69,6 +87,10 @@ public class AiProcessingService {
                                                 + " не найден"
                                 )
                         );
+
+        validateAnalysisAllowed(
+                document
+        );
 
         if (document.getFile() == null) {
 
@@ -97,10 +119,26 @@ public class AiProcessingService {
                                 .getStoragePath()
                 );
 
-        AiAnalyzeResponse aiResponse =
-                aiClient.analyze(
-                        filePath
-                );
+        AiAnalyzeResponse aiResponse;
+
+        try {
+
+            aiResponse =
+                    aiClient.analyze(
+                            filePath
+                    );
+
+        } catch (RuntimeException exception) {
+
+            markProcessingFailed(
+                    documentId
+            );
+
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "AI-сервис временно недоступен"
+            );
+        }
 
         boolean classificationAccepted =
                 Boolean.TRUE.equals(
@@ -118,12 +156,6 @@ public class AiProcessingService {
                 Boolean.TRUE.equals(
                         aiResponse
                                 .getRequiresOcr()
-                );
-
-        documentMetadataExtractionService
-                .enrichFromRecognizedText(
-                        document,
-                        aiResponse.getText()
                 );
 
         AiProcessingResult result =
@@ -240,6 +272,12 @@ public class AiProcessingService {
                     acceptedType
             );
 
+            documentMetadataExtractionService
+                    .enrichFromRecognizedText(
+                            document,
+                            aiResponse.getText()
+                    );
+
             if (
                     acceptedType
                             == DocumentType.CONTRACT
@@ -282,6 +320,58 @@ public class AiProcessingService {
                 processingStatus.name(),
                 aiResponse.getProbabilities(),
                 aiResponse.getText()
+        );
+    }
+
+    private void markProcessingFailed(
+            Long documentId
+    ) {
+
+        requiresNewTransactionTemplate
+                .executeWithoutResult(
+                        transactionStatus -> {
+
+                            Document failedDocument =
+                                    documentRepository
+                                            .findById(documentId)
+                                            .orElseThrow(
+                                                    () ->
+                                                            new DocumentNotFoundException(
+                                                                    "Документ с ID "
+                                                                            + documentId
+                                                                            + " не найден"
+                                                            )
+                                            );
+
+                            failedDocument.setStatus(
+                                    DocumentStatus.PROCESSING_FAILED
+                            );
+
+                            documentRepository.save(
+                                    failedDocument
+                            );
+                        }
+                );
+    }
+
+    private void validateAnalysisAllowed(
+            Document document
+    ) {
+
+        DocumentStatus status =
+                document.getStatus();
+
+        if (
+                status == DocumentStatus.UPLOADED
+                        || status
+                        == DocumentStatus.PROCESSING_FAILED
+        ) {
+            return;
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "AI-анализ доступен только для документов со статусом UPLOADED или PROCESSING_FAILED"
         );
     }
 

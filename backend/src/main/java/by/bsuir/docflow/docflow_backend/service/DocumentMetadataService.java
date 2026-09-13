@@ -3,8 +3,10 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataRequest;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
+import by.bsuir.docflow.docflow_backend.repository.SedDispatchRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +19,17 @@ import java.util.Locale;
 public class DocumentMetadataService {
 
     private final DocumentRepository documentRepository;
+    private final SedDispatchRepository sedDispatchRepository;
 
     public DocumentMetadataService(
-            DocumentRepository documentRepository
+            DocumentRepository documentRepository,
+            SedDispatchRepository sedDispatchRepository
     ) {
         this.documentRepository =
                 documentRepository;
+
+        this.sedDispatchRepository =
+                sedDispatchRepository;
     }
 
     @Transactional
@@ -32,6 +39,7 @@ public class DocumentMetadataService {
     ) {
 
         if (request == null) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Необходимо передать метаданные документа"
@@ -49,7 +57,13 @@ public class DocumentMetadataService {
                                 )
                         );
 
-        validate(request);
+        validateEditingAllowed(
+                document
+        );
+
+        validate(
+                request
+        );
 
         document.setDocumentNumber(
                 normalizeText(
@@ -126,6 +140,47 @@ public class DocumentMetadataService {
         );
     }
 
+    private void validateEditingAllowed(
+            Document document
+    ) {
+
+        if (
+                document.getStatus()
+                        == DocumentStatus.READY_FOR_SED
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Документ уже подготовлен к отправке в СЭД. Реквизиты больше нельзя изменять"
+            );
+        }
+
+        if (
+                document.getStatus()
+                        == DocumentStatus.SENT_TO_SED
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Документ уже отправлен в СЭД. Реквизиты больше нельзя изменять"
+            );
+        }
+
+        if (
+                !sedDispatchRepository
+                        .findByDocumentIdOrderByCreatedAtDesc(
+                                document.getId()
+                        )
+                        .isEmpty()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Документ имеет историю отправки в СЭД. Реквизиты больше нельзя изменять"
+            );
+        }
+    }
+
     private void validate(
             DocumentMetadataRequest request
     ) {
@@ -139,6 +194,7 @@ public class DocumentMetadataService {
                                 BigDecimal.ZERO
                         ) < 0
         ) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Сумма документа не может быть отрицательной"
@@ -153,6 +209,7 @@ public class DocumentMetadataService {
                                         request.validTo()
                                 )
         ) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Дата начала действия не может быть позже даты окончания действия"
@@ -168,6 +225,7 @@ public class DocumentMetadataService {
                 currency != null
                         && currency.length() != 3
         ) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Код валюты должен состоять из 3 символов"
@@ -196,7 +254,9 @@ public class DocumentMetadataService {
     ) {
 
         String normalized =
-                normalizeText(value);
+                normalizeText(
+                        value
+                );
 
         if (normalized == null) {
             return null;
