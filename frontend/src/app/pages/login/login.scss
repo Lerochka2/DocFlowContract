@@ -104,7 +104,6 @@
   z-index: 2;
 }
 
-/* Логотип сверху */
 .product-header {
   width: min(840px, 100%);
   margin: 0 auto;
@@ -161,7 +160,6 @@
   font-size: 13px;
 }
 
-/* Главный hero по центру левой половины */
 .hero-content {
   width: min(840px, 100%);
   margin: auto;
@@ -807,23 +805,28 @@
 }
 
 .login-heading .welcome-label {
-  color: #3569dc;
-  font-size: 14px;
-  font-weight: 680;
+  display: block;
+  width: fit-content;
+  margin-bottom: 4px;
+  color: #5d55c6;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 760;
+  letter-spacing: -0.02em;
 }
 
 .login-heading h2 {
-  margin: 11px 0 0;
+  margin: 12px 0 0;
   color: #20293a;
-  font-size: 38px;
-  line-height: 1.18;
-  font-weight: 720;
-  letter-spacing: -0.03em;
+  font-size: 40px;
+  line-height: 1.16;
+  font-weight: 730;
+  letter-spacing: -0.035em;
 }
 
 .login-heading p {
   max-width: 440px;
-  margin: 14px 0 0;
+  margin: 15px 0 0;
   color: #768091;
   font-size: 16px;
   line-height: 1.6;
@@ -977,8 +980,6 @@
   font-weight: 400;
 }
 
-/* AI NOTE */
-
 .login-ai-note {
   display: flex;
   align-items: flex-start;
@@ -1024,8 +1025,6 @@
   font-size: 12px;
   line-height: 1.45;
 }
-
-/* SECURITY */
 
 .security-note {
   display: flex;
@@ -1074,8 +1073,6 @@
   font-size: 12px;
   line-height: 1.45;
 }
-
-/* RIGHT FOOTER */
 
 .login-footer {
   width: min(500px, 100%);
@@ -1145,8 +1142,12 @@
     padding: 22px;
   }
 
+  .login-heading .welcome-label {
+    font-size: 20px;
+  }
+
   .login-heading h2 {
-    font-size: 31px;
+    font-size: 32px;
   }
 
   .login-footer {

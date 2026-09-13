@@ -183,19 +183,19 @@ export class Dashboard implements OnInit {
     const types = [
       {
         type: 'CONTRACT',
-        color: '#4779ee'
+        color: '#4f55d9'
       },
       {
         type: 'APPENDIX',
-        color: '#7b58d7'
+        color: '#6558c8'
       },
       {
         type: 'AMENDMENT_CHANGE',
-        color: '#35c5e3'
+        color: '#8268d6'
       },
       {
         type: 'AMENDMENT_PROLONGATION',
-        color: '#78d5e8'
+        color: '#ab8ce8'
       }
     ];
 
@@ -203,7 +203,7 @@ export class Dashboard implements OnInit {
       this.classifiedDocumentsCount;
 
     if (total === 0) {
-      return '#edf1f6';
+      return '#f0eef8';
     }
 
     let start = 0;
