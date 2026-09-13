@@ -142,6 +142,24 @@
     }
 
 
+    @if (metadataSuccessMessage) {
+
+      <div class="metadata-message success">
+        {{ metadataSuccessMessage }}
+      </div>
+
+    }
+
+
+    @if (metadataErrorMessage && !editingMetadata) {
+
+      <div class="metadata-message error">
+        {{ metadataErrorMessage }}
+      </div>
+
+    }
+
+
     <section class="overview-grid">
 
       <article class="panel main-info">
@@ -149,6 +167,7 @@
         <div class="panel-heading">
 
           <div>
+
             <span class="section-eyebrow">
               ОСНОВНЫЕ ДАННЫЕ
             </span>
@@ -156,104 +175,346 @@
             <h2>
               Информация о документе
             </h2>
+
           </div>
+
+
+          @if (!editingMetadata) {
+
+            <button
+              class="edit-button"
+              type="button"
+              [disabled]="loadingMetadata"
+              (click)="startMetadataEditing()"
+            >
+              @if (loadingMetadata) {
+                Загрузка...
+              } @else {
+                Редактировать реквизиты
+              }
+            </button>
+
+          }
 
         </div>
 
 
-        <div class="info-grid">
+        @if (
+          editingMetadata &&
+          metadataForm
+        ) {
 
-          <div class="info-item">
+          <form
+            class="metadata-form"
+            (ngSubmit)="saveMetadata()"
+          >
 
-            <span>
-              Тип документа
-            </span>
+            <label class="form-field">
 
-            <strong>
-              {{ getDocumentTypeLabel(document.documentType) }}
-            </strong>
+              <span>
+                Номер документа
+              </span>
+
+              <input
+                type="text"
+                name="documentNumber"
+                [(ngModel)]="metadataForm.documentNumber"
+                maxlength="100"
+                placeholder="Например, 57/26"
+              />
+
+            </label>
+
+
+            <label class="form-field">
+
+              <span>
+                Дата документа
+              </span>
+
+              <input
+                type="date"
+                name="documentDate"
+                [(ngModel)]="metadataForm.documentDate"
+              />
+
+            </label>
+
+
+            <label class="form-field">
+
+              <span>
+                Сумма
+              </span>
+
+              <input
+                type="number"
+                name="amount"
+                [(ngModel)]="metadataForm.amount"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              />
+
+            </label>
+
+
+            <label class="form-field">
+
+              <span>
+                Валюта
+              </span>
+
+              <select
+                name="currency"
+                [(ngModel)]="metadataForm.currency"
+              >
+
+                <option [ngValue]="null">
+                  Не указана
+                </option>
+
+                <option value="BYN">
+                  BYN
+                </option>
+
+                <option value="USD">
+                  USD
+                </option>
+
+                <option value="EUR">
+                  EUR
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label class="form-field wide">
+
+              <span>
+                Предмет документа
+              </span>
+
+              <textarea
+                name="subject"
+                [(ngModel)]="metadataForm.subject"
+                rows="4"
+                maxlength="1000"
+                placeholder="Предмет договора или соглашения"
+              ></textarea>
+
+            </label>
+
+
+            <label class="form-field">
+
+              <span>
+                Действует с
+              </span>
+
+              <input
+                type="date"
+                name="validFrom"
+                [(ngModel)]="metadataForm.validFrom"
+              />
+
+            </label>
+
+
+            <label class="form-field">
+
+              <span>
+                Действует до
+              </span>
+
+              <input
+                type="date"
+                name="validTo"
+                [(ngModel)]="metadataForm.validTo"
+              />
+
+            </label>
+
+
+            @if (
+              document.documentType !== 'CONTRACT'
+            ) {
+
+              <div class="reference-divider wide">
+                Реквизиты основного договора
+              </div>
+
+
+              <label class="form-field">
+
+                <span>
+                  Номер основного договора
+                </span>
+
+                <input
+                  type="text"
+                  name="referencedContractNumber"
+                  [(ngModel)]="metadataForm.referencedContractNumber"
+                  maxlength="100"
+                  placeholder="Номер договора"
+                />
+
+              </label>
+
+
+              <label class="form-field">
+
+                <span>
+                  Дата основного договора
+                </span>
+
+                <input
+                  type="date"
+                  name="referencedContractDate"
+                  [(ngModel)]="metadataForm.referencedContractDate"
+                />
+
+              </label>
+
+            }
+
+
+            @if (metadataErrorMessage) {
+
+              <div class="form-error wide">
+                {{ metadataErrorMessage }}
+              </div>
+
+            }
+
+
+            <div class="form-actions wide">
+
+              <button
+                class="save-button"
+                type="submit"
+                [disabled]="savingMetadata"
+              >
+                @if (savingMetadata) {
+                  Сохраняем...
+                } @else {
+                  Сохранить
+                }
+              </button>
+
+
+              <button
+                class="cancel-button"
+                type="button"
+                [disabled]="savingMetadata"
+                (click)="cancelMetadataEditing()"
+              >
+                Отмена
+              </button>
+
+            </div>
+
+          </form>
+
+        } @else {
+
+          <div class="info-grid">
+
+            <div class="info-item">
+
+              <span>
+                Тип документа
+              </span>
+
+              <strong>
+                {{ getDocumentTypeLabel(document.documentType) }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Номер
+              </span>
+
+              <strong>
+                {{ document.documentNumber || '—' }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Дата документа
+              </span>
+
+              <strong>
+                {{ formatDate(document.documentDate) }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Сумма
+              </span>
+
+              <strong>
+                {{ getAmount() }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item wide">
+
+              <span>
+                Предмет документа
+              </span>
+
+              <strong>
+                {{ document.subject || '—' }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Действует с
+              </span>
+
+              <strong>
+                {{ formatDate(document.validFrom) }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Действует до
+              </span>
+
+              <strong>
+                {{ formatDate(document.validTo) }}
+              </strong>
+
+            </div>
 
           </div>
 
-
-          <div class="info-item">
-
-            <span>
-              Номер
-            </span>
-
-            <strong>
-              {{ document.documentNumber || '—' }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span>
-              Дата документа
-            </span>
-
-            <strong>
-              {{ formatDate(document.documentDate) }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span>
-              Сумма
-            </span>
-
-            <strong>
-              {{ getAmount() }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item wide">
-
-            <span>
-              Предмет документа
-            </span>
-
-            <strong>
-              {{ document.subject || '—' }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span>
-              Действует с
-            </span>
-
-            <strong>
-              {{ formatDate(document.validFrom) }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span>
-              Действует до
-            </span>
-
-            <strong>
-              {{ formatDate(document.validTo) }}
-            </strong>
-
-          </div>
-
-        </div>
+        }
 
       </article>
 
@@ -263,6 +524,7 @@
         <div class="panel-heading">
 
           <div>
+
             <span class="section-eyebrow">
               ИНТЕЛЛЕКТУАЛЬНЫЙ АНАЛИЗ
             </span>
@@ -270,6 +532,7 @@
             <h2>
               AI-классификация
             </h2>
+
           </div>
 
           <span class="ai-badge">
@@ -506,7 +769,9 @@
           }
 
 
-          @if (document.linkedDocumentsCount > 0) {
+          @if (
+            document.linkedDocumentsCount > 0
+          ) {
 
             <div class="linked-count">
 

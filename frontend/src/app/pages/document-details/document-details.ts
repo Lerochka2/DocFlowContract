@@ -5,6 +5,10 @@ import {
 } from '@angular/core';
 
 import {
+  FormsModule
+} from '@angular/forms';
+
+import {
   HttpErrorResponse
 } from '@angular/common/http';
 
@@ -18,6 +22,8 @@ import {
 } from 'rxjs';
 
 import {
+  DocumentMetadata,
+  DocumentMetadataRequest,
   DocumentSummary,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
@@ -25,6 +31,9 @@ import {
 @Component({
   selector: 'app-document-details',
   standalone: true,
+  imports: [
+    FormsModule
+  ],
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'
 })
@@ -32,11 +41,18 @@ export class DocumentDetails implements OnInit {
 
   document: DocumentSummary | null = null;
 
+  metadataForm: DocumentMetadataRequest | null = null;
+
   loading = true;
   deleting = false;
+  editingMetadata = false;
+  loadingMetadata = false;
+  savingMetadata = false;
 
   errorMessage = '';
   deleteErrorMessage = '';
+  metadataErrorMessage = '';
+  metadataSuccessMessage = '';
 
   private documentId: number | null = null;
 
@@ -124,6 +140,214 @@ export class DocumentDetails implements OnInit {
             this.errorMessage =
               'Не удалось загрузить данные документа.';
           }
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  startMetadataEditing(): void {
+
+    if (
+      this.documentId === null ||
+      this.loadingMetadata ||
+      this.savingMetadata
+    ) {
+      return;
+    }
+
+    this.loadingMetadata = true;
+    this.metadataErrorMessage = '';
+    this.metadataSuccessMessage = '';
+
+    this.workspaceService
+      .getDocumentMetadata(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingMetadata = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: metadata => {
+
+          this.metadataForm =
+            this.metadataToRequest(
+              metadata
+            );
+
+          this.editingMetadata = true;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.metadataErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось загрузить реквизиты документа.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  cancelMetadataEditing(): void {
+
+    if (this.savingMetadata) {
+      return;
+    }
+
+    this.editingMetadata = false;
+    this.metadataForm = null;
+    this.metadataErrorMessage = '';
+
+    this.changeDetectorRef
+      .markForCheck();
+  }
+
+  saveMetadata(): void {
+
+    if (
+      this.documentId === null ||
+      !this.metadataForm ||
+      this.savingMetadata
+    ) {
+      return;
+    }
+
+    this.metadataErrorMessage = '';
+    this.metadataSuccessMessage = '';
+
+    if (
+      this.metadataForm.amount !== null &&
+      this.metadataForm.amount < 0
+    ) {
+
+      this.metadataErrorMessage =
+        'Сумма документа не может быть отрицательной.';
+
+      return;
+    }
+
+    if (
+      this.metadataForm.validFrom &&
+      this.metadataForm.validTo &&
+      this.metadataForm.validFrom
+        > this.metadataForm.validTo
+    ) {
+
+      this.metadataErrorMessage =
+        'Дата начала действия не может быть позже даты окончания.';
+
+      return;
+    }
+
+    this.savingMetadata = true;
+
+    const request:
+      DocumentMetadataRequest = {
+
+        documentNumber:
+          this.normalizeNullableText(
+            this.metadataForm.documentNumber
+          ),
+
+        documentDate:
+          this.metadataForm.documentDate || null,
+
+        amount:
+          this.metadataForm.amount === null ||
+          this.metadataForm.amount === undefined
+            ? null
+            : Number(
+                this.metadataForm.amount
+              ),
+
+        currency:
+          this.normalizeNullableText(
+            this.metadataForm.currency
+          )?.toUpperCase()
+          ?? null,
+
+        subject:
+          this.normalizeNullableText(
+            this.metadataForm.subject
+          ),
+
+        validFrom:
+          this.metadataForm.validFrom || null,
+
+        validTo:
+          this.metadataForm.validTo || null,
+
+        referencedContractNumber:
+          this.normalizeNullableText(
+            this.metadataForm.referencedContractNumber
+          ),
+
+        referencedContractDate:
+          this.metadataForm.referencedContractDate || null
+      };
+
+    this.workspaceService
+      .updateDocumentMetadata(
+        this.documentId,
+        request
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.savingMetadata = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: metadata => {
+
+          this.applyMetadataToDocument(
+            metadata
+          );
+
+          this.metadataForm = null;
+          this.editingMetadata = false;
+
+          this.metadataSuccessMessage =
+            'Реквизиты документа сохранены.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.metadataErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось сохранить реквизиты документа.';
 
           this.changeDetectorRef
             .markForCheck();
@@ -226,7 +450,9 @@ export class DocumentDetails implements OnInit {
       return false;
     }
 
-    if (this.document.sed !== null) {
+    if (
+      this.document.sed !== null
+    ) {
       return false;
     }
 
@@ -252,7 +478,9 @@ export class DocumentDetails implements OnInit {
       return 'Документ уже отправлен в СЭД и хранится в истории.';
     }
 
-    if (this.document.sed !== null) {
+    if (
+      this.document.sed !== null
+    ) {
 
       return 'Документ имеет историю отправки в СЭД и не может быть удалён.';
     }
@@ -585,6 +813,92 @@ export class DocumentDetails implements OnInit {
     return this.document?.currency
       ? `${formatted} ${this.document.currency}`
       : formatted;
+  }
+
+  private metadataToRequest(
+    metadata: DocumentMetadata
+  ): DocumentMetadataRequest {
+
+    return {
+      documentNumber:
+        metadata.documentNumber,
+
+      documentDate:
+        metadata.documentDate,
+
+      amount:
+        metadata.amount,
+
+      currency:
+        metadata.currency,
+
+      subject:
+        metadata.subject,
+
+      validFrom:
+        metadata.validFrom,
+
+      validTo:
+        metadata.validTo,
+
+      referencedContractNumber:
+        metadata.referencedContractNumber,
+
+      referencedContractDate:
+        metadata.referencedContractDate
+    };
+  }
+
+  private applyMetadataToDocument(
+    metadata: DocumentMetadata
+  ): void {
+
+    if (!this.document) {
+      return;
+    }
+
+    this.document.documentType =
+      metadata.documentType;
+
+    this.document.status =
+      metadata.status;
+
+    this.document.documentNumber =
+      metadata.documentNumber;
+
+    this.document.documentDate =
+      metadata.documentDate;
+
+    this.document.amount =
+      metadata.amount;
+
+    this.document.currency =
+      metadata.currency;
+
+    this.document.subject =
+      metadata.subject;
+
+    this.document.validFrom =
+      metadata.validFrom;
+
+    this.document.validTo =
+      metadata.validTo;
+  }
+
+  private normalizeNullableText(
+    value: string | null
+  ): string | null {
+
+    if (value === null) {
+      return null;
+    }
+
+    const normalized =
+      value.trim();
+
+    return normalized
+      ? normalized
+      : null;
   }
 
   private extractBackendMessage(

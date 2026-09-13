@@ -94,6 +94,33 @@ export interface DocumentSummary {
   linkedDocumentsCount: number;
 }
 
+export interface DocumentMetadata {
+  documentId: number;
+  documentType: string | null;
+  status: string | null;
+  documentNumber: string | null;
+  documentDate: string | null;
+  amount: number | null;
+  currency: string | null;
+  subject: string | null;
+  validFrom: string | null;
+  validTo: string | null;
+  referencedContractNumber: string | null;
+  referencedContractDate: string | null;
+}
+
+export interface DocumentMetadataRequest {
+  documentNumber: string | null;
+  documentDate: string | null;
+  amount: number | null;
+  currency: string | null;
+  subject: string | null;
+  validFrom: string | null;
+  validTo: string | null;
+  referencedContractNumber: string | null;
+  referencedContractDate: string | null;
+}
+
 export interface DocumentUploadResponse {
   documentId: number;
   fileId: number;
@@ -188,6 +215,26 @@ export class WorkspaceService {
 
     return this.http.get<DocumentSummary>(
       `${this.documentsApiUrl}/${documentId}/summary`
+    );
+  }
+
+  getDocumentMetadata(
+    documentId: number
+  ): Observable<DocumentMetadata> {
+
+    return this.http.get<DocumentMetadata>(
+      `${this.documentsApiUrl}/${documentId}/metadata`
+    );
+  }
+
+  updateDocumentMetadata(
+    documentId: number,
+    request: DocumentMetadataRequest
+  ): Observable<DocumentMetadata> {
+
+    return this.http.put<DocumentMetadata>(
+      `${this.documentsApiUrl}/${documentId}/metadata`,
+      request
     );
   }
 
