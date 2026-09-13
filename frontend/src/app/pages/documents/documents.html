@@ -17,14 +17,61 @@
         загруженные в DocFlow.
       </p>
 
+      @if (uploadMessage) {
+        <p class="feedback success">
+          {{ uploadMessage }}
+        </p>
+      }
+
+      @if (uploadErrorMessage) {
+        <p class="feedback error">
+          {{ uploadErrorMessage }}
+        </p>
+      }
+
+      @if (deleteMessage) {
+        <p class="feedback success">
+          {{ deleteMessage }}
+        </p>
+      }
+
+      @if (deleteErrorMessage) {
+        <p class="feedback error">
+          {{ deleteErrorMessage }}
+        </p>
+      }
+
     </div>
+
+
+    <input
+      #fileInput
+      type="file"
+      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+      style="display: none"
+      (change)="onFileSelected($event)"
+    />
+
 
     <button
       class="upload-button"
       type="button"
+      [disabled]="uploading || deleting"
+      (click)="fileInput.click()"
     >
-      <span>+</span>
-      Загрузить документ
+
+      @if (uploading) {
+
+        <span>↻</span>
+        Обработка...
+
+      } @else {
+
+        <span>+</span>
+        Загрузить документ
+
+      }
+
     </button>
 
   </header>
@@ -170,10 +217,36 @@
 
       </div>
 
-      <span class="ai-label">
-        <i></i>
-        Данные из DocFlow
-      </span>
+
+      <div class="panel-actions">
+
+        @if (selectedCount > 0) {
+
+          <span class="selected-count">
+            Выбрано: {{ selectedCount }}
+          </span>
+
+          <button
+            class="delete-selected-button"
+            type="button"
+            [disabled]="deleting"
+            (click)="deleteSelectedDocuments()"
+          >
+            @if (deleting) {
+              Удаляем...
+            } @else {
+              Удалить выбранные
+            }
+          </button>
+
+        }
+
+        <span class="ai-label">
+          <i></i>
+          Данные из DocFlow
+        </span>
+
+      </div>
 
     </div>
 
@@ -212,12 +285,25 @@
         <div class="documents-table">
 
           <div class="document-row table-head">
+
+            <span class="checkbox-cell">
+
+              <input
+                type="checkbox"
+                aria-label="Выбрать все доступные документы"
+                [checked]="allDeletableSelected"
+                (change)="toggleSelectAll($event)"
+              />
+
+            </span>
+
             <span>Документ</span>
             <span>Тип</span>
             <span>Статус</span>
             <span>Номер</span>
             <span>Дата</span>
             <span>Сумма</span>
+
           </div>
 
 
@@ -233,6 +319,26 @@
               (click)="openDocument(document.documentId)"
               (keydown.enter)="openDocument(document.documentId)"
             >
+
+              <span
+                class="checkbox-cell"
+                (click)="$event.stopPropagation()"
+              >
+
+                <input
+                  type="checkbox"
+                  [checked]="isDocumentSelected(document.documentId)"
+                  [disabled]="!isDocumentDeletable(document) || deleting"
+                  [title]="
+                    isDocumentDeletable(document)
+                      ? 'Выбрать документ'
+                      : 'Документ, отправленный в СЭД, удалить нельзя'
+                  "
+                  (change)="toggleDocumentSelection(document, $event)"
+                />
+
+              </span>
+
 
               <div class="document-main">
 

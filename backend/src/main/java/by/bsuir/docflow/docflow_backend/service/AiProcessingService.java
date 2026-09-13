@@ -27,19 +27,31 @@ public class AiProcessingService {
     private final AiProcessingResultRepository aiProcessingResultRepository;
     private final AiClient aiClient;
     private final DocumentRoutingService documentRoutingService;
+    private final DocumentMetadataExtractionService
+            documentMetadataExtractionService;
 
     public AiProcessingService(
             DocumentRepository documentRepository,
             AiProcessingResultRepository aiProcessingResultRepository,
             AiClient aiClient,
-            DocumentRoutingService documentRoutingService
+            DocumentRoutingService documentRoutingService,
+            DocumentMetadataExtractionService
+                    documentMetadataExtractionService
     ) {
-        this.documentRepository = documentRepository;
+        this.documentRepository =
+                documentRepository;
+
         this.aiProcessingResultRepository =
                 aiProcessingResultRepository;
-        this.aiClient = aiClient;
+
+        this.aiClient =
+                aiClient;
+
         this.documentRoutingService =
                 documentRoutingService;
+
+        this.documentMetadataExtractionService =
+                documentMetadataExtractionService;
     }
 
     @Transactional
@@ -47,71 +59,100 @@ public class AiProcessingService {
             Long documentId
     ) {
 
-        Document document = documentRepository
-                .findById(documentId)
-                .orElseThrow(
-                        () -> new DocumentNotFoundException(
-                                "Документ с ID "
-                                        + documentId
-                                        + " не найден"
-                        )
-                );
+        Document document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () -> new DocumentNotFoundException(
+                                        "Документ с ID "
+                                                + documentId
+                                                + " не найден"
+                                )
+                        );
 
         if (document.getFile() == null) {
+
             throw new IllegalStateException(
                     "У документа отсутствует связанный файл"
             );
         }
 
-        if (!"application/pdf".equalsIgnoreCase(
-                document.getFile().getMimeType()
-        )) {
+        if (
+                !"application/pdf".equalsIgnoreCase(
+                        document
+                                .getFile()
+                                .getMimeType()
+                )
+        ) {
+
             throw new IllegalStateException(
                     "AI-анализ пока поддерживает только PDF-файлы"
             );
         }
 
-        Path filePath = Path.of(
-                document.getFile().getStoragePath()
-        );
+        Path filePath =
+                Path.of(
+                        document
+                                .getFile()
+                                .getStoragePath()
+                );
 
         AiAnalyzeResponse aiResponse =
-                aiClient.analyze(filePath);
+                aiClient.analyze(
+                        filePath
+                );
 
         boolean classificationAccepted =
                 Boolean.TRUE.equals(
-                        aiResponse.getClassificationAccepted()
+                        aiResponse
+                                .getClassificationAccepted()
                 );
 
         boolean reviewRequired =
                 Boolean.TRUE.equals(
-                        aiResponse.getReviewRequired()
+                        aiResponse
+                                .getReviewRequired()
                 );
 
         boolean requiresOcr =
                 Boolean.TRUE.equals(
-                        aiResponse.getRequiresOcr()
+                        aiResponse
+                                .getRequiresOcr()
+                );
+
+        documentMetadataExtractionService
+                .enrichFromRecognizedText(
+                        document,
+                        aiResponse.getText()
                 );
 
         AiProcessingResult result =
                 new AiProcessingResult();
 
-        result.setDocument(document);
+        result.setDocument(
+                document
+        );
 
         DocumentType predictedType =
                 parseDocumentType(
-                        aiResponse.getPredictedType()
+                        aiResponse
+                                .getPredictedType()
                 );
 
         result.setPredictedType(
                 predictedType
         );
 
-        if (aiResponse.getConfidence() != null) {
+        if (
+                aiResponse.getConfidence()
+                        != null
+        ) {
+
             result.setConfidence(
                     BigDecimal
                             .valueOf(
-                                    aiResponse.getConfidence()
+                                    aiResponse
+                                            .getConfidence()
                             )
                             .setScale(
                                     5,
@@ -132,7 +173,9 @@ public class AiProcessingService {
                 aiResponse.getText()
         );
 
-        result.setOcrUsed(false);
+        result.setOcrUsed(
+                false
+        );
 
         result.setModelVersion(
                 aiResponse.getModelVersion()
@@ -147,9 +190,12 @@ public class AiProcessingService {
         AiProcessingStatus processingStatus;
 
         if (requiresOcr) {
+
             processingStatus =
                     AiProcessingStatus.OCR_REQUIRED;
+
         } else {
+
             processingStatus =
                     AiProcessingStatus.SUCCESS;
         }
@@ -179,19 +225,25 @@ public class AiProcessingService {
 
         } else if (
                 classificationAccepted
-                        && aiResponse.getDocumentType() != null
+                        && aiResponse
+                                .getDocumentType()
+                        != null
         ) {
 
             DocumentType acceptedType =
                     parseDocumentType(
-                            aiResponse.getDocumentType()
+                            aiResponse
+                                    .getDocumentType()
                     );
 
             document.setDocumentType(
                     acceptedType
             );
 
-            if (acceptedType == DocumentType.CONTRACT) {
+            if (
+                    acceptedType
+                            == DocumentType.CONTRACT
+            ) {
 
                 document.setStatus(
                         DocumentStatus.VERIFIED
@@ -237,17 +289,25 @@ public class AiProcessingService {
             String value
     ) {
 
-        if (value == null || value.isBlank()) {
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
             return null;
         }
 
         try {
+
             return DocumentType.valueOf(
                     value
                             .trim()
                             .toUpperCase()
             );
-        } catch (IllegalArgumentException exception) {
+
+        } catch (
+                IllegalArgumentException exception
+        ) {
+
             throw new IllegalStateException(
                     "AI-сервис вернул неизвестный тип документа: "
                             + value,

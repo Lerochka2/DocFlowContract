@@ -31,10 +31,16 @@ import java.util.UUID;
 @Service
 public class DocumentService {
 
-    private static final long MAX_FILE_SIZE = 20L * 1024 * 1024;
+    private static final long MAX_FILE_SIZE =
+            20L * 1024 * 1024;
 
     private static final Set<String> ALLOWED_EXTENSIONS =
-            Set.of("pdf", "jpg", "jpeg", "png");
+            Set.of(
+                    "pdf",
+                    "jpg",
+                    "jpeg",
+                    "png"
+            );
 
     private final StoredFileRepository storedFileRepository;
     private final DocumentRepository documentRepository;
@@ -47,12 +53,19 @@ public class DocumentService {
             AppUserRepository userRepository,
             @Value("${app.storage.path}") String storagePath
     ) {
-        this.storedFileRepository = storedFileRepository;
-        this.documentRepository = documentRepository;
-        this.userRepository = userRepository;
-        this.storageRoot = Paths.get(storagePath)
-                .toAbsolutePath()
-                .normalize();
+        this.storedFileRepository =
+                storedFileRepository;
+
+        this.documentRepository =
+                documentRepository;
+
+        this.userRepository =
+                userRepository;
+
+        this.storageRoot =
+                Paths.get(storagePath)
+                        .toAbsolutePath()
+                        .normalize();
     }
 
     @Transactional
@@ -60,58 +73,140 @@ public class DocumentService {
             MultipartFile file,
             Long userId
     ) {
-        validateFile(file);
 
-        AppUser user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalStateException("Пользователь не найден")
-                );
+        validateFile(
+                file
+        );
 
-        String originalName = file.getOriginalFilename();
+        AppUser user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "Пользователь не найден"
+                                        )
+                        );
 
-        if (originalName == null || originalName.isBlank()) {
+        String originalName =
+                file.getOriginalFilename();
+
+        if (
+                originalName == null
+                        || originalName.isBlank()
+        ) {
+
             throw new IllegalArgumentException(
                     "Не удалось определить имя файла"
             );
         }
 
-        String extension = getExtension(originalName);
+        String extension =
+                getExtension(
+                        originalName
+                );
 
         byte[] bytes;
 
         try {
-            bytes = file.getBytes();
-        } catch (IOException exception) {
+
+            bytes =
+                    file.getBytes();
+
+        } catch (
+                IOException exception
+        ) {
+
             throw new IllegalStateException(
                     "Не удалось прочитать загруженный файл",
                     exception
             );
         }
 
-        validateSignature(bytes, extension);
+        validateSignature(
+                bytes,
+                extension
+        );
 
-        String checksum = calculateSha256(bytes);
+        String checksum =
+                calculateSha256(
+                        bytes
+                );
+
+        StoredFile existingStoredFile =
+                storedFileRepository
+                        .findFirstBySha256Checksum(
+                                checksum
+                        )
+                        .orElse(null);
+
+        if (existingStoredFile != null) {
+
+            Document existingDocument =
+                    documentRepository
+                            .findByFileId(
+                                    existingStoredFile.getId()
+                            )
+                            .orElse(null);
+
+            if (existingDocument != null) {
+
+                return new DocumentUploadResponse(
+                        existingDocument.getId(),
+                        existingStoredFile.getId(),
+                        existingStoredFile.getOriginalName(),
+                        existingDocument.getStatus() == null
+                                ? null
+                                : existingDocument
+                                        .getStatus()
+                                        .name(),
+                        true,
+                        checksum
+                );
+            }
+        }
 
         boolean duplicateDetected =
-                storedFileRepository.existsBySha256Checksum(checksum);
+                existingStoredFile != null;
 
         String storedName =
-                UUID.randomUUID() + "." + extension;
+                UUID.randomUUID()
+                        + "."
+                        + extension;
 
-        Path target = storageRoot
-                .resolve(storedName)
-                .normalize();
+        Path target =
+                storageRoot
+                        .resolve(
+                                storedName
+                        )
+                        .normalize();
 
-        if (!target.startsWith(storageRoot)) {
+        if (
+                !target.startsWith(
+                        storageRoot
+                )
+        ) {
+
             throw new IllegalArgumentException(
                     "Недопустимый путь хранения файла"
             );
         }
 
         try {
-            Files.createDirectories(storageRoot);
-            Files.write(target, bytes);
-        } catch (IOException exception) {
+
+            Files.createDirectories(
+                    storageRoot
+            );
+
+            Files.write(
+                    target,
+                    bytes
+            );
+
+        } catch (
+                IOException exception
+        ) {
+
             throw new IllegalStateException(
                     "Не удалось сохранить файл",
                     exception
@@ -119,23 +214,64 @@ public class DocumentService {
         }
 
         try {
-            StoredFile storedFile = new StoredFile();
-            storedFile.setOriginalName(originalName);
-            storedFile.setStoredName(storedName);
-            storedFile.setStoragePath(target.toString());
-            storedFile.setMimeType(file.getContentType());
-            storedFile.setSizeBytes(file.getSize());
-            storedFile.setSha256Checksum(checksum);
-            storedFile.setEncrypted(false);
 
-            storedFile = storedFileRepository.save(storedFile);
+            StoredFile storedFile =
+                    new StoredFile();
 
-            Document document = new Document();
-            document.setFile(storedFile);
-            document.setCreatedBy(user);
-            document.setStatus(DocumentStatus.UPLOADED);
+            storedFile.setOriginalName(
+                    originalName
+            );
 
-            document = documentRepository.save(document);
+            storedFile.setStoredName(
+                    storedName
+            );
+
+            storedFile.setStoragePath(
+                    target.toString()
+            );
+
+            storedFile.setMimeType(
+                    file.getContentType()
+            );
+
+            storedFile.setSizeBytes(
+                    file.getSize()
+            );
+
+            storedFile.setSha256Checksum(
+                    checksum
+            );
+
+            storedFile.setEncrypted(
+                    false
+            );
+
+            storedFile =
+                    storedFileRepository
+                            .save(
+                                    storedFile
+                            );
+
+            Document document =
+                    new Document();
+
+            document.setFile(
+                    storedFile
+            );
+
+            document.setCreatedBy(
+                    user
+            );
+
+            document.setStatus(
+                    DocumentStatus.UPLOADED
+            );
+
+            document =
+                    documentRepository
+                            .save(
+                                    document
+                            );
 
             return new DocumentUploadResponse(
                     document.getId(),
@@ -146,11 +282,19 @@ public class DocumentService {
                     checksum
             );
 
-        } catch (RuntimeException exception) {
+        } catch (
+                RuntimeException exception
+        ) {
 
             try {
-                Files.deleteIfExists(target);
-            } catch (IOException ignored) {
+
+                Files.deleteIfExists(
+                        target
+                );
+
+            } catch (
+                    IOException ignored
+            ) {
             }
 
             throw exception;
@@ -163,61 +307,120 @@ public class DocumentService {
         return documentRepository
                 .findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(document -> new DocumentSummaryResponse(
-                        document.getId(),
-                        document.getFile().getOriginalName(),
-                        document.getDocumentType() == null
-                                ? null
-                                : document.getDocumentType().name(),
-                        document.getStatus().name(),
-                        document.getDocumentNumber(),
-                        document.getCreatedAt(),
-                        document.getCreatedBy().getFullName()
-                ))
+                .map(
+                        document ->
+                                new DocumentSummaryResponse(
+                                        document.getId(),
+                                        document
+                                                .getFile()
+                                                .getOriginalName(),
+                                        document.getDocumentType() == null
+                                                ? null
+                                                : document
+                                                        .getDocumentType()
+                                                        .name(),
+                                        document
+                                                .getStatus()
+                                                .name(),
+                                        document
+                                                .getDocumentNumber(),
+                                        document
+                                                .getCreatedAt(),
+                                        document
+                                                .getCreatedBy()
+                                                .getFullName()
+                                )
+                )
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public DocumentDetailsResponse getDocument(Long id) {
+    public DocumentDetailsResponse getDocument(
+            Long id
+    ) {
 
-        Document document = documentRepository.findById(id)
-                .orElseThrow(() ->
-                        new DocumentNotFoundException(
-                                "Документ с id " + id + " не найден"
-                        )
-                );
+        Document document =
+                documentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new DocumentNotFoundException(
+                                                "Документ с id "
+                                                        + id
+                                                        + " не найден"
+                                        )
+                        );
 
-        AppUser verifiedBy = document.getVerifiedBy();
+        AppUser verifiedBy =
+                document.getVerifiedBy();
 
         return new DocumentDetailsResponse(
                 document.getId(),
 
-                document.getFile().getId(),
-                document.getFile().getOriginalName(),
-                document.getFile().getMimeType(),
-                document.getFile().getSizeBytes(),
-                document.getFile().getSha256Checksum(),
+                document
+                        .getFile()
+                        .getId(),
+
+                document
+                        .getFile()
+                        .getOriginalName(),
+
+                document
+                        .getFile()
+                        .getMimeType(),
+
+                document
+                        .getFile()
+                        .getSizeBytes(),
+
+                document
+                        .getFile()
+                        .getSha256Checksum(),
 
                 document.getDocumentType() == null
                         ? null
-                        : document.getDocumentType().name(),
+                        : document
+                                .getDocumentType()
+                                .name(),
 
-                document.getStatus().name(),
-                document.getDocumentNumber(),
-                document.getDocumentDate(),
+                document
+                        .getStatus()
+                        .name(),
 
-                document.getAmount(),
-                document.getCurrency(),
-                document.getSubject(),
+                document
+                        .getDocumentNumber(),
 
-                document.getValidFrom(),
-                document.getValidTo(),
+                document
+                        .getDocumentDate(),
 
-                document.getReferencedContractNumber(),
-                document.getReferencedContractDate(),
+                document
+                        .getAmount(),
 
-                document.getCreatedBy().getId(),
-                document.getCreatedBy().getFullName(),
+                document
+                        .getCurrency(),
+
+                document
+                        .getSubject(),
+
+                document
+                        .getValidFrom(),
+
+                document
+                        .getValidTo(),
+
+                document
+                        .getReferencedContractNumber(),
+
+                document
+                        .getReferencedContractDate(),
+
+                document
+                        .getCreatedBy()
+                        .getId(),
+
+                document
+                        .getCreatedBy()
+                        .getFullName(),
 
                 verifiedBy == null
                         ? null
@@ -227,69 +430,126 @@ public class DocumentService {
                         ? null
                         : verifiedBy.getFullName(),
 
-                document.getVerifiedAt(),
-                document.getCreatedAt(),
-                document.getUpdatedAt()
+                document
+                        .getVerifiedAt(),
+
+                document
+                        .getCreatedAt(),
+
+                document
+                        .getUpdatedAt()
         );
     }
 
-    private void validateFile(MultipartFile file) {
+    private void validateFile(
+            MultipartFile file
+    ) {
 
-        if (file == null || file.isEmpty()) {
+        if (
+                file == null
+                        || file.isEmpty()
+        ) {
+
             throw new IllegalArgumentException(
                     "Файл не выбран или пуст"
             );
         }
 
-        if (file.getSize() > MAX_FILE_SIZE) {
+        if (
+                file.getSize()
+                        > MAX_FILE_SIZE
+        ) {
+
             throw new IllegalArgumentException(
                     "Размер файла превышает 20 МБ"
             );
         }
 
-        String originalName = file.getOriginalFilename();
+        String originalName =
+                file.getOriginalFilename();
 
-        if (originalName == null || originalName.isBlank()) {
+        if (
+                originalName == null
+                        || originalName.isBlank()
+        ) {
+
             throw new IllegalArgumentException(
                     "Имя файла отсутствует"
             );
         }
 
-        String extension = getExtension(originalName);
+        String extension =
+                getExtension(
+                        originalName
+                );
 
-        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+        if (
+                !ALLOWED_EXTENSIONS
+                        .contains(
+                                extension
+                        )
+        ) {
+
             throw new IllegalArgumentException(
                     "Разрешены только PDF, JPG, JPEG и PNG"
             );
         }
 
-        String mimeType = file.getContentType();
+        String mimeType =
+                file.getContentType();
 
         boolean validMime =
-                "application/pdf".equals(mimeType)
-                        || "image/jpeg".equals(mimeType)
-                        || "image/png".equals(mimeType);
+                "application/pdf"
+                        .equals(
+                                mimeType
+                        )
+                        ||
+                        "image/jpeg"
+                                .equals(
+                                        mimeType
+                                )
+                        ||
+                        "image/png"
+                                .equals(
+                                        mimeType
+                                );
 
         if (!validMime) {
+
             throw new IllegalArgumentException(
                     "Недопустимый MIME-тип файла"
             );
         }
     }
 
-    private String getExtension(String fileName) {
+    private String getExtension(
+            String fileName
+    ) {
 
-        int dotIndex = fileName.lastIndexOf('.');
+        int dotIndex =
+                fileName.lastIndexOf(
+                        '.'
+                );
 
-        if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
+        if (
+                dotIndex < 0
+                        ||
+                        dotIndex
+                                == fileName.length() - 1
+        ) {
+
             throw new IllegalArgumentException(
                     "Файл должен иметь расширение"
             );
         }
 
         return fileName
-                .substring(dotIndex + 1)
-                .toLowerCase(Locale.ROOT);
+                .substring(
+                        dotIndex + 1
+                )
+                .toLowerCase(
+                        Locale.ROOT
+                );
     }
 
     private void validateSignature(
@@ -297,53 +557,81 @@ public class DocumentService {
             String extension
     ) {
 
-        boolean valid = switch (extension) {
+        boolean valid =
+                switch (extension) {
 
-            case "pdf" ->
-                    bytes.length >= 5
-                            && bytes[0] == '%'
-                            && bytes[1] == 'P'
-                            && bytes[2] == 'D'
-                            && bytes[3] == 'F'
-                            && bytes[4] == '-';
+                    case "pdf" ->
+                            bytes.length >= 5
+                                    && bytes[0] == '%'
+                                    && bytes[1] == 'P'
+                                    && bytes[2] == 'D'
+                                    && bytes[3] == 'F'
+                                    && bytes[4] == '-';
 
-            case "jpg", "jpeg" ->
-                    bytes.length >= 3
-                            && (bytes[0] & 0xFF) == 0xFF
-                            && (bytes[1] & 0xFF) == 0xD8
-                            && (bytes[2] & 0xFF) == 0xFF;
+                    case "jpg", "jpeg" ->
+                            bytes.length >= 3
+                                    && (bytes[0] & 0xFF)
+                                            == 0xFF
+                                    && (bytes[1] & 0xFF)
+                                            == 0xD8
+                                    && (bytes[2] & 0xFF)
+                                            == 0xFF;
 
-            case "png" ->
-                    bytes.length >= 8
-                            && (bytes[0] & 0xFF) == 0x89
-                            && bytes[1] == 0x50
-                            && bytes[2] == 0x4E
-                            && bytes[3] == 0x47
-                            && bytes[4] == 0x0D
-                            && bytes[5] == 0x0A
-                            && bytes[6] == 0x1A
-                            && bytes[7] == 0x0A;
+                    case "png" ->
+                            bytes.length >= 8
+                                    && (bytes[0] & 0xFF)
+                                            == 0x89
+                                    && bytes[1]
+                                            == 0x50
+                                    && bytes[2]
+                                            == 0x4E
+                                    && bytes[3]
+                                            == 0x47
+                                    && bytes[4]
+                                            == 0x0D
+                                    && bytes[5]
+                                            == 0x0A
+                                    && bytes[6]
+                                            == 0x1A
+                                    && bytes[7]
+                                            == 0x0A;
 
-            default -> false;
-        };
+                    default ->
+                            false;
+                };
 
         if (!valid) {
+
             throw new IllegalArgumentException(
                     "Содержимое файла не соответствует его расширению"
             );
         }
     }
 
-    private String calculateSha256(byte[] bytes) {
+    private String calculateSha256(
+            byte[] bytes
+    ) {
 
         try {
+
             MessageDigest digest =
-                    MessageDigest.getInstance("SHA-256");
+                    MessageDigest
+                            .getInstance(
+                                    "SHA-256"
+                            );
 
-            return HexFormat.of()
-                    .formatHex(digest.digest(bytes));
+            return HexFormat
+                    .of()
+                    .formatHex(
+                            digest.digest(
+                                    bytes
+                            )
+                    );
 
-        } catch (NoSuchAlgorithmException exception) {
+        } catch (
+                NoSuchAlgorithmException exception
+        ) {
+
             throw new IllegalStateException(
                     "SHA-256 недоступен",
                     exception

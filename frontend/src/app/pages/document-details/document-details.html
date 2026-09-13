@@ -65,9 +65,11 @@
             <span class="meta-dot"></span>
 
             <span>
-              {{ document.documentNumber
-                ? '№ ' + document.documentNumber
-                : 'Без номера' }}
+              {{
+                document.documentNumber
+                  ? '№ ' + document.documentNumber
+                  : 'Без номера'
+              }}
             </span>
 
           </div>
@@ -77,16 +79,67 @@
       </div>
 
 
-      <span
-        [class]="
-          'document-status ' +
-          getStatusClass(document.status)
-        "
-      >
-        {{ getStatusLabel(document.status) }}
-      </span>
+      <div class="header-actions">
+
+        <span
+          [class]="
+            'document-status ' +
+            getStatusClass(document.status)
+          "
+        >
+          {{ getStatusLabel(document.status) }}
+        </span>
+
+
+        <button
+          class="delete-document-button"
+          type="button"
+          [disabled]="!canDeleteDocument || deleting"
+          [title]="
+            canDeleteDocument
+              ? 'Удалить документ'
+              : deleteRestrictionMessage
+          "
+          (click)="deleteDocument()"
+        >
+
+          @if (deleting) {
+            Удаляем...
+          } @else {
+            Удалить документ
+          }
+
+        </button>
+
+      </div>
 
     </header>
+
+
+    @if (deleteErrorMessage) {
+
+      <div class="delete-error">
+
+        <strong>
+          Не удалось удалить документ
+        </strong>
+
+        <span>
+          {{ deleteErrorMessage }}
+        </span>
+
+      </div>
+
+    }
+
+
+    @if (!canDeleteDocument && deleteRestrictionMessage) {
+
+      <div class="delete-restriction">
+        {{ deleteRestrictionMessage }}
+      </div>
+
+    }
 
 
     <section class="overview-grid">
@@ -271,6 +324,7 @@
             <span class="status-dot"></span>
 
             <div>
+
               <span>
                 Статус обработки
               </span>
@@ -278,6 +332,7 @@
               <strong>
                 {{ getAiStatusLabel(document.ai.processingStatus) }}
               </strong>
+
             </div>
 
           </div>

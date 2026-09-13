@@ -17,9 +17,32 @@ import {
 } from '@angular/router';
 
 import {
+  catchError,
+  concatMap,
+  finalize,
+  from,
+  map,
+  of,
+  switchMap,
+  toArray
+} from 'rxjs';
+
+import {
   WorkspaceDocument,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
+
+interface DeleteResult {
+  documentId: number;
+  success: boolean;
+  message: string | null;
+}
+
+interface UploadFlowResult {
+  documentId: number;
+  duplicate: boolean;
+  analysisSucceeded: boolean;
+}
 
 @Component({
   selector: 'app-documents',
@@ -34,12 +57,22 @@ export class Documents implements OnInit {
 
   documents: WorkspaceDocument[] = [];
 
+  selectedDocumentIds =
+    new Set<number>();
+
   query = '';
   selectedType = '';
   selectedStatus = '';
 
   loading = true;
+  uploading = false;
+  deleting = false;
+
   errorMessage = '';
+  uploadMessage = '';
+  uploadErrorMessage = '';
+  deleteMessage = '';
+  deleteErrorMessage = '';
 
   constructor(
     private readonly workspaceService: WorkspaceService,
@@ -69,6 +102,9 @@ export class Documents implements OnInit {
 
           this.documents =
             documents;
+
+          this.selectedDocumentIds
+            .clear();
 
           this.loading = false;
 
@@ -112,12 +148,594 @@ export class Documents implements OnInit {
     documentId: number
   ): void {
 
+    if (this.deleting) {
+      return;
+    }
+
     void this.router.navigate(
       [
         '/documents',
         documentId
       ]
     );
+  }
+
+  isDocumentSelected(
+    documentId: number
+  ): boolean {
+
+    return this.selectedDocumentIds
+      .has(documentId);
+  }
+
+  isDocumentDeletable(
+    document: WorkspaceDocument
+  ): boolean {
+
+    return document.status
+      !== 'SENT_TO_SED';
+  }
+
+  toggleDocumentSelection(
+    document: WorkspaceDocument,
+    event: Event
+  ): void {
+
+    const checkbox =
+      event.target as HTMLInputElement;
+
+    if (
+      !this.isDocumentDeletable(
+        document
+      )
+    ) {
+
+      checkbox.checked = false;
+      return;
+    }
+
+    if (checkbox.checked) {
+
+      this.selectedDocumentIds
+        .add(
+          document.documentId
+        );
+
+    } else {
+
+      this.selectedDocumentIds
+        .delete(
+          document.documentId
+        );
+    }
+
+    this.deleteMessage = '';
+    this.deleteErrorMessage = '';
+
+    this.changeDetectorRef
+      .markForCheck();
+  }
+
+  toggleSelectAll(
+    event: Event
+  ): void {
+
+    const checkbox =
+      event.target as HTMLInputElement;
+
+    this.selectedDocumentIds
+      .clear();
+
+    if (checkbox.checked) {
+
+      for (
+        const document of this.documents
+      ) {
+
+        if (
+          this.isDocumentDeletable(
+            document
+          )
+        ) {
+
+          this.selectedDocumentIds
+            .add(
+              document.documentId
+            );
+        }
+      }
+    }
+
+    this.changeDetectorRef
+      .markForCheck();
+  }
+
+  get allDeletableSelected(): boolean {
+
+    const deletable =
+      this.documents.filter(
+        document =>
+          this.isDocumentDeletable(
+            document
+          )
+      );
+
+    return (
+      deletable.length > 0
+      &&
+      deletable.every(
+        document =>
+          this.selectedDocumentIds
+            .has(
+              document.documentId
+            )
+      )
+    );
+  }
+
+  get selectedCount(): number {
+
+    return this.selectedDocumentIds.size;
+  }
+
+  deleteSelectedDocuments(): void {
+
+    const ids =
+      Array.from(
+        this.selectedDocumentIds
+      );
+
+    if (
+      ids.length === 0
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        ids.length === 1
+          ? 'Удалить выбранный документ? Это действие нельзя отменить.'
+          : `Удалить выбранные документы (${ids.length})? Это действие нельзя отменить.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deleting = true;
+
+    this.deleteMessage = '';
+    this.deleteErrorMessage = '';
+
+    from(ids)
+      .pipe(
+
+        concatMap(
+          documentId =>
+            this.workspaceService
+              .deleteDocument(
+                documentId
+              )
+              .pipe(
+
+                map(
+                  () => ({
+                    documentId,
+                    success: true,
+                    message: null
+                  }) as DeleteResult
+                ),
+
+                catchError(
+                  (
+                    error: HttpErrorResponse
+                  ) => of({
+                    documentId,
+                    success: false,
+                    message:
+                      this.extractDeleteErrorMessage(
+                        error
+                      )
+                  } as DeleteResult)
+                )
+              )
+        ),
+
+        toArray(),
+
+        finalize(
+          () => {
+
+            this.deleting = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe(
+        results => {
+
+          const deleted =
+            results.filter(
+              result =>
+                result.success
+            );
+
+          const failed =
+            results.filter(
+              result =>
+                !result.success
+            );
+
+          if (
+            deleted.length > 0
+          ) {
+
+            this.deleteMessage =
+              deleted.length === 1
+                ? 'Документ удалён.'
+                : `Удалено документов: ${deleted.length}.`;
+          }
+
+          if (
+            failed.length > 0
+          ) {
+
+            this.deleteErrorMessage =
+              failed
+                .map(
+                  result =>
+                    `ID ${result.documentId}: ${result.message ?? 'не удалось удалить'}`
+                )
+                .join(' ');
+          }
+
+          this.loadDocuments();
+        }
+      );
+  }
+
+  onFileSelected(
+    event: Event
+  ): void {
+
+    const input =
+      event.target as HTMLInputElement;
+
+    const file =
+      input.files?.[0];
+
+    input.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    this.uploadMessage = '';
+    this.uploadErrorMessage = '';
+
+    const extension =
+      file.name
+        .split('.')
+        .pop()
+        ?.toLowerCase();
+
+    const allowedExtensions =
+      [
+        'pdf',
+        'jpg',
+        'jpeg',
+        'png'
+      ];
+
+    if (
+      !extension
+      ||
+      !allowedExtensions
+        .includes(
+          extension
+        )
+    ) {
+
+      this.uploadErrorMessage =
+        'Можно загружать только PDF, JPG, JPEG и PNG.';
+
+      this.changeDetectorRef
+        .markForCheck();
+
+      return;
+    }
+
+    const maxFileSize =
+      20 * 1024 * 1024;
+
+    if (
+      file.size
+      > maxFileSize
+    ) {
+
+      this.uploadErrorMessage =
+        'Размер файла не должен превышать 20 МБ.';
+
+      this.changeDetectorRef
+        .markForCheck();
+
+      return;
+    }
+
+    this.uploadAndAnalyze(
+      file
+    );
+  }
+
+  private uploadAndAnalyze(
+    file: File
+  ): void {
+
+    this.uploading = true;
+
+    this.uploadMessage =
+      `Проверяем файл «${file.name}»...`;
+
+    this.uploadErrorMessage = '';
+
+    this.changeDetectorRef
+      .markForCheck();
+
+    this.workspaceService
+      .uploadDocument(file)
+      .pipe(
+
+        switchMap(
+          uploadResponse => {
+
+            if (
+              uploadResponse
+                .duplicateDetected
+            ) {
+
+              return of({
+                documentId:
+                  uploadResponse
+                    .documentId,
+
+                duplicate:
+                  true,
+
+                analysisSucceeded:
+                  true
+              } as UploadFlowResult);
+            }
+
+            this.uploadMessage =
+              'Файл загружен. Запускаем AI-анализ...';
+
+            this.changeDetectorRef
+              .markForCheck();
+
+            return this.workspaceService
+              .analyzeDocument(
+                uploadResponse
+                  .documentId
+              )
+              .pipe(
+
+                map(
+                  () => ({
+                    documentId:
+                      uploadResponse
+                        .documentId,
+
+                    duplicate:
+                      false,
+
+                    analysisSucceeded:
+                      true
+                  }) as UploadFlowResult
+                ),
+
+                catchError(
+                  () => of({
+                    documentId:
+                      uploadResponse
+                        .documentId,
+
+                    duplicate:
+                      false,
+
+                    analysisSucceeded:
+                      false
+                  } as UploadFlowResult)
+                )
+              );
+          }
+        ),
+
+        finalize(
+          () => {
+
+            this.uploading = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: result => {
+
+          if (result.duplicate) {
+
+            this.uploadMessage = '';
+
+            window.alert(
+              'Такой файл уже существует в DocFlow.\n\n'
+              + `Документ ID ${result.documentId} будет открыт. `
+              + 'Новая копия не создана.'
+            );
+
+            void this.router.navigate(
+              [
+                '/documents',
+                result.documentId
+              ]
+            );
+
+            return;
+          }
+
+          if (
+            result.analysisSucceeded
+          ) {
+
+            this.uploadMessage =
+              'Документ успешно загружен и проанализирован.';
+
+            this.changeDetectorRef
+              .markForCheck();
+
+            void this.router.navigate(
+              [
+                '/documents',
+                result.documentId
+              ]
+            );
+
+            return;
+          }
+
+          this.uploadMessage =
+            'Документ загружен, но AI-анализ завершился с ошибкой.';
+
+          this.loadDocuments();
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.uploadMessage = '';
+
+          this.uploadErrorMessage =
+            this.getUploadErrorMessage(
+              error
+            );
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  private getUploadErrorMessage(
+    error: HttpErrorResponse
+  ): string {
+
+    if (
+      error.status === 0
+    ) {
+
+      return 'Не удалось подключиться к серверу DocFlow.';
+    }
+
+    if (
+      error.status === 413
+    ) {
+
+      return 'Файл слишком большой.';
+    }
+
+    if (
+      error.status === 400
+    ) {
+
+      return this.extractBackendMessage(
+        error
+      ) ?? 'Сервер отклонил загружаемый файл.';
+    }
+
+    return 'Не удалось загрузить документ.';
+  }
+
+  private extractDeleteErrorMessage(
+    error: HttpErrorResponse
+  ): string {
+
+    if (
+      error.status === 0
+    ) {
+
+      return 'сервер DocFlow недоступен';
+    }
+
+    return this.extractBackendMessage(
+      error
+    ) ?? (
+      error.status === 409
+        ? 'документ нельзя удалить из-за связанных данных'
+        : 'не удалось удалить документ'
+    );
+  }
+
+  private extractBackendMessage(
+    error: HttpErrorResponse
+  ): string | null {
+
+    if (
+      typeof error.error
+        === 'string'
+      &&
+      error.error.trim()
+    ) {
+
+      return error.error;
+    }
+
+    if (
+      error.error
+      &&
+      typeof error.error
+        === 'object'
+    ) {
+
+      const errorObject =
+        error.error as {
+          message?: unknown;
+          detail?: unknown;
+          error?: unknown;
+        };
+
+      if (
+        typeof errorObject.message
+          === 'string'
+      ) {
+
+        return errorObject.message;
+      }
+
+      if (
+        typeof errorObject.detail
+          === 'string'
+      ) {
+
+        return errorObject.detail;
+      }
+
+      if (
+        typeof errorObject.error
+          === 'string'
+      ) {
+
+        return errorObject.error;
+      }
+    }
+
+    return null;
   }
 
   getDocumentTypeLabel(
@@ -234,11 +852,16 @@ export class Documents implements OnInit {
     }
 
     const datePart =
-      value.substring(0, 10);
+      value.substring(
+        0,
+        10
+      );
 
     const match =
       /^(\d{4})-(\d{2})-(\d{2})$/
-        .exec(datePart);
+        .exec(
+          datePart
+        );
 
     if (!match) {
       return value;
@@ -251,7 +874,9 @@ export class Documents implements OnInit {
     document: WorkspaceDocument
   ): string {
 
-    if (document.amount === null) {
+    if (
+      document.amount === null
+    ) {
       return '—';
     }
 

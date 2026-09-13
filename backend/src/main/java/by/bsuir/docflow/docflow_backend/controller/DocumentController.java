@@ -5,12 +5,14 @@ import by.bsuir.docflow.docflow_backend.dto.document.DocumentDetailsResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentSummaryResponse;
 import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
 import by.bsuir.docflow.docflow_backend.service.AiProcessingService;
+import by.bsuir.docflow.docflow_backend.service.DocumentDeletionService;
 import by.bsuir.docflow.docflow_backend.service.DocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +29,21 @@ public class DocumentController {
 
     private final DocumentService documentService;
     private final AiProcessingService aiProcessingService;
+    private final DocumentDeletionService documentDeletionService;
 
     public DocumentController(
             DocumentService documentService,
-            AiProcessingService aiProcessingService
+            AiProcessingService aiProcessingService,
+            DocumentDeletionService documentDeletionService
     ) {
-        this.documentService = documentService;
-        this.aiProcessingService = aiProcessingService;
+        this.documentService =
+                documentService;
+
+        this.aiProcessingService =
+                aiProcessingService;
+
+        this.documentDeletionService =
+                documentDeletionService;
     }
 
     @PostMapping(
@@ -44,10 +54,12 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt
     ) {
+
         Number userIdClaim =
                 jwt.getClaim("userId");
 
         if (userIdClaim == null) {
+
             throw new IllegalStateException(
                     "JWT не содержит идентификатор пользователя"
             );
@@ -69,20 +81,39 @@ public class DocumentController {
 
     @GetMapping
     public List<DocumentSummaryResponse> getAllDocuments() {
-        return documentService.getAllDocuments();
+
+        return documentService
+                .getAllDocuments();
     }
 
     @GetMapping("/{id}")
     public DocumentDetailsResponse getDocument(
             @PathVariable Long id
     ) {
-        return documentService.getDocument(id);
+
+        return documentService
+                .getDocument(id);
     }
 
     @PostMapping("/{id}/analyze")
     public AiProcessingResponse analyzeDocument(
             @PathVariable Long id
     ) {
-        return aiProcessingService.analyze(id);
+
+        return aiProcessingService
+                .analyze(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocument(
+            @PathVariable Long id
+    ) {
+
+        documentDeletionService
+                .deleteDocument(id);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

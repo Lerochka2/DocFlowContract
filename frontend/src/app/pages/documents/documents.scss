@@ -38,6 +38,24 @@
   line-height: 1.5;
 }
 
+.feedback {
+  width: fit-content;
+  margin-top: 10px !important;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px !important;
+}
+
+.feedback.success {
+  color: #337b63;
+  background: #eaf7f1;
+}
+
+.feedback.error {
+  color: #aa534c;
+  background: #fff0ee;
+}
+
 .upload-button {
   height: 46px;
   display: inline-flex;
@@ -57,6 +75,11 @@
   font-size: 14px;
   font-weight: 650;
   cursor: pointer;
+}
+
+.upload-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .upload-button span {
@@ -171,7 +194,7 @@
   border-bottom: 1px solid #edf0f4;
 }
 
-.panel-heading > div {
+.panel-heading > div:first-child {
   display: flex;
   flex-direction: column;
 }
@@ -182,10 +205,44 @@
   font-size: 19px;
 }
 
-.panel-heading > div > span {
+.panel-heading > div:first-child > span {
   margin-top: 5px;
   color: #929baa;
   font-size: 12px;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selected-count {
+  color: #69758a;
+  font-size: 12px;
+  font-weight: 620;
+}
+
+.delete-selected-button {
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #f0c8c4;
+  border-radius: 8px;
+  color: #b14e49;
+  background: #fff6f5;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.delete-selected-button:hover:not(:disabled) {
+  background: #ffedeb;
+}
+
+.delete-selected-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .ai-label {
@@ -212,13 +269,14 @@
 }
 
 .documents-table {
-  min-width: 1080px;
+  min-width: 1120px;
 }
 
 .document-row {
   min-height: 76px;
   display: grid;
   grid-template-columns:
+    38px
     minmax(280px, 1.8fr)
     minmax(220px, 1.25fr)
     minmax(170px, 1fr)
@@ -235,6 +293,24 @@
 
 .document-row:last-child {
   border-bottom: 0;
+}
+
+.checkbox-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-cell input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4776df;
+  cursor: pointer;
+}
+
+.checkbox-cell input:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .clickable-row {
@@ -435,6 +511,17 @@
 
   .search-field {
     grid-column: 1 / -1;
+  }
+
+  .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .panel-actions {
+    flex-wrap: wrap;
   }
 }
 

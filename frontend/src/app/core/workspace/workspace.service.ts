@@ -94,6 +94,30 @@ export interface DocumentSummary {
   linkedDocumentsCount: number;
 }
 
+export interface DocumentUploadResponse {
+  documentId: number;
+  fileId: number;
+  originalName: string;
+  status: string;
+  duplicateDetected: boolean;
+  sha256Checksum: string;
+}
+
+export interface AiProcessingResponse {
+  resultId: number;
+  documentId: number;
+  predictedType: string | null;
+  documentType: string | null;
+  confidence: number | null;
+  classificationAccepted: boolean | null;
+  reviewRequired: boolean | null;
+  requiresOcr: boolean | null;
+  modelVersion: string | null;
+  processingStatus: string | null;
+  probabilities: Record<string, number>;
+  recognizedText: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -164,6 +188,43 @@ export class WorkspaceService {
 
     return this.http.get<DocumentSummary>(
       `${this.documentsApiUrl}/${documentId}/summary`
+    );
+  }
+
+  uploadDocument(
+    file: File
+  ): Observable<DocumentUploadResponse> {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'file',
+      file
+    );
+
+    return this.http.post<DocumentUploadResponse>(
+      `${this.documentsApiUrl}/upload`,
+      formData
+    );
+  }
+
+  analyzeDocument(
+    documentId: number
+  ): Observable<AiProcessingResponse> {
+
+    return this.http.post<AiProcessingResponse>(
+      `${this.documentsApiUrl}/${documentId}/analyze`,
+      null
+    );
+  }
+
+  deleteDocument(
+    documentId: number
+  ): Observable<void> {
+
+    return this.http.delete<void>(
+      `${this.documentsApiUrl}/${documentId}`
     );
   }
 }

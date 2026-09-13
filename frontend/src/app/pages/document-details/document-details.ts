@@ -14,6 +14,10 @@ import {
 } from '@angular/router';
 
 import {
+  finalize
+} from 'rxjs';
+
+import {
   DocumentSummary,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
@@ -29,8 +33,10 @@ export class DocumentDetails implements OnInit {
   document: DocumentSummary | null = null;
 
   loading = true;
+  deleting = false;
 
   errorMessage = '';
+  deleteErrorMessage = '';
 
   private documentId: number | null = null;
 
@@ -78,6 +84,7 @@ export class DocumentDetails implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
+    this.deleteErrorMessage = '';
 
     this.workspaceService
       .getDocumentSummary(
@@ -129,6 +136,135 @@ export class DocumentDetails implements OnInit {
     void this.router.navigate(
       ['/documents']
     );
+  }
+
+  deleteDocument(): void {
+
+    if (
+      !this.document ||
+      !this.canDeleteDocument ||
+      this.deleting
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Удалить документ «${this.document.originalName ?? 'Документ'}»?\n\n`
+        + 'Документ, результаты AI-анализа, маршрут и связанный файл будут удалены. '
+        + 'Это действие нельзя отменить.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deleting = true;
+    this.deleteErrorMessage = '';
+
+    this.workspaceService
+      .deleteDocument(
+        this.document.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.deleting = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          void this.router.navigate(
+            ['/documents']
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          if (error.status === 0) {
+
+            this.deleteErrorMessage =
+              'Не удалось подключиться к серверу DocFlow.';
+
+          } else {
+
+            this.deleteErrorMessage =
+              this.extractBackendMessage(
+                error
+              )
+              ?? (
+                error.status === 409
+                  ? 'Этот документ нельзя удалить из-за связанных данных.'
+                  : 'Не удалось удалить документ.'
+              );
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get canDeleteDocument(): boolean {
+
+    if (!this.document) {
+      return false;
+    }
+
+    if (
+      this.document.status === 'SENT_TO_SED'
+    ) {
+      return false;
+    }
+
+    if (this.document.sed !== null) {
+      return false;
+    }
+
+    if (
+      this.document.linkedDocumentsCount > 0
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  get deleteRestrictionMessage(): string {
+
+    if (!this.document) {
+      return '';
+    }
+
+    if (
+      this.document.status === 'SENT_TO_SED'
+    ) {
+
+      return 'Документ уже отправлен в СЭД и хранится в истории.';
+    }
+
+    if (this.document.sed !== null) {
+
+      return 'Документ имеет историю отправки в СЭД и не может быть удалён.';
+    }
+
+    if (
+      this.document.linkedDocumentsCount > 0
+    ) {
+
+      return 'К этому договору привязаны другие документы. Сначала необходимо удалить или перепривязать их.';
+    }
+
+    return '';
   }
 
   openLinkedContract(): void {
@@ -266,13 +402,14 @@ export class DocumentDetails implements OnInit {
     switch (status) {
 
       case 'SUCCESS':
-        return 'Обработан';
-
       case 'COMPLETED':
         return 'Обработан';
 
       case 'REVIEW_REQUIRED':
         return 'Требуется проверка';
+
+      case 'OCR_REQUIRED':
+        return 'Требуется OCR';
 
       case 'FAILED':
         return 'Ошибка';
@@ -321,8 +458,6 @@ export class DocumentDetails implements OnInit {
         return 'Отправлен';
 
       case 'FAILED':
-        return 'Ошибка отправки';
-
       case 'ERROR':
         return 'Ошибка отправки';
 
@@ -450,5 +585,53 @@ export class DocumentDetails implements OnInit {
     return this.document?.currency
       ? `${formatted} ${this.document.currency}`
       : formatted;
+  }
+
+  private extractBackendMessage(
+    error: HttpErrorResponse
+  ): string | null {
+
+    if (
+      typeof error.error === 'string'
+      &&
+      error.error.trim()
+    ) {
+
+      return error.error;
+    }
+
+    if (
+      error.error
+      &&
+      typeof error.error === 'object'
+    ) {
+
+      const response =
+        error.error as {
+          message?: unknown;
+          detail?: unknown;
+          error?: unknown;
+        };
+
+      if (
+        typeof response.message === 'string'
+      ) {
+        return response.message;
+      }
+
+      if (
+        typeof response.detail === 'string'
+      ) {
+        return response.detail;
+      }
+
+      if (
+        typeof response.error === 'string'
+      ) {
+        return response.error;
+      }
+    }
+
+    return null;
   }
 }
