@@ -32,6 +32,10 @@ import {
   WorkspaceService
 } from '../../core/workspace/workspace.service';
 
+import {
+  AuthService
+} from '../../core/auth/auth.service';
+
 interface DeleteResult {
   documentId: number;
   success: boolean;
@@ -76,6 +80,7 @@ export class Documents implements OnInit {
 
   constructor(
     private readonly workspaceService: WorkspaceService,
+    private readonly authService: AuthService,
     private readonly router: Router,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {
@@ -83,6 +88,32 @@ export class Documents implements OnInit {
 
   ngOnInit(): void {
     this.loadDocuments();
+  }
+
+  private get currentRole(): string | null {
+
+    return this.authService
+      .getCurrentUser()
+      ?.role
+      ?? null;
+  }
+
+
+  get canManageDocuments(): boolean {
+
+    return (
+      this.currentRole === 'ADMIN'
+      ||
+      this.currentRole === 'DOCUMENT_OPERATOR'
+    );
+  }
+
+
+  get documentsListTitle(): string {
+
+    return this.canManageDocuments
+      ? 'Все документы'
+      : 'Мои документы';
   }
 
   loadDocuments(): void {
@@ -172,8 +203,12 @@ export class Documents implements OnInit {
     document: WorkspaceDocument
   ): boolean {
 
-    return document.status
-      !== 'SENT_TO_SED';
+    return (
+      this.canManageDocuments
+      &&
+      document.status
+        !== 'SENT_TO_SED'
+    );
   }
 
   toggleDocumentSelection(
@@ -225,6 +260,13 @@ export class Documents implements OnInit {
 
     this.selectedDocumentIds
       .clear();
+
+    if (!this.canManageDocuments) {
+
+      checkbox.checked = false;
+
+      return;
+    }
 
     if (checkbox.checked) {
 
@@ -279,6 +321,10 @@ export class Documents implements OnInit {
   }
 
   deleteSelectedDocuments(): void {
+
+    if (!this.canManageDocuments) {
+      return;
+    }
 
     const ids =
       Array.from(
@@ -403,6 +449,13 @@ export class Documents implements OnInit {
     const input =
       event.target as HTMLInputElement;
 
+    if (!this.canManageDocuments) {
+
+      input.value = '';
+
+      return;
+    }
+
     const file =
       input.files?.[0];
 
@@ -472,6 +525,10 @@ export class Documents implements OnInit {
   private uploadAndAnalyze(
     file: File
   ): void {
+
+    if (!this.canManageDocuments) {
+      return;
+    }
 
     this.uploading = true;
 

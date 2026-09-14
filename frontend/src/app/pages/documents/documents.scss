@@ -539,3 +539,16 @@
     grid-column: auto;
   }
 }
+.documents-table.read-only-table {
+  min-width: 1060px;
+}
+
+.documents-table.read-only-table .document-row {
+  grid-template-columns:
+    minmax(320px, 1.9fr)
+    minmax(220px, 1.25fr)
+    minmax(170px, 1fr)
+    100px
+    110px
+    130px;
+}

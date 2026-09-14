@@ -44,35 +44,39 @@
     </div>
 
 
-    <input
-      #fileInput
-      type="file"
-      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-      style="display: none"
-      (change)="onFileSelected($event)"
-    />
+    @if (canManageDocuments) {
+
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
 
 
-    <button
-      class="upload-button"
-      type="button"
-      [disabled]="uploading || deleting"
-      (click)="fileInput.click()"
-    >
+      <button
+        class="upload-button"
+        type="button"
+        [disabled]="uploading || deleting"
+        (click)="fileInput.click()"
+      >
 
-      @if (uploading) {
+        @if (uploading) {
 
-        <span>↻</span>
-        Обработка...
+          <span>↻</span>
+          Обработка...
 
-      } @else {
+        } @else {
 
-        <span>+</span>
-        Загрузить документ
+          <span>+</span>
+          Загрузить документ
 
-      }
+        }
 
-    </button>
+      </button>
+
+    }
 
   </header>
 
@@ -208,7 +212,7 @@
       <div>
 
         <h2>
-          Все документы
+          {{ documentsListTitle }}
         </h2>
 
         <span>
@@ -220,7 +224,7 @@
 
       <div class="panel-actions">
 
-        @if (selectedCount > 0) {
+        @if (canManageDocuments && selectedCount > 0) {
 
           <span class="selected-count">
             Выбрано: {{ selectedCount }}
@@ -282,20 +286,24 @@
 
       <div class="table-wrapper">
 
-        <div class="documents-table">
+        <div class="documents-table" [class.read-only-table]="!canManageDocuments">
 
           <div class="document-row table-head">
 
-            <span class="checkbox-cell">
+            @if (canManageDocuments) {
 
-              <input
-                type="checkbox"
-                aria-label="Выбрать все доступные документы"
-                [checked]="allDeletableSelected"
-                (change)="toggleSelectAll($event)"
-              />
+              <span class="checkbox-cell">
 
-            </span>
+                <input
+                  type="checkbox"
+                  aria-label="Выбрать все доступные документы"
+                  [checked]="allDeletableSelected"
+                  (change)="toggleSelectAll($event)"
+                />
+
+              </span>
+
+            }
 
             <span>Документ</span>
             <span>Тип</span>
@@ -320,24 +328,28 @@
               (keydown.enter)="openDocument(document.documentId)"
             >
 
-              <span
-                class="checkbox-cell"
-                (click)="$event.stopPropagation()"
-              >
+              @if (canManageDocuments) {
 
-                <input
-                  type="checkbox"
-                  [checked]="isDocumentSelected(document.documentId)"
-                  [disabled]="!isDocumentDeletable(document) || deleting"
-                  [title]="
-                    isDocumentDeletable(document)
-                      ? 'Выбрать документ'
-                      : 'Документ, отправленный в СЭД, удалить нельзя'
-                  "
-                  (change)="toggleDocumentSelection(document, $event)"
-                />
+                <span
+                  class="checkbox-cell"
+                  (click)="$event.stopPropagation()"
+                >
 
-              </span>
+                  <input
+                    type="checkbox"
+                    [checked]="isDocumentSelected(document.documentId)"
+                    [disabled]="!isDocumentDeletable(document) || deleting"
+                    [title]="
+                      isDocumentDeletable(document)
+                        ? 'Выбрать документ'
+                        : 'Документ, отправленный в СЭД, удалить нельзя'
+                    "
+                    (change)="toggleDocumentSelection(document, $event)"
+                  />
+
+                </span>
+
+              }
 
 
               <div class="document-main">
