@@ -140,6 +140,171 @@ public class DocumentMetadataExtractionService {
                             + "))?"
             );
 
+    private static final Pattern LABELED_SUBJECT_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "предмет\\s+документа"
+                            + "|предмет\\s+(?:настоящего\\s+)?"
+                            + "(?:договора|соглашения|приложения)"
+                            + "|наименование\\s+приложения"
+                            + ")"
+                            + "\\s*(?:является|:|—|-)\\s*"
+                            + "(.+?)"
+                            + "(?=\\.\\s|;\\s|\\s+\\d+\\.\\d+\\.|$)"
+            );
+
+    private static final Pattern CONTRACT_OBLIGATION_SUBJECT_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "поставщик"
+                            + "|исполнитель"
+                            + "|подрядчик"
+                            + "|продавец"
+                            + ")"
+                            + "\\s+обязуется\\s+"
+                            + "(.+?)"
+                            + "(?=\\.\\s|;\\s|\\s+\\d+\\.\\d+\\.|$)"
+            );
+
+    private static final Pattern AMENDMENT_DECISION_SUBJECT_PATTERN =
+            Pattern.compile(
+                    "(?iuU)"
+                            + "стороны\\s+"
+                            + "(?:согласовали|договорились)"
+                            + "(?:\\s+(?:о|об))?"
+                            + "\\s+"
+                            + "(.+?)"
+                            + "(?=\\.\\s|;\\s|\\s+\\d+\\.\\d+\\.|$)"
+            );
+
+    private static final Pattern APPENDIX_SUBJECT_PATTERN =
+            Pattern.compile(
+                    "(?iuU)\\b("
+                            + "спецификация\\s+"
+                            + "(?:товаров|продукции|оборудования|работ|услуг)"
+                            + ")\\b"
+            );
+
+    private static final Pattern VALIDITY_RANGE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "срок\\s+действия.{0,120}?"
+                            + "|действует\\s+"
+                            + ")"
+                            + "(?:с\\s+)?"
+                            + "("
+                            + DATE_FRAGMENT
+                            + ")"
+                            + "\\s+(?:по|до)\\s+"
+                            + "("
+                            + DATE_FRAGMENT
+                            + ")"
+            );
+
+    private static final Pattern VALID_FROM_DOCUMENT_DATE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "вступает\\s+в\\s+силу\\s+"
+                            + "(?:с\\s+даты|со\\s+дня)\\s+подписания"
+                            + "|действует\\s+"
+                            + "(?:с\\s+даты|со\\s+дня)\\s+подписания"
+                            + ")"
+            );
+
+    private static final Pattern EXTENDED_VALID_TO_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "действует\\s+(?:до|по)"
+                            + "|срок\\s+действия.{0,100}?(?:до|по)"
+                            + ")"
+                            + "\\s+("
+                            + DATE_FRAGMENT
+                            + ")"
+            );
+
+    private static final Pattern PROLONGATION_VALID_TO_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "продлить"
+                            + "|продлевается"
+                            + "|продлен"
+                            + "|продлён"
+                            + ")"
+                            + ".{0,140}?"
+                            + "(?:до|по)"
+                            + "\\s+("
+                            + DATE_FRAGMENT
+                            + ")"
+            );
+
+    private static final Pattern AMOUNT_CHANGE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "изменить"
+                            + "|изменяется"
+                            + "|изменена"
+                            + "|установить"
+                            + "|устанавливается"
+                            + "|считать"
+                            + ")"
+                            + ".{0,120}?"
+                            + "(?:общую\\s+)?"
+                            + "(?:стоимость|сумму|цену)"
+                            + ".{0,140}?"
+                            + "(?:до|на|в\\s+размере)"
+                            + "\\s*"
+                            + "(\\d{1,3}(?:[\\s\\u00A0]\\d{3})*"
+                            + "(?:[.,]\\d{1,2})?)"
+            );
+
+    private static final Pattern AMOUNT_CHANGE_REVERSE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "сумма"
+                            + "|стоимость"
+                            + "|цена"
+                            + ")"
+                            + ".{0,100}?"
+                            + "(?:изменяется|изменена|устанавливается)"
+                            + ".{0,120}?"
+                            + "(?:до|на|в\\s+размере)"
+                            + "\\s*"
+                            + "(\\d{1,3}(?:[\\s\\u00A0]\\d{3})*"
+                            + "(?:[.,]\\d{1,2})?)"
+            );
+
+    private static final Pattern REFERENCED_CONTRACT_FALLBACK_PATTERN =
+            Pattern.compile(
+                    "(?iuU)\\bдоговор(?:у|а)?\\b"
+                            + "(?:\\s+[\\p{L}\"«»'().-]+){0,8}"
+                            + "\\s*"
+                            + "(?:№|#|\\bN(?:[OoОоº°])?\\b)"
+                            + "\\s*"
+                            + "([\\p{L}0-9][\\p{L}0-9./_-]{0,99})"
+                            + "(?:\\s+от\\s+("
+                            + DATE_FRAGMENT
+                            + "))?"
+            );
+
+    private static final Pattern AMOUNT_FROM_TO_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "изменение"
+                            + "|изменить"
+                            + "|изменяется"
+                            + ")"
+                            + ".{0,180}?"
+                            + "(?:стоимости|суммы|цены)"
+                            + ".{0,180}?"
+                            + "\\bс\\s+"
+                            + "\\d{1,3}(?:[\\s\\u00A0]\\d{3})*"
+                            + "(?:[.,]\\d{1,2})?"
+                            + "\\s*(?:BYN|USD|EUR|руб\\w*)?"
+                            + "\\s+до\\s+"
+                            + "(\\d{1,3}(?:[\\s\\u00A0]\\d{3})*"
+                            + "(?:[.,]\\d{1,2})?)"
+            );
+
     private static final Pattern BYN_PATTERN =
             Pattern.compile(
                     "(?iuU)\\bBYN\\b"
@@ -410,23 +575,62 @@ public class DocumentMetadataExtractionService {
 
         if (document.getAmount() == null) {
 
-            Matcher matcher =
-                    AMOUNT_PATTERN
-                            .matcher(text);
+            String amountValue = null;
 
-            if (matcher.find()) {
+            if (
+                    requiresContractReference(
+                            document.getDocumentType()
+                    )
+            ) {
 
-                BigDecimal amount =
-                        parseAmount(
-                                matcher.group(1)
+                amountValue =
+                        findValue(
+                                AMOUNT_FROM_TO_PATTERN,
+                                text,
+                                1
                         );
 
-                if (amount != null) {
+                if (amountValue == null) {
 
-                    document.setAmount(
-                            amount
-                    );
+                    amountValue =
+                            findValue(
+                                    AMOUNT_CHANGE_PATTERN,
+                                    text,
+                                    1
+                            );
                 }
+
+                if (amountValue == null) {
+
+                    amountValue =
+                            findValue(
+                                    AMOUNT_CHANGE_REVERSE_PATTERN,
+                                    text,
+                                    1
+                            );
+                }
+            }
+
+            if (amountValue == null) {
+
+                amountValue =
+                        findValue(
+                                AMOUNT_PATTERN,
+                                text,
+                                1
+                        );
+            }
+
+            BigDecimal amount =
+                    parseAmount(
+                            amountValue
+                    );
+
+            if (amount != null) {
+
+                document.setAmount(
+                        amount
+                );
             }
         }
 
@@ -447,7 +651,6 @@ public class DocumentMetadataExtractionService {
             }
         }
     }
-
     private void fillSubject(
             Document document,
             String text
@@ -459,17 +662,61 @@ public class DocumentMetadataExtractionService {
             return;
         }
 
-        String subject = null;
+        String subject =
+                findCleanValue(
+                        LABELED_SUBJECT_PATTERN,
+                        text,
+                        1
+                );
 
         if (
-                requiresContractReference(
-                        document.getDocumentType()
-                )
+                subject == null
+                        && requiresContractReference(
+                                document.getDocumentType()
+                        )
         ) {
 
             subject =
                     findCleanValue(
-                            AMENDMENT_SUBJECT_PATTERN,
+                            AMENDMENT_DECISION_SUBJECT_PATTERN,
+                            text,
+                            1
+                    );
+
+            if (subject == null) {
+
+                subject =
+                        findCleanValue(
+                                AMENDMENT_SUBJECT_PATTERN,
+                                text,
+                                1
+                        );
+            }
+        }
+
+        if (
+                subject == null
+                        && document.getDocumentType()
+                        == DocumentType.APPENDIX
+        ) {
+
+            subject =
+                    findCleanValue(
+                            APPENDIX_SUBJECT_PATTERN,
+                            text,
+                            1
+                    );
+        }
+
+        if (
+                subject == null
+                        && document.getDocumentType()
+                        == DocumentType.CONTRACT
+        ) {
+
+            subject =
+                    findCleanValue(
+                            CONTRACT_OBLIGATION_SUBJECT_PATTERN,
                             text,
                             1
                     );
@@ -502,12 +749,62 @@ public class DocumentMetadataExtractionService {
                 subject
         );
     }
-
     private void fillValidity(
             Document document,
             String text
     ) {
 
+        /*
+         * Сначала пытаемся распознать диапазон:
+         * "действует с ... по ..."
+         * "срок действия ... с ... до ..."
+         */
+        if (
+                document.getValidFrom() == null
+                        || document.getValidTo() == null
+        ) {
+
+            Matcher rangeMatcher =
+                    VALIDITY_RANGE_PATTERN
+                            .matcher(text);
+
+            if (rangeMatcher.find()) {
+
+                if (document.getValidFrom() == null) {
+
+                    LocalDate validFrom =
+                            parseDate(
+                                    rangeMatcher.group(1)
+                            );
+
+                    if (validFrom != null) {
+
+                        document.setValidFrom(
+                                validFrom
+                        );
+                    }
+                }
+
+                if (document.getValidTo() == null) {
+
+                    LocalDate validTo =
+                            parseDate(
+                                    rangeMatcher.group(2)
+                            );
+
+                    if (validTo != null) {
+
+                        document.setValidTo(
+                                validTo
+                        );
+                    }
+                }
+            }
+        }
+
+        /*
+         * Обычное явное начало действия.
+         */
         if (document.getValidFrom() == null) {
 
             LocalDate validFrom =
@@ -525,6 +822,26 @@ public class DocumentMetadataExtractionService {
             }
         }
 
+        /*
+         * Если написано "с даты подписания",
+         * используем дату самого документа.
+         */
+        if (
+                document.getValidFrom() == null
+                        && document.getDocumentDate() != null
+                        && VALID_FROM_DOCUMENT_DATE_PATTERN
+                        .matcher(text)
+                        .find()
+        ) {
+
+            document.setValidFrom(
+                    document.getDocumentDate()
+            );
+        }
+
+        /*
+         * Дата окончания действия.
+         */
         if (document.getValidTo() == null) {
 
             LocalDate validTo =
@@ -534,6 +851,34 @@ public class DocumentMetadataExtractionService {
                             1
                     );
 
+            if (validTo == null) {
+
+                validTo =
+                        findDate(
+                                EXTENDED_VALID_TO_PATTERN,
+                                text,
+                                1
+                        );
+            }
+
+            /*
+             * Для соглашения о продлении дополнительно
+             * понимаем "продлить ... до 31.03.2027".
+             */
+            if (
+                    validTo == null
+                            && document.getDocumentType()
+                            == DocumentType.AMENDMENT_PROLONGATION
+            ) {
+
+                validTo =
+                        findDate(
+                                PROLONGATION_VALID_TO_PATTERN,
+                                text,
+                                1
+                        );
+            }
+
             if (validTo != null) {
 
                 document.setValidTo(
@@ -542,11 +887,22 @@ public class DocumentMetadataExtractionService {
             }
         }
     }
-
     private void fillReferencedContract(
             Document document,
             String text
     ) {
+
+        /*
+         * Ссылка на основной договор нужна только
+         * для доп. соглашений и приложений.
+         */
+        if (
+                !requiresContractReference(
+                        document.getDocumentType()
+                )
+        ) {
+            return;
+        }
 
         if (
                 !isBlank(
@@ -557,9 +913,42 @@ public class DocumentMetadataExtractionService {
             return;
         }
 
-        Matcher matcher =
+        /*
+         * Сначала используем основной, более строгий шаблон.
+         */
+        fillReferencedContractFromPattern(
+                document,
+                text,
                 REFERENCED_CONTRACT_PATTERN
-                        .matcher(text);
+        );
+
+        /*
+         * Если чего-то не нашли, используем
+         * дополнительный более широкий шаблон.
+         */
+        if (
+                isBlank(
+                        document.getReferencedContractNumber()
+                )
+                        || document.getReferencedContractDate() == null
+        ) {
+
+            fillReferencedContractFromPattern(
+                    document,
+                    text,
+                    REFERENCED_CONTRACT_FALLBACK_PATTERN
+            );
+        }
+    }
+
+    private void fillReferencedContractFromPattern(
+            Document document,
+            String text,
+            Pattern pattern
+    ) {
+
+        Matcher matcher =
+                pattern.matcher(text);
 
         while (matcher.find()) {
 
@@ -585,6 +974,7 @@ public class DocumentMetadataExtractionService {
 
             if (
                     document.getReferencedContractDate() == null
+                            && matcher.groupCount() >= 2
                             && matcher.group(2) != null
             ) {
 
@@ -604,7 +994,6 @@ public class DocumentMetadataExtractionService {
             return;
         }
     }
-
     private boolean requiresContractReference(
             DocumentType documentType
     ) {

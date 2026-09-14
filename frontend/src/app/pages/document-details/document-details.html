@@ -603,7 +603,7 @@
               <div class="ai-type">
 
                 <span>
-                  Предсказанный класс
+                  Предсказание AI
                 </span>
 
                 <strong>
@@ -639,6 +639,51 @@
 
             </div>
 
+
+
+            @if (
+              document.documentType
+              &&
+              document.ai.predictedType
+              &&
+              document.documentType !== document.ai.predictedType
+            ) {
+
+              <div class="ai-review-result">
+
+                <div class="ai-review-result-icon">
+                  ✓
+                </div>
+
+                <div class="ai-review-result-content">
+
+                  <span>
+                    РЕЗУЛЬТАТ РУЧНОЙ ПРОВЕРКИ
+                  </span>
+
+                  <strong>
+                    {{
+                      getDocumentTypeLabel(
+                        document.documentType
+                      )
+                    }}
+                  </strong>
+
+                  <p>
+                    Тип документа скорректирован пользователем.
+                    Исходное предсказание AI сохранено
+                    для истории обработки.
+                  </p>
+
+                </div>
+
+                <span class="ai-review-badge">
+                  ПОДТВЕРЖДЕНО
+                </span>
+
+              </div>
+
+            }
 
             <div class="ai-status">
 
