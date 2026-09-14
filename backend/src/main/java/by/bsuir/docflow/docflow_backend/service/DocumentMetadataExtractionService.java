@@ -1,6 +1,7 @@
 package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -61,6 +62,17 @@ public class DocumentMetadataExtractionService {
                             + ")"
             );
 
+    private static final Pattern CITY_DOCUMENT_DATE_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:\\bг\\.|\\bгород)\\s+"
+                            + "[\\p{L}-]+"
+                            + "(?:\\s+[\\p{L}-]+){0,2}"
+                            + "\\s*[,;]?\\s*"
+                            + "("
+                            + DATE_FRAGMENT
+                            + ")"
+            );
+
     private static final Pattern AMOUNT_PATTERN =
             Pattern.compile(
                     "(?iuU)(?:общая\\s+стоимость|стоимость|сумма)"
@@ -81,6 +93,18 @@ public class DocumentMetadataExtractionService {
                             + "(?=,\\s*(?:а\\s+)?заказчик\\b"
                             + "|\\.\\s*\\d+\\.\\d+\\."
                             + "|\\.)"
+            );
+
+    private static final Pattern AMENDMENT_SUBJECT_PATTERN =
+            Pattern.compile(
+                    "(?iuU)(?:"
+                            + "стороны\\s+согласовали"
+                            + "|стороны\\s+договорились\\s+о"
+                            + "|предметом\\s+(?:настоящего\\s+)?"
+                            + "дополнительного\\s+соглашения\\s+является"
+                            + ")"
+                            + "\\s+(.+?)"
+                            + "(?=\\.\\s|;\\s|\\s+\\d+\\.\\d+\\.)"
             );
 
     private static final Pattern VALID_FROM_PATTERN =
@@ -105,7 +129,10 @@ public class DocumentMetadataExtractionService {
     private static final Pattern REFERENCED_CONTRACT_PATTERN =
             Pattern.compile(
                     "(?iuU)(?:к|по)\\s+"
-                            + "(?:основному\\s+)?договору\\s*"
+                            + "(?:основному\\s+)?"
+                            + "договору\\b"
+                            + "(?:\\s+[\\p{L}][\\p{L}\"«»'().-]*){0,8}"
+                            + "\\s*"
                             + "(?:(?:№|#|\\bN(?:[OoОоº°])?\\b)\\s*)?"
                             + "([\\p{L}0-9][\\p{L}0-9./_-]{0,99})"
                             + "(?:\\s+от\\s+("
@@ -219,7 +246,7 @@ public class DocumentMetadataExtractionService {
         int end =
                 Math.min(
                         text.length(),
-                        start + 350
+                        start + 500
                 );
 
         return text.substring(
@@ -286,12 +313,39 @@ public class DocumentMetadataExtractionService {
             return;
         }
 
-        LocalDate date =
-                findDate(
-                        HEADER_DATE_PATTERN,
-                        header,
-                        1
-                );
+        LocalDate date = null;
+
+        if (
+                requiresContractReference(
+                        document.getDocumentType()
+                )
+        ) {
+
+            date =
+                    findDate(
+                            CITY_DOCUMENT_DATE_PATTERN,
+                            header,
+                            1
+                    );
+
+            if (date == null) {
+
+                date =
+                        findFirstHeaderDateOutsideReferencedContract(
+                                header
+                        );
+            }
+        }
+
+        if (date == null) {
+
+            date =
+                    findDate(
+                            HEADER_DATE_PATTERN,
+                            header,
+                            1
+                    );
+        }
 
         if (date != null) {
 
@@ -299,6 +353,54 @@ public class DocumentMetadataExtractionService {
                     date
             );
         }
+    }
+
+    private LocalDate findFirstHeaderDateOutsideReferencedContract(
+            String header
+    ) {
+
+        Matcher referencedContractMatcher =
+                REFERENCED_CONTRACT_PATTERN
+                        .matcher(header);
+
+        int excludedStart = -1;
+        int excludedEnd = -1;
+
+        if (referencedContractMatcher.find()) {
+
+            excludedStart =
+                    referencedContractMatcher.start();
+
+            excludedEnd =
+                    referencedContractMatcher.end();
+        }
+
+        Matcher dateMatcher =
+                HEADER_DATE_PATTERN
+                        .matcher(header);
+
+        while (dateMatcher.find()) {
+
+            boolean insideReferencedContract =
+                    excludedStart >= 0
+                            && dateMatcher.start() >= excludedStart
+                            && dateMatcher.end() <= excludedEnd;
+
+            if (insideReferencedContract) {
+                continue;
+            }
+
+            LocalDate date =
+                    parseDate(
+                            dateMatcher.group(1)
+                    );
+
+            if (date != null) {
+                return date;
+            }
+        }
+
+        return null;
     }
 
     private void fillAmountAndCurrency(
@@ -357,18 +459,31 @@ public class DocumentMetadataExtractionService {
             return;
         }
 
-        Matcher matcher =
-                SUBJECT_PATTERN
-                        .matcher(text);
+        String subject = null;
 
-        if (!matcher.find()) {
-            return;
+        if (
+                requiresContractReference(
+                        document.getDocumentType()
+                )
+        ) {
+
+            subject =
+                    findCleanValue(
+                            AMENDMENT_SUBJECT_PATTERN,
+                            text,
+                            1
+                    );
         }
 
-        String subject =
-                cleanValue(
-                        matcher.group(1)
-                );
+        if (subject == null) {
+
+            subject =
+                    findCleanValue(
+                            SUBJECT_PATTERN,
+                            text,
+                            1
+                    );
+        }
 
         if (subject == null) {
             return;
@@ -490,6 +605,22 @@ public class DocumentMetadataExtractionService {
         }
     }
 
+    private boolean requiresContractReference(
+            DocumentType documentType
+    ) {
+
+        if (documentType == null) {
+            return false;
+        }
+
+        return documentType
+                == DocumentType.AMENDMENT_CHANGE
+                || documentType
+                == DocumentType.AMENDMENT_PROLONGATION
+                || documentType
+                == DocumentType.APPENDIX;
+    }
+
     private String findPlausibleDocumentNumber(
             Pattern pattern,
             String text
@@ -547,6 +678,24 @@ public class DocumentMetadataExtractionService {
         }
 
         return matcher.group(group);
+    }
+
+    private String findCleanValue(
+            Pattern pattern,
+            String text,
+            int group
+    ) {
+
+        String value =
+                findValue(
+                        pattern,
+                        text,
+                        group
+                );
+
+        return cleanValue(
+                value
+        );
     }
 
     private LocalDate findDate(

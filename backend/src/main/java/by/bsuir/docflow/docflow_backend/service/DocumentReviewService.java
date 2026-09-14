@@ -2,11 +2,13 @@ package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.dto.ManualReviewRequest;
 import by.bsuir.docflow.docflow_backend.dto.ManualReviewResponse;
+import by.bsuir.docflow.docflow_backend.entity.AiProcessingResult;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
+import by.bsuir.docflow.docflow_backend.repository.AiProcessingResultRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,14 +20,28 @@ public class DocumentReviewService {
 
     private final DocumentRepository documentRepository;
     private final DocumentRoutingService documentRoutingService;
+    private final AiProcessingResultRepository aiProcessingResultRepository;
+    private final DocumentMetadataExtractionService
+            documentMetadataExtractionService;
 
     public DocumentReviewService(
             DocumentRepository documentRepository,
-            DocumentRoutingService documentRoutingService
+            DocumentRoutingService documentRoutingService,
+            AiProcessingResultRepository aiProcessingResultRepository,
+            DocumentMetadataExtractionService
+                    documentMetadataExtractionService
     ) {
-        this.documentRepository = documentRepository;
+        this.documentRepository =
+                documentRepository;
+
         this.documentRoutingService =
                 documentRoutingService;
+
+        this.aiProcessingResultRepository =
+                aiProcessingResultRepository;
+
+        this.documentMetadataExtractionService =
+                documentMetadataExtractionService;
     }
 
     @Transactional
@@ -34,15 +50,16 @@ public class DocumentReviewService {
             ManualReviewRequest request
     ) {
 
-        Document document = documentRepository
-                .findById(documentId)
-                .orElseThrow(
-                        () -> new DocumentNotFoundException(
-                                "Документ с ID "
-                                        + documentId
-                                        + " не найден"
-                        )
-                );
+        Document document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () -> new DocumentNotFoundException(
+                                        "Документ с ID "
+                                                + documentId
+                                                + " не найден"
+                                )
+                        );
 
         if (
                 request == null
@@ -71,7 +88,14 @@ public class DocumentReviewService {
                 selectedType
         );
 
-        if (selectedType == DocumentType.CONTRACT) {
+        enrichMetadataFromLatestAiResult(
+                document
+        );
+
+        if (
+                selectedType
+                        == DocumentType.CONTRACT
+        ) {
 
             document.setStatus(
                     DocumentStatus.VERIFIED
@@ -110,5 +134,37 @@ public class DocumentReviewService {
                 null,
                 null
         );
+    }
+
+    private void enrichMetadataFromLatestAiResult(
+            Document document
+    ) {
+
+        AiProcessingResult latestResult =
+                aiProcessingResultRepository
+                        .findFirstByDocumentIdOrderByCreatedAtDesc(
+                                document.getId()
+                        )
+                        .orElse(null);
+
+        if (latestResult == null) {
+            return;
+        }
+
+        String recognizedText =
+                latestResult.getRecognizedText();
+
+        if (
+                recognizedText == null
+                        || recognizedText.isBlank()
+        ) {
+            return;
+        }
+
+        documentMetadataExtractionService
+                .enrichFromRecognizedText(
+                        document,
+                        recognizedText
+                );
     }
 }
