@@ -37,6 +37,10 @@ import {
   WorkspaceService
 } from '../../core/workspace/workspace.service';
 
+import {
+  AuthService
+} from '../../core/auth/auth.service';
+
 @Component({
   selector: 'app-document-details',
   standalone: true,
@@ -100,6 +104,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly workspaceService: WorkspaceService,
+    private readonly authService: AuthService,
     private readonly http: HttpClient,
     private readonly sanitizer: DomSanitizer,
     private readonly changeDetectorRef: ChangeDetectorRef
@@ -468,6 +473,110 @@ export class DocumentDetails implements OnInit, OnDestroy {
       null;
   }
 
+  private get currentRole(): string | null {
+
+    return this.authService
+      .getCurrentUser()
+      ?.role
+      ?? null;
+  }
+
+
+  get isAdminUser(): boolean {
+
+    return this.currentRole
+      === 'ADMIN';
+  }
+
+
+  get isOperatorUser(): boolean {
+
+    return this.currentRole
+      === 'DOCUMENT_OPERATOR';
+  }
+
+
+  get isSpecialistUser(): boolean {
+
+    return (
+      this.currentRole === 'LAWYER'
+      ||
+      this.currentRole === 'CONTRACT_MANAGER'
+    );
+  }
+
+
+  get canReviewByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isOperatorUser
+    );
+  }
+
+
+  get canLinkByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isOperatorUser
+    );
+  }
+
+
+  get canEditMetadataByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isSpecialistUser
+    );
+  }
+
+
+  get canPrepareForSedByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isSpecialistUser
+    );
+  }
+
+
+  get canSendToSedByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isOperatorUser
+    );
+  }
+
+
+  get canDeleteByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isOperatorUser
+    );
+  }
+
+
+  get canLinkDocument(): boolean {
+
+    return (
+      this.canLinkByRole
+      &&
+      this.document?.status === 'LINK_REQUIRED'
+      &&
+      !this.document?.link
+    );
+  }
+
   reviewDocument(): void {
 
     if (
@@ -556,8 +665,12 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canReviewDocument(): boolean {
 
-    return this.document?.status
-      === 'REVIEW_REQUIRED';
+    return (
+      this.canReviewByRole
+      &&
+      this.document?.status
+        === 'REVIEW_REQUIRED'
+    );
   }
 
   private isDocumentTypeCode(
@@ -593,6 +706,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
     if (
       this.documentId === null
+      ||
+      !this.canLinkDocument
       ||
       this.loadingCandidates
     ) {
@@ -658,6 +773,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
     if (
       this.documentId === null
+      ||
+      !this.canLinkDocument
       ||
       this.selectedContractDocumentId === null
       ||
@@ -866,7 +983,11 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canPrepareForSed(): boolean {
 
-    if (!this.document) {
+    if (
+      !this.document
+      ||
+      !this.canPrepareForSedByRole
+    ) {
       return false;
     }
 
@@ -884,8 +1005,12 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canSendToSed(): boolean {
 
-    return this.document?.status
-      === 'READY_FOR_SED';
+    return (
+      this.canSendToSedByRole
+      &&
+      this.document?.status
+        === 'READY_FOR_SED'
+    );
   }
 
   get sedActionHint(): string {
@@ -1010,7 +1135,11 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canEditMetadata(): boolean {
 
-    if (!this.document) {
+    if (
+      !this.document
+      ||
+      !this.canEditMetadataByRole
+    ) {
       return false;
     }
 
@@ -1295,7 +1424,11 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canDeleteDocument(): boolean {
 
-    if (!this.document) {
+    if (
+      !this.document
+      ||
+      !this.canDeleteByRole
+    ) {
       return false;
     }
 

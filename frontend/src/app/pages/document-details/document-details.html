@@ -90,30 +90,34 @@
           {{ getStatusLabel(document.status) }}
         </span>
 
-        <button
-          class="delete-document-button"
-          type="button"
-          [disabled]="!canDeleteDocument || deleting"
-          [title]="
-            canDeleteDocument
-              ? 'Удалить документ'
-              : deleteRestrictionMessage
-          "
-          (click)="deleteDocument()"
-        >
-          @if (deleting) {
-            Удаляем...
-          } @else {
-            Удалить документ
-          }
-        </button>
+        @if (canDeleteByRole) {
+
+          <button
+            class="delete-document-button"
+            type="button"
+            [disabled]="!canDeleteDocument || deleting"
+            [title]="
+              canDeleteDocument
+                ? 'Удалить документ'
+                : deleteRestrictionMessage
+            "
+            (click)="deleteDocument()"
+          >
+            @if (deleting) {
+              Удаляем...
+            } @else {
+              Удалить документ
+            }
+          </button>
+
+        }
 
       </div>
 
     </header>
 
 
-    @if (deleteErrorMessage) {
+    @if (canDeleteByRole && deleteErrorMessage) {
 
       <div class="delete-error">
 
@@ -131,6 +135,8 @@
 
 
     @if (
+      canDeleteByRole
+      &&
       !canDeleteDocument
       &&
       deleteRestrictionMessage
@@ -213,7 +219,11 @@
             </div>
 
 
-            @if (!editingMetadata) {
+            @if (
+              !editingMetadata
+              &&
+              canEditMetadataByRole
+            ) {
 
               <button
                 class="edit-button"
@@ -1084,6 +1094,8 @@
 
             } @else if (
               document.status === 'LINK_REQUIRED'
+              &&
+              canLinkByRole
             ) {
 
               <div class="link-required-box">
@@ -1264,11 +1276,23 @@
               <div class="empty-section compact">
 
                 <strong>
-                  Привязка отсутствует
+                  @if (
+                    document.status === 'LINK_REQUIRED'
+                  ) {
+                    Требуется привязка к договору
+                  } @else {
+                    Привязка отсутствует
+                  }
                 </strong>
 
                 <span>
-                  Для этого документа связь с основным договором не создана.
+                  @if (
+                    document.status === 'LINK_REQUIRED'
+                  ) {
+                    Выбор основного договора выполняется делопроизводителем.
+                  } @else {
+                    Для этого документа связь с основным договором не создана.
+                  }
                 </span>
 
               </div>
@@ -1375,10 +1399,12 @@
 
               <div
                 [class]="
-                  canSendToSed
+                  document.status === 'READY_FOR_SED'
                     ? 'sed-readiness ready'
                     : (
-                        canPrepareForSed
+                        document.status === 'LINKED'
+                        ||
+                        document.status === 'VERIFIED'
                           ? 'sed-readiness available'
                           : 'sed-readiness pending'
                       )
@@ -1390,9 +1416,15 @@
                 <div>
 
                   <strong>
-                    @if (canSendToSed) {
+                    @if (
+                      document.status === 'READY_FOR_SED'
+                    ) {
                       Готов к отправке
-                    } @else if (canPrepareForSed) {
+                    } @else if (
+                      document.status === 'LINKED'
+                      ||
+                      document.status === 'VERIFIED'
+                    ) {
                       Готов к подготовке
                     } @else {
                       Пока не готов
@@ -1453,6 +1485,30 @@
 
                 <div class="sed-help">
                   После отправки документ будет зарегистрирован в корпоративной СЭД.
+                </div>
+
+              } @else if (
+                document.status === 'READY_FOR_SED'
+                &&
+                isSpecialistUser
+              ) {
+
+                <div class="sed-help">
+                  Документ подготовлен. Отправку в СЭД выполняет делопроизводитель.
+                </div>
+
+              } @else if (
+                (
+                  document.status === 'LINKED'
+                  ||
+                  document.status === 'VERIFIED'
+                )
+                &&
+                isOperatorUser
+              ) {
+
+                <div class="sed-help">
+                  Подготовку документа выполняет назначенный специалист.
                 </div>
 
               }
