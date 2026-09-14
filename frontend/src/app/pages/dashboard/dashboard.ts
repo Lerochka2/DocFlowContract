@@ -133,6 +133,30 @@ export class Dashboard implements OnInit {
       });
   }
 
+
+  get isSpecialistView(): boolean {
+
+    const role =
+      this.authService
+        .getCurrentUser()
+        ?.role;
+
+    return (
+      role === 'LAWYER'
+      ||
+      role === 'CONTRACT_MANAGER'
+    );
+  }
+
+  get specialistActionableCount(): number {
+
+    return this.documents.filter(
+      document =>
+        document.status !== 'READY_FOR_SED'
+        &&
+        document.status !== 'SENT_TO_SED'
+    ).length;
+  }
   get recentDocuments(): WorkspaceDocument[] {
 
     return this.documents.slice(
@@ -387,6 +411,11 @@ export class Dashboard implements OnInit {
     }
 
     return '—';
+  }
+  openDocuments(): void {
+    void this.router.navigate(
+      ['/documents']
+    );
   }
 
   private formatDate(

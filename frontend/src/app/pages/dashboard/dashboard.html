@@ -111,104 +111,209 @@
 
     <section class="stats">
 
-      <article class="stat-card">
+      @if (isSpecialistView) {
 
-        <div class="stat-icon blue">
-          ▤
-        </div>
+        <article class="stat-card">
 
-        <div>
-
-          <span>
-            Всего документов
-          </span>
-
-          <div class="stat-number">
-            {{ dashboard.totalDocuments }}
+          <div class="stat-icon blue">
+            ▤
           </div>
 
-          <small>
-            в рабочем пространстве
-          </small>
+          <div>
 
-        </div>
+            <span>
+              Назначено мне
+            </span>
 
-      </article>
+            <div class="stat-number">
+              {{ dashboard.totalDocuments }}
+            </div>
 
+            <small>
+              документов в работе
+            </small>
 
-      <article class="stat-card">
-
-        <div class="stat-icon red">
-          !
-        </div>
-
-        <div>
-
-          <span>
-            Требуют проверки
-          </span>
-
-          <div class="stat-number">
-            {{ dashboard.reviewRequired }}
           </div>
 
-          <small>
-            нужно решение пользователя
-          </small>
-
-        </div>
-
-      </article>
+        </article>
 
 
-      <article class="stat-card">
+        <article class="stat-card">
 
-        <div class="stat-icon violet">
-          ⛓
-        </div>
-
-        <div>
-
-          <span>
-            Требуют привязки
-          </span>
-
-          <div class="stat-number">
-            {{ dashboard.linkRequired }}
+          <div class="stat-icon red">
+            !
           </div>
 
-          <small>
-            к базовому договору
-          </small>
+          <div>
 
-        </div>
+            <span>
+              Требуют обработки
+            </span>
 
-      </article>
+            <div class="stat-number">
+              {{ specialistActionableCount }}
+            </div>
 
+            <small>
+              ожидают вашей работы
+            </small>
 
-      <article class="stat-card">
-
-        <div class="stat-icon cyan">
-          ➤
-        </div>
-
-        <div>
-
-          <span>
-            Отправлено в СЭД
-          </span>
-
-          <div class="stat-number">
-            {{ dashboard.sentToSed }}
           </div>
 
-          <small>
-            успешно зарегистрировано
-          </small>
+        </article>
 
-        </div>
 
-      </article>
+        <article class="stat-card">
+
+          <div class="stat-icon violet">
+            ✓
+          </div>
+
+          <div>
+
+            <span>
+              Готовы к СЭД
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.readyForSed }}
+            </div>
+
+            <small>
+              подготовлены специалистом
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon cyan">
+            ➤
+          </div>
+
+          <div>
+
+            <span>
+              Отправлены в СЭД
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.sentToSed }}
+            </div>
+
+            <small>
+              успешно зарегистрированы
+            </small>
+
+          </div>
+
+        </article>
+
+      } @else {
+
+        <article class="stat-card">
+
+          <div class="stat-icon blue">
+            ▤
+          </div>
+
+          <div>
+
+            <span>
+              Всего документов
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.totalDocuments }}
+            </div>
+
+            <small>
+              в рабочем пространстве
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon red">
+            !
+          </div>
+
+          <div>
+
+            <span>
+              Требуют проверки
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.reviewRequired }}
+            </div>
+
+            <small>
+              нужно решение пользователя
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon violet">
+            ⛓
+          </div>
+
+          <div>
+
+            <span>
+              Требуют привязки
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.linkRequired }}
+            </div>
+
+            <small>
+              к базовому договору
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon cyan">
+            ➤
+          </div>
+
+          <div>
+
+            <span>
+              Отправлено в СЭД
+            </span>
+
+            <div class="stat-number">
+              {{ dashboard.sentToSed }}
+            </div>
+
+            <small>
+              успешно зарегистрировано
+            </small>
+
+          </div>
+
+        </article>
+
+      }
 
     </section>
 
@@ -372,7 +477,11 @@
         <div class="panel-title-row">
 
           <h2>
-            Состояние обработки
+            @if (isSpecialistView) {
+              Состояние моих задач
+            } @else {
+              Состояние обработки
+            }
           </h2>
 
           <span class="accuracy-pill">
@@ -385,64 +494,129 @@
         </div>
 
 
-        <div class="confidence-row">
+        @if (isSpecialistView) {
 
-          <span>
-            Требуют проверки
-          </span>
+          <div class="confidence-row">
 
-          <div class="confidence-bar">
-            <i
-              class="low"
-              [style.width.%]="statusPercent(dashboard.reviewRequired)"
-            ></i>
+            <span>
+              Требуют обработки
+            </span>
+
+            <div class="confidence-bar">
+              <i
+                class="low"
+                [style.width.%]="statusPercent(specialistActionableCount)"
+              ></i>
+            </div>
+
+            <strong>
+              {{ specialistActionableCount }}
+            </strong>
+
           </div>
 
-          <strong>
-            {{ dashboard.reviewRequired }}
-          </strong>
 
-        </div>
+          <div class="confidence-row">
 
+            <span>
+              Готовы к СЭД
+            </span>
 
-        <div class="confidence-row">
+            <div class="confidence-bar">
+              <i
+                class="medium"
+                [style.width.%]="statusPercent(dashboard.readyForSed)"
+              ></i>
+            </div>
 
-          <span>
-            Требуют привязки
-          </span>
+            <strong>
+              {{ dashboard.readyForSed }}
+            </strong>
 
-          <div class="confidence-bar">
-            <i
-              class="medium"
-              [style.width.%]="statusPercent(dashboard.linkRequired)"
-            ></i>
           </div>
 
-          <strong>
-            {{ dashboard.linkRequired }}
-          </strong>
 
-        </div>
+          <div class="confidence-row">
 
+            <span>
+              Отправлены в СЭД
+            </span>
 
-        <div class="confidence-row">
+            <div class="confidence-bar">
+              <i
+                class="high"
+                [style.width.%]="statusPercent(dashboard.sentToSed)"
+              ></i>
+            </div>
 
-          <span>
-            Отправлены в СЭД
-          </span>
+            <strong>
+              {{ dashboard.sentToSed }}
+            </strong>
 
-          <div class="confidence-bar">
-            <i
-              class="high"
-              [style.width.%]="statusPercent(dashboard.sentToSed)"
-            ></i>
           </div>
 
-          <strong>
-            {{ dashboard.sentToSed }}
-          </strong>
+        } @else {
 
-        </div>
+          <div class="confidence-row">
+
+            <span>
+              Требуют проверки
+            </span>
+
+            <div class="confidence-bar">
+              <i
+                class="low"
+                [style.width.%]="statusPercent(dashboard.reviewRequired)"
+              ></i>
+            </div>
+
+            <strong>
+              {{ dashboard.reviewRequired }}
+            </strong>
+
+          </div>
+
+
+          <div class="confidence-row">
+
+            <span>
+              Требуют привязки
+            </span>
+
+            <div class="confidence-bar">
+              <i
+                class="medium"
+                [style.width.%]="statusPercent(dashboard.linkRequired)"
+              ></i>
+            </div>
+
+            <strong>
+              {{ dashboard.linkRequired }}
+            </strong>
+
+          </div>
+
+
+          <div class="confidence-row">
+
+            <span>
+              Отправлены в СЭД
+            </span>
+
+            <div class="confidence-bar">
+              <i
+                class="high"
+                [style.width.%]="statusPercent(dashboard.sentToSed)"
+              ></i>
+            </div>
+
+            <strong>
+              {{ dashboard.sentToSed }}
+            </strong>
+
+          </div>
+
+        }
 
 
         <div class="quality-card">
@@ -458,8 +632,13 @@
             </strong>
 
             <p>
-              Статистика и документы на этой странице
-              загружены напрямую из backend.
+              @if (isSpecialistView) {
+                Здесь отображаются только документы,
+                назначенные вашей роли.
+              } @else {
+                Статистика и документы на этой странице
+                загружены напрямую из backend.
+              }
             </p>
 
           </div>
@@ -647,6 +826,7 @@
           <button
             class="details-button"
             type="button"
+            (click)="openDocuments()"
           >
             Все документы →
           </button>
@@ -743,77 +923,155 @@
 
           <div class="insights-title">
             <span>✦</span>
-            <h2>AI Insights</h2>
+
+            <h2>
+              @if (isSpecialistView) {
+                Рабочая сводка
+              } @else {
+                AI Insights
+              }
+            </h2>
           </div>
 
         </div>
 
 
-        <div class="insight-item">
+        @if (isSpecialistView) {
 
-          <span class="insight-icon green-insight">
-            ✓
-          </span>
+          <div class="insight-item">
 
-          <p>
-            В рабочем пространстве находится
-            <strong>
-              {{ dashboard.totalDocuments }}
-            </strong>
-            документов.
-          </p>
+            <span class="insight-icon green-insight">
+              ✓
+            </span>
 
-        </div>
+            <p>
+              Вам назначено
+              <strong>
+                {{ dashboard.totalDocuments }}
+              </strong>
+              документ(а).
+            </p>
 
-
-        <div class="insight-item">
-
-          <span class="insight-icon clock-insight">
-            ◷
-          </span>
-
-          <p>
-            <strong>
-              {{ dashboard.reviewRequired }}
-            </strong>
-            документ(а) требуют ручной проверки.
-          </p>
-
-        </div>
+          </div>
 
 
-        <div class="insight-item">
+          <div class="insight-item">
 
-          <span class="insight-icon link-insight">
-            ⛓
-          </span>
+            <span class="insight-icon clock-insight">
+              ◷
+            </span>
 
-          <p>
-            <strong>
-              {{ dashboard.linkRequired }}
-            </strong>
-            документ(а) ожидают привязки
-            к основному договору.
-          </p>
+            <p>
+              <strong>
+                {{ specialistActionableCount }}
+              </strong>
+              документ(а) требуют обработки.
+            </p>
 
-        </div>
+          </div>
 
 
-        <div class="insight-item">
+          <div class="insight-item">
 
-          <span class="insight-icon star-insight">
-            ☆
-          </span>
+            <span class="insight-icon link-insight">
+              ✓
+            </span>
 
-          <p>
-            В СЭД успешно отправлено
-            <strong>
-              {{ dashboard.sentToSed }}
-            </strong>
-            документ(а).
-          </p>
+            <p>
+              <strong>
+                {{ dashboard.readyForSed }}
+              </strong>
+              документ(а) подготовлены к СЭД.
+            </p>
 
-        </div>
+          </div>
+
+
+          <div class="insight-item">
+
+            <span class="insight-icon star-insight">
+              ☆
+            </span>
+
+            <p>
+              В СЭД уже отправлено
+              <strong>
+                {{ dashboard.sentToSed }}
+              </strong>
+              документ(а).
+            </p>
+
+          </div>
+
+        } @else {
+
+          <div class="insight-item">
+
+            <span class="insight-icon green-insight">
+              ✓
+            </span>
+
+            <p>
+              В рабочем пространстве находится
+              <strong>
+                {{ dashboard.totalDocuments }}
+              </strong>
+              документов.
+            </p>
+
+          </div>
+
+
+          <div class="insight-item">
+
+            <span class="insight-icon clock-insight">
+              ◷
+            </span>
+
+            <p>
+              <strong>
+                {{ dashboard.reviewRequired }}
+              </strong>
+              документ(а) требуют ручной проверки.
+            </p>
+
+          </div>
+
+
+          <div class="insight-item">
+
+            <span class="insight-icon link-insight">
+              ⛓
+            </span>
+
+            <p>
+              <strong>
+                {{ dashboard.linkRequired }}
+              </strong>
+              документ(а) ожидают привязки
+              к основному договору.
+            </p>
+
+          </div>
+
+
+          <div class="insight-item">
+
+            <span class="insight-icon star-insight">
+              ☆
+            </span>
+
+            <p>
+              В СЭД успешно отправлено
+              <strong>
+                {{ dashboard.sentToSed }}
+              </strong>
+              документ(а).
+            </p>
+
+          </div>
+
+        }
 
       </article>
 

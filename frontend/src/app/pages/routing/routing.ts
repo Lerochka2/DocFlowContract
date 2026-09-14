@@ -131,27 +131,16 @@ export class RoutingWorkspace implements OnInit {
       ? 'Контроль автоматически сформированных маршрутов на основе результата интеллектуальной классификации документов.'
       : 'Документы, автоматически назначенные вам для проверки и подготовки к передаче в корпоративную СЭД.';
   }
-
-
   get actionableTaskCount(): number {
 
     return this.documents.filter(
-      document => {
-
-        if (
-          document.documentType
-          === 'CONTRACT'
-        ) {
-
-          return document.status
-            === 'VERIFIED';
-        }
-
-        return document.status
-          === 'LINKED';
-      }
+      document =>
+        document.status !== 'READY_FOR_SED'
+        &&
+        document.status !== 'SENT_TO_SED'
     ).length;
   }
+
 
 
   get completedSpecialistTaskCount(): number {
