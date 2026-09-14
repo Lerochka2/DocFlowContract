@@ -5,16 +5,15 @@
     <div>
 
       <span class="eyebrow">
-        АВТОМАТИЗИРОВАННАЯ МАРШРУТИЗАЦИЯ
+        {{ pageEyebrow }}
       </span>
 
       <h1>
-        Маршрутизация документов
+        {{ pageTitle }}
       </h1>
 
       <p>
-        Контроль автоматически сформированных маршрутов
-        на основе результата интеллектуальной классификации документов.
+        {{ pageDescription }}
       </p>
 
     </div>
@@ -36,93 +35,167 @@
   </header>
 
 
-  <section class="statistics">
+  @if (isAdminView) {
 
-    <article class="stat-card">
+    <section class="statistics">
 
-      <div class="stat-icon all">
-        ↗
-      </div>
+      <article class="stat-card">
 
-      <div>
+        <div class="stat-icon all">
+          ↗
+        </div>
 
-        <span>
-          Всего маршрутов
-        </span>
+        <div>
 
-        <strong>
-          {{ documents.length }}
-        </strong>
+          <span>
+            Всего маршрутов
+          </span>
 
-      </div>
+          <strong>
+            {{ documents.length }}
+          </strong>
 
-    </article>
+        </div>
 
-
-    <article class="stat-card">
-
-      <div class="stat-icon manager">
-        M
-      </div>
-
-      <div>
-
-        <span>
-          Менеджер по договорам
-        </span>
-
-        <strong>
-          {{ contractManagerCount }}
-        </strong>
-
-      </div>
-
-    </article>
+      </article>
 
 
-    <article class="stat-card">
+      <article class="stat-card">
 
-      <div class="stat-icon lawyer">
-        Ю
-      </div>
+        <div class="stat-icon manager">
+          M
+        </div>
 
-      <div>
+        <div>
 
-        <span>
-          Юрист
-        </span>
+          <span>
+            Менеджер по договорам
+          </span>
 
-        <strong>
-          {{ lawyerCount }}
-        </strong>
+          <strong>
+            {{ contractManagerCount }}
+          </strong>
 
-      </div>
+        </div>
 
-    </article>
+      </article>
 
 
-    <article class="stat-card">
+      <article class="stat-card">
 
-      <div class="stat-icon routed">
-        ✓
-      </div>
+        <div class="stat-icon lawyer">
+          Ю
+        </div>
 
-      <div>
+        <div>
 
-        <span>
-          Успешно определены
-        </span>
+          <span>
+            Юрист
+          </span>
 
-        <strong>
-          {{ routedCount }}
-        </strong>
+          <strong>
+            {{ lawyerCount }}
+          </strong>
 
-      </div>
+        </div>
 
-    </article>
+      </article>
 
-  </section>
 
+      <article class="stat-card">
+
+        <div class="stat-icon routed">
+          ✓
+        </div>
+
+        <div>
+
+          <span>
+            Успешно определены
+          </span>
+
+          <strong>
+            {{ routedCount }}
+          </strong>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  } @else {
+
+    <section class="statistics specialist-statistics">
+
+      <article class="stat-card">
+
+        <div class="stat-icon all">
+          ☰
+        </div>
+
+        <div>
+
+          <span>
+            Назначено мне
+          </span>
+
+          <strong>
+            {{ documents.length }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon lawyer">
+          !
+        </div>
+
+        <div>
+
+          <span>
+            Требуют обработки
+          </span>
+
+          <strong>
+            {{ actionableTaskCount }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon routed">
+          ✓
+        </div>
+
+        <div>
+
+          <span>
+            Подготовлены
+          </span>
+
+          <strong>
+            {{ completedSpecialistTaskCount }}
+          </strong>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  }
+
+
+  @if (isAdminView) {
 
   <section class="route-rules">
 
@@ -191,8 +264,13 @@
 
   </section>
 
+  }
 
-  <section class="filters">
+
+  <section
+    class="filters"
+    [class.specialist-filters]="!isAdminView"
+  >
 
     <label class="search-field">
 
@@ -204,35 +282,43 @@
       <input
         type="text"
         [(ngModel)]="searchQuery"
-        placeholder="Поиск по документу, номеру, предмету или маршруту..."
+        [placeholder]="
+          isAdminView
+            ? 'Поиск по документу, номеру, предмету или маршруту...'
+            : 'Поиск по документу, номеру или предмету...'
+        "
       />
 
     </label>
 
 
-    <label class="filter-field">
+    @if (isAdminView) {
 
-      <span>
-        Получатель
-      </span>
+      <label class="filter-field">
 
-      <select
-        [(ngModel)]="targetFilter"
-      >
-        <option value="ALL">
-          Все маршруты
-        </option>
+        <span>
+          Получатель
+        </span>
 
-        <option value="CONTRACT_MANAGER">
-          Менеджер по договорам
-        </option>
+        <select
+          [(ngModel)]="targetFilter"
+        >
+          <option value="ALL">
+            Все маршруты
+          </option>
 
-        <option value="LAWYER">
-          Юрист
-        </option>
-      </select>
+          <option value="CONTRACT_MANAGER">
+            Менеджер по договорам
+          </option>
 
-    </label>
+          <option value="LAWYER">
+            Юрист
+          </option>
+        </select>
+
+      </label>
+
+    }
 
 
     <button
@@ -253,11 +339,19 @@
       <div class="loader"></div>
 
       <strong>
-        Загружаем маршруты
+        @if (isAdminView) {
+          Загружаем маршруты
+        } @else {
+          Загружаем ваши задачи
+        }
       </strong>
 
       <span>
-        Получаем документы и результаты автоматической маршрутизации...
+        @if (isAdminView) {
+          Получаем документы и результаты автоматической маршрутизации...
+        } @else {
+          Получаем документы, назначенные вам для обработки...
+        }
       </span>
 
     </section>
@@ -296,19 +390,31 @@
       </div>
 
       <strong>
-        Маршруты не найдены
+        @if (isAdminView) {
+          Маршруты не найдены
+        } @else {
+          Задач не найдено
+        }
       </strong>
 
       <span>
-        Для выбранных условий нет документов
-        с сформированным маршрутом.
+        @if (isAdminView) {
+          Для выбранных условий нет документов
+          с сформированным маршрутом.
+        } @else {
+          Сейчас нет назначенных вам документов,
+          соответствующих условиям поиска.
+        }
       </span>
 
     </section>
 
   } @else {
 
-    <div class="table-header">
+        <div
+      class="table-header"
+      [class.specialist-table]="!isAdminView"
+    >
 
       <span>
         Документ
@@ -318,9 +424,13 @@
         Класс
       </span>
 
-      <span>
-        Получатель
-      </span>
+      @if (isAdminView) {
+
+        <span>
+          Получатель
+        </span>
+
+      }
 
       <span>
         Маршрутизация
@@ -342,7 +452,10 @@
         track document.documentId
       ) {
 
-        <article class="route-card">
+                <article
+          class="route-card"
+          [class.specialist-table]="!isAdminView"
+        >
 
           <div class="document-cell">
 
@@ -389,43 +502,47 @@
           </div>
 
 
-          <div class="target-cell">
+          @if (isAdminView) {
 
-            <span
-              [class]="
-                'target-icon ' +
-                getTargetClass(
-                  document.routing?.routingTarget || null
-                )
-              "
-            >
-              @if (
-                document.routing?.routingTarget
-                  === 'LAWYER'
-              ) {
-                Ю
-              } @else {
-                M
-              }
-            </span>
+            <div class="target-cell">
 
-            <div>
-
-              <span>
-                Получатель
-              </span>
-
-              <strong>
-                {{
-                  getRoutingTargetLabel(
+              <span
+                [class]="
+                  'target-icon ' +
+                  getTargetClass(
                     document.routing?.routingTarget || null
                   )
-                }}
-              </strong>
+                "
+              >
+                @if (
+                  document.routing?.routingTarget
+                    === 'LAWYER'
+                ) {
+                  Ю
+                } @else {
+                  M
+                }
+              </span>
+
+              <div>
+
+                <span>
+                  Получатель
+                </span>
+
+                <strong>
+                  {{
+                    getRoutingTargetLabel(
+                      document.routing?.routingTarget || null
+                    )
+                  }}
+                </strong>
+
+              </div>
 
             </div>
 
-          </div>
+          }
 
 
           <div class="routing-cell">

@@ -32,6 +32,10 @@ import {
   WorkspaceService
 } from '../../core/workspace/workspace.service';
 
+import {
+  AuthService
+} from '../../core/auth/auth.service';
+
 @Component({
   selector: 'app-routing-workspace',
   standalone: true,
@@ -53,6 +57,7 @@ export class RoutingWorkspace implements OnInit {
 
   constructor(
     private readonly workspaceService: WorkspaceService,
+    private readonly authService: AuthService,
     private readonly router: Router,
     private readonly changeDetectorRef: ChangeDetectorRef
   ) {
@@ -60,6 +65,103 @@ export class RoutingWorkspace implements OnInit {
 
   ngOnInit(): void {
     this.loadRoutingWorkspace();
+  }
+
+  private get currentRole(): string | null {
+
+    return this.authService
+      .getCurrentUser()
+      ?.role
+      ?? null;
+  }
+
+
+  get isAdminView(): boolean {
+
+    return this.currentRole
+      === 'ADMIN';
+  }
+
+
+  get isSpecialistView(): boolean {
+
+    return (
+      this.currentRole === 'LAWYER'
+      ||
+      this.currentRole === 'CONTRACT_MANAGER'
+    );
+  }
+
+
+  get specialistRoleLabel(): string {
+
+    switch (this.currentRole) {
+
+      case 'LAWYER':
+        return 'Юрист';
+
+      case 'CONTRACT_MANAGER':
+        return 'Менеджер по договорам';
+
+      default:
+        return 'Специалист';
+    }
+  }
+
+
+  get pageEyebrow(): string {
+
+    return this.isAdminView
+      ? 'АВТОМАТИЗИРОВАННАЯ МАРШРУТИЗАЦИЯ'
+      : 'РАБОЧЕЕ ПРОСТРАНСТВО СПЕЦИАЛИСТА';
+  }
+
+
+  get pageTitle(): string {
+
+    return this.isAdminView
+      ? 'Маршрутизация документов'
+      : 'Мои задачи';
+  }
+
+
+  get pageDescription(): string {
+
+    return this.isAdminView
+      ? 'Контроль автоматически сформированных маршрутов на основе результата интеллектуальной классификации документов.'
+      : 'Документы, автоматически назначенные вам для проверки и подготовки к передаче в корпоративную СЭД.';
+  }
+
+
+  get actionableTaskCount(): number {
+
+    return this.documents.filter(
+      document => {
+
+        if (
+          document.documentType
+          === 'CONTRACT'
+        ) {
+
+          return document.status
+            === 'VERIFIED';
+        }
+
+        return document.status
+          === 'LINKED';
+      }
+    ).length;
+  }
+
+
+  get completedSpecialistTaskCount(): number {
+
+    return this.documents.filter(
+      document =>
+        document.status === 'READY_FOR_SED'
+        ||
+        document.status === 'SENT_TO_SED'
+    ).length;
   }
 
   loadRoutingWorkspace(): void {
@@ -134,6 +236,8 @@ export class RoutingWorkspace implements OnInit {
       document => {
 
         const matchesTarget =
+          !this.isAdminView
+          ||
           this.targetFilter === 'ALL'
           ||
           document.routing?.routingTarget
