@@ -33,47 +33,70 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        createUserIfMissing(
+        ensureSystemUser(
                 "admin",
-                "Администратор системы",
+                "Александрова Валерия Вячеславовна",
                 "ADMIN",
                 "DOCFLOW_ADMIN_PASSWORD"
         );
 
-        createUserIfMissing(
+        ensureSystemUser(
                 "operator",
-                "Делопроизводитель",
+                "Петрова Анна Сергеевна",
                 "DOCUMENT_OPERATOR",
                 "DOCFLOW_OPERATOR_PASSWORD"
         );
 
-        createUserIfMissing(
+        ensureSystemUser(
                 "lawyer",
-                "Юрист",
+                "Смирнов Алексей Олегович",
                 "LAWYER",
                 "DOCFLOW_LAWYER_PASSWORD"
         );
 
-        createUserIfMissing(
+        ensureSystemUser(
                 "manager",
-                "Менеджер по договорам",
+                "Козлова Мария Игоревна",
                 "CONTRACT_MANAGER",
                 "DOCFLOW_MANAGER_PASSWORD"
         );
     }
 
-    private void createUserIfMissing(
+    private void ensureSystemUser(
             String login,
             String fullName,
             String roleCode,
             String passwordEnvironmentVariable
     ) {
 
-        if (
-                userRepository.existsByLogin(
-                        login
-                )
-        ) {
+        AppUser existingUser =
+                userRepository
+                        .findByLogin(login)
+                        .orElse(null);
+
+        if (existingUser != null) {
+
+            if (
+                    !fullName.equals(
+                            existingUser.getFullName()
+                    )
+            ) {
+
+                existingUser.setFullName(
+                        fullName
+                );
+
+                userRepository.save(
+                        existingUser
+                );
+
+                System.out.println(
+                        "System user '"
+                                + login
+                                + "' full name updated."
+                );
+            }
+
             return;
         }
 
@@ -84,7 +107,8 @@ public class AdminInitializer implements CommandLineRunner {
 
         if (
                 rawPassword == null
-                        || rawPassword.isBlank()
+                        ||
+                        rawPassword.isBlank()
         ) {
 
             System.out.println(

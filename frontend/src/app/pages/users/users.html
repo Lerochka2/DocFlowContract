@@ -1,0 +1,495 @@
+<section class="users-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        АДМИНИСТРИРОВАНИЕ
+      </span>
+
+      <h1>
+        Пользователи
+      </h1>
+
+      <p>
+        Управление учетными записями,
+        ролями и доступом сотрудников DocFlow.
+      </p>
+
+    </div>
+
+    <div class="user-counter">
+
+      <strong>
+        {{ users.length }}
+      </strong>
+
+      <span>
+        пользователей
+      </span>
+
+    </div>
+
+  </header>
+
+
+  @if (successMessage) {
+
+    <div class="message success">
+      {{ successMessage }}
+    </div>
+
+  }
+
+
+  @if (errorMessage) {
+
+    <div class="message error">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <section class="create-card">
+
+    <div class="section-heading">
+
+      <div>
+
+        <span class="section-eyebrow">
+          НОВАЯ УЧЕТНАЯ ЗАПИСЬ
+        </span>
+
+        <h2>
+          Добавить пользователя
+        </h2>
+
+      </div>
+
+      <span class="security-note">
+        Пароль сохраняется в виде BCrypt-хэша
+      </span>
+
+    </div>
+
+
+    <form
+      class="create-form"
+      (ngSubmit)="createUser()"
+    >
+
+      <label>
+
+        <span>
+          ФИО
+        </span>
+
+        <input
+          type="text"
+          name="fullName"
+          [(ngModel)]="createForm.fullName"
+          placeholder="Например, Иванов Иван Иванович"
+          maxlength="255"
+        />
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Логин
+        </span>
+
+        <input
+          type="text"
+          name="login"
+          [(ngModel)]="createForm.login"
+          placeholder="Например, ivanov"
+          maxlength="100"
+        />
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Пароль
+        </span>
+
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="createForm.password"
+          placeholder="Минимум 8 символов"
+        />
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Роль
+        </span>
+
+        <select
+          name="roleCode"
+          [(ngModel)]="createForm.roleCode"
+        >
+
+          @for (
+            role of roles;
+            track role.code
+          ) {
+
+            <option
+              [value]="role.code"
+            >
+              {{ role.name }}
+            </option>
+
+          }
+
+        </select>
+
+      </label>
+
+
+      <button
+        class="create-button"
+        type="submit"
+        [disabled]="submitting"
+      >
+
+        @if (submitting) {
+          Создание...
+        } @else {
+          + Создать пользователя
+        }
+
+      </button>
+
+    </form>
+
+  </section>
+
+
+  <section class="users-card">
+
+    <div class="table-toolbar">
+
+      <div>
+
+        <span class="section-eyebrow">
+          УЧЕТНЫЕ ЗАПИСИ
+        </span>
+
+        <h2>
+          Сотрудники системы
+        </h2>
+
+      </div>
+
+
+      <div class="search-box">
+
+        <span>
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Поиск по имени, логину или роли..."
+        />
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="state-panel">
+        Загружаем пользователей...
+      </div>
+
+    } @else if (
+      filteredUsers.length === 0
+    ) {
+
+      <div class="state-panel">
+        Пользователи не найдены.
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Пользователь
+              </th>
+
+              <th>
+                Логин
+              </th>
+
+              <th>
+                Роль
+              </th>
+
+              <th>
+                Последний вход
+              </th>
+
+              <th>
+                Статус
+              </th>
+
+              <th>
+                Действия
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              user of filteredUsers;
+              track user.userId
+            ) {
+
+              <tr
+                [class.disabled-user]="
+                  !user.enabled
+                "
+              >
+
+                <td>
+
+                  <div class="user-cell">
+
+                    <span class="avatar">
+                      {{
+                        user.fullName
+                          .substring(0, 1)
+                          .toUpperCase()
+                      }}
+                    </span>
+
+                    <div class="user-info">
+
+                      @if (
+                        editingUserId
+                        === user.userId
+                      ) {
+
+                        <div class="name-edit">
+
+                          <input
+                            type="text"
+                            [(ngModel)]="editingFullName"
+                            maxlength="255"
+                            (keydown.enter)="saveFullName(user)"
+                            (keydown.escape)="cancelNameEdit()"
+                          />
+
+                          <div class="name-edit-actions">
+
+                            <button
+                              type="button"
+                              class="name-save"
+                              (click)="saveFullName(user)"
+                            >
+                              Сохранить
+                            </button>
+
+                            <button
+                              type="button"
+                              class="name-cancel"
+                              (click)="cancelNameEdit()"
+                            >
+                              Отмена
+                            </button>
+
+                          </div>
+
+                        </div>
+
+                      } @else {
+
+                        <div class="user-name-line">
+
+                          <strong>
+                            {{ user.fullName }}
+                          </strong>
+
+                          <button
+                            type="button"
+                            class="edit-name-button"
+                            title="Изменить ФИО"
+                            (click)="startNameEdit(user)"
+                          >
+                            ✎
+                          </button>
+
+                        </div>
+
+                        <span>
+                          ID {{ user.userId }}
+
+                          @if (
+                            isCurrentUser(user)
+                          ) {
+                            · Вы
+                          }
+                        </span>
+
+                      }
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  <span class="login-value">
+                    {{ user.login }}
+                  </span>
+                </td>
+
+
+                <td>
+
+                  <select
+                    class="role-select"
+                    [ngModel]="user.roleCode"
+                    [disabled]="
+                      isCurrentUser(user)
+                    "
+                    (ngModelChange)="
+                      changeRole(
+                        user,
+                        $event
+                      )
+                    "
+                  >
+
+                    @for (
+                      role of roles;
+                      track role.code
+                    ) {
+
+                      <option
+                        [value]="role.code"
+                      >
+                        {{ role.name }}
+                      </option>
+
+                    }
+
+                  </select>
+
+                </td>
+
+
+                <td>
+                  <span class="date-value">
+                    {{
+                      formatDate(
+                        user.lastLoginAt
+                      )
+                    }}
+                  </span>
+                </td>
+
+
+                <td>
+
+                  <span
+                    [class]="
+                      user.enabled
+                        ? 'status active'
+                        : 'status blocked'
+                    "
+                  >
+
+                    <i></i>
+
+                    {{
+                      user.enabled
+                        ? 'Активен'
+                        : 'Заблокирован'
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  @if (
+                    isCurrentUser(user)
+                  ) {
+
+                    <span class="current-user-label">
+                      Текущая учетная запись
+                    </span>
+
+                  } @else {
+
+                    <button
+                      type="button"
+                      [class]="
+                        user.enabled
+                          ? 'state-button block'
+                          : 'state-button unblock'
+                      "
+                      (click)="
+                        toggleEnabled(user)
+                      "
+                    >
+
+                      {{
+                        user.enabled
+                          ? 'Заблокировать'
+                          : 'Разблокировать'
+                      }}
+
+                    </button>
+
+                  }
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</section>

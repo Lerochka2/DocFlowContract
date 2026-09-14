@@ -146,7 +146,9 @@ public class SecurityConfig {
                          */
                         .requestMatchers(
                                 "/api/roles",
-                                "/api/roles/**"
+                                "/api/roles/**",
+                                "/api/users",
+                                "/api/users/**"
                         )
                         .hasRole("ADMIN")
 

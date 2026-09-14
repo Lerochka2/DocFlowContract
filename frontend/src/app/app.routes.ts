@@ -35,6 +35,10 @@ import {
 } from './pages/sed/sed';
 
 import {
+  UsersWorkspace
+} from './pages/users/users';
+
+import {
   SettingsWorkspace
 } from './pages/settings/settings';
 
@@ -124,6 +128,18 @@ export const routes: Routes = [
           roles: [
             'ADMIN',
             'DOCUMENT_OPERATOR'
+          ]
+        }
+      },
+      {
+        path: 'users',
+        component: UsersWorkspace,
+        canActivate: [
+          roleGuard
+        ],
+        data: {
+          roles: [
+            'ADMIN'
           ]
         }
       },

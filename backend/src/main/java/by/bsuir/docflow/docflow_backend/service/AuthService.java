@@ -38,8 +38,8 @@ public class AuthService {
                 );
 
         if (!Boolean.TRUE.equals(user.getEnabled())) {
-            throw new IllegalStateException(
-                    "Пользователь заблокирован"
+            throw new InvalidCredentialsException(
+                    "Неверный логин или пароль"
             );
         }
 
