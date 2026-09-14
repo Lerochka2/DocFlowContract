@@ -7,9 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
@@ -79,6 +81,49 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingServletRequestPart(
+            MissingServletRequestPartException exception,
+            HttpServletRequest request
+    ) {
+
+        String message;
+
+        if (
+                "file".equals(
+                        exception.getRequestPartName()
+                )
+        ) {
+            message =
+                    "Не передан файл для загрузки";
+        } else {
+            message =
+                    "Отсутствует обязательная часть multipart-запроса: "
+                            + exception.getRequestPartName();
+        }
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                message,
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException exception,
+            HttpServletRequest request
+    ) {
+
+        return buildResponse(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Unsupported Media Type",
+                "Для загрузки файла требуется Content-Type multipart/form-data",
+                request.getRequestURI()
+        );
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceeded(
             MaxUploadSizeExceededException exception,
@@ -114,7 +159,6 @@ public class GlobalExceptionHandler {
                 message == null
                         || message.isBlank()
         ) {
-
             message =
                     errorName;
         }
@@ -143,8 +187,12 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity
-                .status(statusCode)
-                .body(body);
+                .status(
+                        statusCode
+                )
+                .body(
+                        body
+                );
     }
 
     @ExceptionHandler(Exception.class)
@@ -199,8 +247,12 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity
-                .status(status)
-                .body(body);
+                .status(
+                        status
+                )
+                .body(
+                        body
+                );
     }
 
     private String resolveErrorName(

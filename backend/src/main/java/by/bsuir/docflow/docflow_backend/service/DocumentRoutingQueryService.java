@@ -2,7 +2,6 @@ package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.dto.DocumentRouteResponse;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
-import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,14 +14,17 @@ import java.util.List;
 public class DocumentRoutingQueryService {
 
     private final DocumentRouteRepository documentRouteRepository;
-    private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public DocumentRoutingQueryService(
             DocumentRouteRepository documentRouteRepository,
-            DocumentRepository documentRepository
+            DocumentAccessService documentAccessService
     ) {
-        this.documentRouteRepository = documentRouteRepository;
-        this.documentRepository = documentRepository;
+        this.documentRouteRepository =
+                documentRouteRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
@@ -30,10 +32,15 @@ public class DocumentRoutingQueryService {
             Long documentId
     ) {
 
-        ensureDocumentExists(documentId);
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         return documentRouteRepository
-                .findByDocumentIdOrderByCreatedAtDesc(documentId)
+                .findByDocumentIdOrderByCreatedAtDesc(
+                        documentId
+                )
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -44,11 +51,16 @@ public class DocumentRoutingQueryService {
             Long documentId
     ) {
 
-        ensureDocumentExists(documentId);
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         DocumentRoute route =
                 documentRouteRepository
-                        .findFirstByDocumentIdOrderByCreatedAtDesc(documentId)
+                        .findFirstByDocumentIdOrderByCreatedAtDesc(
+                                documentId
+                        )
                         .orElseThrow(
                                 () -> new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -58,21 +70,9 @@ public class DocumentRoutingQueryService {
                                 )
                         );
 
-        return toResponse(route);
-    }
-
-    private void ensureDocumentExists(
-            Long documentId
-    ) {
-
-        if (!documentRepository.existsById(documentId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Документ с ID "
-                            + documentId
-                            + " не найден"
-            );
-        }
+        return toResponse(
+                route
+        );
     }
 
     private DocumentRouteResponse toResponse(

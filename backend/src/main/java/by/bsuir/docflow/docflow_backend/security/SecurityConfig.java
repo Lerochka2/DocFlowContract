@@ -3,6 +3,7 @@ package by.bsuir.docflow.docflow_backend.security;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -75,7 +76,9 @@ public class SecurityConfig {
                 )
         );
 
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(
+                true
+        );
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
@@ -120,6 +123,12 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
                                 "/api/health",
                                 "/api/auth/login",
                                 "/error"
@@ -127,12 +136,145 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers(
-                                "/api/roles"
+                                HttpMethod.GET,
+                                "/api/auth/me"
+                        )
+                        .authenticated()
+
+                        /*
+                         * Administration
+                         */
+                        .requestMatchers(
+                                "/api/roles",
+                                "/api/roles/**"
                         )
                         .hasRole("ADMIN")
 
+                        /*
+                         * Upload documents
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/upload"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * AI processing
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/analyze"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Manual AI review
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/review"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Link additional document to base contract
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/link"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Delete unfinished document
+                         */
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/documents/*"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Metadata editing.
+                         * Object-level access is checked in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/documents/*/metadata"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
+                         * Prepare document for SED.
+                         * Object-level access is checked in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/prepare-for-sed"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
+                         * Send document to SED
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/send-to-sed"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Read-only document APIs.
+                         * Object-level filtering/access is checked
+                         * in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/documents",
+                                "/api/documents/**",
+                                "/api/workspace/documents",
+                                "/api/workspace/dashboard"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
+                         * Everything else is denied by default.
+                         */
                         .anyRequest()
-                        .authenticated()
+                        .denyAll()
                 )
 
                 .oauth2ResourceServer(oauth2 ->

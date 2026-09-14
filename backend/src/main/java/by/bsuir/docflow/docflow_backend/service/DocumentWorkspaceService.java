@@ -18,12 +18,17 @@ import java.util.Locale;
 public class DocumentWorkspaceService {
 
     private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public DocumentWorkspaceService(
-            DocumentRepository documentRepository
+            DocumentRepository documentRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentRepository =
                 documentRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
@@ -34,16 +39,27 @@ public class DocumentWorkspaceService {
     ) {
 
         DocumentType documentType =
-                parseDocumentType(type);
+                parseDocumentType(
+                        type
+                );
 
         DocumentStatus documentStatus =
-                parseDocumentStatus(status);
+                parseDocumentStatus(
+                        status
+                );
 
         String normalizedQuery =
-                normalizeSearchQuery(query);
+                normalizeSearchQuery(
+                        query
+                );
 
-        return documentRepository
-                .findAll()
+        List<Document> accessibleDocuments =
+                documentAccessService
+                        .filterAccessibleDocuments(
+                                documentRepository.findAll()
+                        );
+
+        return accessibleDocuments
                 .stream()
                 .filter(
                         document ->
@@ -74,7 +90,9 @@ public class DocumentWorkspaceService {
                                 )
                                 .reversed()
                 )
-                .map(this::toResponse)
+                .map(
+                        this::toResponse
+                )
                 .toList();
     }
 
@@ -90,7 +108,8 @@ public class DocumentWorkspaceService {
         String originalName =
                 document.getFile() == null
                         ? null
-                        : document.getFile().getOriginalName();
+                        : document.getFile()
+                                .getOriginalName();
 
         return containsIgnoreCase(
                 originalName,
@@ -116,8 +135,12 @@ public class DocumentWorkspaceService {
         }
 
         return value
-                .toLowerCase(Locale.ROOT)
-                .contains(query);
+                .toLowerCase(
+                        Locale.ROOT
+                )
+                .contains(
+                        query
+                );
     }
 
     private String normalizeSearchQuery(
@@ -131,7 +154,9 @@ public class DocumentWorkspaceService {
         String normalized =
                 value
                         .trim()
-                        .toLowerCase(Locale.ROOT);
+                        .toLowerCase(
+                                Locale.ROOT
+                        );
 
         return normalized.isEmpty()
                 ? null
@@ -142,17 +167,27 @@ public class DocumentWorkspaceService {
             String value
     ) {
 
-        if (value == null || value.isBlank()) {
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
             return null;
         }
 
         try {
+
             return DocumentType.valueOf(
                     value
                             .trim()
-                            .toUpperCase(Locale.ROOT)
+                            .toUpperCase(
+                                    Locale.ROOT
+                            )
             );
-        } catch (IllegalArgumentException exception) {
+
+        } catch (
+                IllegalArgumentException exception
+        ) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Неизвестный тип документа: "
@@ -165,17 +200,27 @@ public class DocumentWorkspaceService {
             String value
     ) {
 
-        if (value == null || value.isBlank()) {
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
             return null;
         }
 
         try {
+
             return DocumentStatus.valueOf(
                     value
                             .trim()
-                            .toUpperCase(Locale.ROOT)
+                            .toUpperCase(
+                                    Locale.ROOT
+                            )
             );
-        } catch (IllegalArgumentException exception) {
+
+        } catch (
+                IllegalArgumentException exception
+        ) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Неизвестный статус документа: "
@@ -197,15 +242,18 @@ public class DocumentWorkspaceService {
 
                 document.getFile() == null
                         ? null
-                        : document.getFile().getOriginalName(),
+                        : document.getFile()
+                                .getOriginalName(),
 
                 document.getDocumentType() == null
                         ? null
-                        : document.getDocumentType().name(),
+                        : document.getDocumentType()
+                                .name(),
 
                 document.getStatus() == null
                         ? null
-                        : document.getStatus().name(),
+                        : document.getStatus()
+                                .name(),
 
                 document.getDocumentNumber(),
                 document.getDocumentDate(),

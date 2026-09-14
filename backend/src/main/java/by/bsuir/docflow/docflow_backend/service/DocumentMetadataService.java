@@ -20,16 +20,21 @@ public class DocumentMetadataService {
 
     private final DocumentRepository documentRepository;
     private final SedDispatchRepository sedDispatchRepository;
+    private final DocumentAccessService documentAccessService;
 
     public DocumentMetadataService(
             DocumentRepository documentRepository,
-            SedDispatchRepository sedDispatchRepository
+            SedDispatchRepository sedDispatchRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentRepository =
                 documentRepository;
 
         this.sedDispatchRepository =
                 sedDispatchRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional
@@ -39,7 +44,6 @@ public class DocumentMetadataService {
     ) {
 
         if (request == null) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Необходимо передать метаданные документа"
@@ -47,15 +51,9 @@ public class DocumentMetadataService {
         }
 
         Document document =
-                documentRepository
-                        .findById(documentId)
-                        .orElseThrow(
-                                () -> new DocumentNotFoundException(
-                                        "Документ с ID "
-                                                + documentId
-                                                + " не найден"
-                                )
-                        );
+                getAccessibleDocument(
+                        documentId
+                );
 
         validateEditingAllowed(
                 document
@@ -125,6 +123,20 @@ public class DocumentMetadataService {
     ) {
 
         Document document =
+                getAccessibleDocument(
+                        documentId
+                );
+
+        return toResponse(
+                document
+        );
+    }
+
+    private Document getAccessibleDocument(
+            Long documentId
+    ) {
+
+        Document document =
                 documentRepository
                         .findById(documentId)
                         .orElseThrow(
@@ -135,9 +147,12 @@ public class DocumentMetadataService {
                                 )
                         );
 
-        return toResponse(
-                document
-        );
+        documentAccessService
+                .requireAccess(
+                        document
+                );
+
+        return document;
     }
 
     private void validateEditingAllowed(
@@ -148,7 +163,6 @@ public class DocumentMetadataService {
                 document.getStatus()
                         == DocumentStatus.READY_FOR_SED
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Документ уже подготовлен к отправке в СЭД. Реквизиты больше нельзя изменять"
@@ -159,7 +173,6 @@ public class DocumentMetadataService {
                 document.getStatus()
                         == DocumentStatus.SENT_TO_SED
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Документ уже отправлен в СЭД. Реквизиты больше нельзя изменять"
@@ -173,7 +186,6 @@ public class DocumentMetadataService {
                         )
                         .isEmpty()
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Документ имеет историю отправки в СЭД. Реквизиты больше нельзя изменять"
@@ -194,7 +206,6 @@ public class DocumentMetadataService {
                                 BigDecimal.ZERO
                         ) < 0
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Сумма документа не может быть отрицательной"
@@ -209,7 +220,6 @@ public class DocumentMetadataService {
                                         request.validTo()
                                 )
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Дата начала действия не может быть позже даты окончания действия"
@@ -225,7 +235,6 @@ public class DocumentMetadataService {
                 currency != null
                         && currency.length() != 3
         ) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Код валюты должен состоять из 3 символов"

@@ -13,19 +13,27 @@ import java.util.List;
 public class WorkspaceDashboardService {
 
     private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public WorkspaceDashboardService(
-            DocumentRepository documentRepository
+            DocumentRepository documentRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentRepository =
                 documentRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
     public WorkspaceDashboardResponse getDashboard() {
 
         List<Document> documents =
-                documentRepository.findAll();
+                documentAccessService
+                        .filterAccessibleDocuments(
+                                documentRepository.findAll()
+                        );
 
         return new WorkspaceDashboardResponse(
                 documents.size(),

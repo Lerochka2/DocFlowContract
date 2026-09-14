@@ -22,15 +22,21 @@ public class DocumentLinkQueryService {
 
     private final DocumentLinkRepository documentLinkRepository;
     private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public DocumentLinkQueryService(
             DocumentLinkRepository documentLinkRepository,
-            DocumentRepository documentRepository
+            DocumentRepository documentRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentLinkRepository =
                 documentLinkRepository;
+
         this.documentRepository =
                 documentRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
@@ -38,9 +44,15 @@ public class DocumentLinkQueryService {
             Long childDocumentId
     ) {
 
-        ensureDocumentExists(
-                childDocumentId
-        );
+        Document childDocument =
+                getDocument(
+                        childDocumentId
+                );
+
+        documentAccessService
+                .requireAccess(
+                        childDocument
+                );
 
         DocumentLink link =
                 documentLinkRepository
@@ -56,7 +68,9 @@ public class DocumentLinkQueryService {
                                 )
                         );
 
-        return toResponse(link);
+        return toResponse(
+                link
+        );
     }
 
     @Transactional(readOnly = true)
@@ -65,17 +79,14 @@ public class DocumentLinkQueryService {
     ) {
 
         Document contractDocument =
-                documentRepository
-                        .findById(
-                                contractDocumentId
-                        )
-                        .orElseThrow(
-                                () -> new DocumentNotFoundException(
-                                        "Документ с ID "
-                                                + contractDocumentId
-                                                + " не найден"
-                                )
-                        );
+                getDocument(
+                        contractDocumentId
+                );
+
+        documentAccessService
+                .requireAccess(
+                        contractDocument
+                );
 
         if (
                 contractDocument.getDocumentType()
@@ -92,6 +103,13 @@ public class DocumentLinkQueryService {
                         contractDocumentId
                 )
                 .stream()
+                .filter(
+                        link ->
+                                documentAccessService
+                                        .canAccess(
+                                                link.getChildDocument()
+                                        )
+                )
                 .map(this::toResponse)
                 .toList();
     }
@@ -102,17 +120,14 @@ public class DocumentLinkQueryService {
     ) {
 
         Document childDocument =
-                documentRepository
-                        .findById(
-                                childDocumentId
-                        )
-                        .orElseThrow(
-                                () -> new DocumentNotFoundException(
-                                        "Документ с ID "
-                                                + childDocumentId
-                                                + " не найден"
-                                )
-                        );
+                getDocument(
+                        childDocumentId
+                );
+
+        documentAccessService
+                .requireAccess(
+                        childDocument
+                );
 
         if (
                 childDocument.getStatus()
@@ -159,6 +174,23 @@ public class DocumentLinkQueryService {
                 .toList();
     }
 
+    private Document getDocument(
+            Long documentId
+    ) {
+
+        return documentRepository
+                .findById(
+                        documentId
+                )
+                .orElseThrow(
+                        () -> new DocumentNotFoundException(
+                                "Документ с ID "
+                                        + documentId
+                                        + " не найден"
+                        )
+                );
+    }
+
     private boolean isAvailableContractStatus(
             DocumentStatus status
     ) {
@@ -170,21 +202,6 @@ public class DocumentLinkQueryService {
         return status == DocumentStatus.VERIFIED
                 || status == DocumentStatus.READY_FOR_SED
                 || status == DocumentStatus.SENT_TO_SED;
-    }
-
-    private void ensureDocumentExists(
-            Long documentId
-    ) {
-
-        if (!documentRepository.existsById(
-                documentId
-        )) {
-            throw new DocumentNotFoundException(
-                    "Документ с ID "
-                            + documentId
-                            + " не найден"
-            );
-        }
     }
 
     private ContractCandidateResponse toCandidateResponse(

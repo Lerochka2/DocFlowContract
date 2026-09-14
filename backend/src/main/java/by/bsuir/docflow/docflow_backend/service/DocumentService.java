@@ -48,12 +48,14 @@ public class DocumentService {
     private final StoredFileRepository storedFileRepository;
     private final DocumentRepository documentRepository;
     private final AppUserRepository userRepository;
+    private final DocumentAccessService documentAccessService;
     private final Path storageRoot;
 
     public DocumentService(
             StoredFileRepository storedFileRepository,
             DocumentRepository documentRepository,
             AppUserRepository userRepository,
+            DocumentAccessService documentAccessService,
             @Value("${app.storage.path}") String storagePath
     ) {
         this.storedFileRepository =
@@ -64,6 +66,9 @@ public class DocumentService {
 
         this.userRepository =
                 userRepository;
+
+        this.documentAccessService =
+                documentAccessService;
 
         this.storageRoot =
                 Paths.get(storagePath)
@@ -98,7 +103,6 @@ public class DocumentService {
                 originalName == null
                         || originalName.isBlank()
         ) {
-
             throw new IllegalArgumentException(
                     "Не удалось определить имя файла"
             );
@@ -112,14 +116,9 @@ public class DocumentService {
         byte[] bytes;
 
         try {
-
             bytes =
                     file.getBytes();
-
-        } catch (
-                IOException exception
-        ) {
-
+        } catch (IOException exception) {
             throw new IllegalStateException(
                     "Не удалось прочитать загруженный файл",
                     exception
@@ -189,7 +188,6 @@ public class DocumentService {
                         storageRoot
                 )
         ) {
-
             throw new IllegalArgumentException(
                     "Недопустимый путь хранения файла"
             );
@@ -206,9 +204,7 @@ public class DocumentService {
                     bytes
             );
 
-        } catch (
-                IOException exception
-        ) {
+        } catch (IOException exception) {
 
             throw new IllegalStateException(
                     "Не удалось сохранить файл",
@@ -285,19 +281,13 @@ public class DocumentService {
                     checksum
             );
 
-        } catch (
-                RuntimeException exception
-        ) {
+        } catch (RuntimeException exception) {
 
             try {
-
                 Files.deleteIfExists(
                         target
                 );
-
-            } catch (
-                    IOException ignored
-            ) {
+            } catch (IOException ignored) {
             }
 
             throw exception;
@@ -307,8 +297,14 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public List<DocumentSummaryResponse> getAllDocuments() {
 
-        return documentRepository
-                .findAllByOrderByCreatedAtDesc()
+        List<Document> accessibleDocuments =
+                documentAccessService
+                        .filterAccessibleDocuments(
+                                documentRepository
+                                        .findAllByOrderByCreatedAtDesc()
+                        );
+
+        return accessibleDocuments
                 .stream()
                 .map(
                         document ->
@@ -353,6 +349,11 @@ public class DocumentService {
                                                         + " не найден"
                                         )
                         );
+
+        documentAccessService
+                .requireAccess(
+                        document
+                );
 
         AppUser verifiedBy =
                 document.getVerifiedBy();
@@ -461,17 +462,19 @@ public class DocumentService {
                                         )
                         );
 
+        documentAccessService
+                .requireAccess(
+                        document
+                );
+
         StoredFile storedFile =
                 document.getFile();
 
         if (
                 storedFile == null
-                        ||
-                        storedFile.getStoragePath() == null
-                        ||
-                        storedFile.getStoragePath().isBlank()
+                        || storedFile.getStoragePath() == null
+                        || storedFile.getStoragePath().isBlank()
         ) {
-
             throw new IllegalStateException(
                     "У документа отсутствует исходный файл"
             );
@@ -489,7 +492,6 @@ public class DocumentService {
                         storageRoot
                 )
         ) {
-
             throw new IllegalStateException(
                     "Недопустимый путь к файлу документа"
             );
@@ -497,10 +499,8 @@ public class DocumentService {
 
         if (
                 !Files.exists(filePath)
-                        ||
-                        !Files.isRegularFile(filePath)
+                        || !Files.isRegularFile(filePath)
         ) {
-
             throw new IllegalStateException(
                     "Файл документа не найден в хранилище"
             );
@@ -515,10 +515,8 @@ public class DocumentService {
 
             if (
                     !resource.exists()
-                            ||
-                            !resource.isReadable()
+                            || !resource.isReadable()
             ) {
-
                 throw new IllegalStateException(
                         "Файл документа недоступен для чтения"
                 );
@@ -530,9 +528,7 @@ public class DocumentService {
                     storedFile.getMimeType()
             );
 
-        } catch (
-                MalformedURLException exception
-        ) {
+        } catch (MalformedURLException exception) {
 
             throw new IllegalStateException(
                     "Не удалось открыть файл документа",
@@ -549,7 +545,6 @@ public class DocumentService {
                 file == null
                         || file.isEmpty()
         ) {
-
             throw new IllegalArgumentException(
                     "Файл не выбран или пуст"
             );
@@ -559,7 +554,6 @@ public class DocumentService {
                 file.getSize()
                         > MAX_FILE_SIZE
         ) {
-
             throw new IllegalArgumentException(
                     "Размер файла превышает 20 МБ"
             );
@@ -572,7 +566,6 @@ public class DocumentService {
                 originalName == null
                         || originalName.isBlank()
         ) {
-
             throw new IllegalArgumentException(
                     "Имя файла отсутствует"
             );
@@ -589,7 +582,6 @@ public class DocumentService {
                                 extension
                         )
         ) {
-
             throw new IllegalArgumentException(
                     "Разрешены только PDF, JPG, JPEG и PNG"
             );
@@ -599,23 +591,17 @@ public class DocumentService {
                 file.getContentType();
 
         boolean validMime =
-                "application/pdf"
-                        .equals(
+                "application/pdf".equals(
+                        mimeType
+                )
+                        || "image/jpeg".equals(
                                 mimeType
                         )
-                        ||
-                        "image/jpeg"
-                                .equals(
-                                        mimeType
-                                )
-                        ||
-                        "image/png"
-                                .equals(
-                                        mimeType
-                                );
+                        || "image/png".equals(
+                                mimeType
+                        );
 
         if (!validMime) {
-
             throw new IllegalArgumentException(
                     "Недопустимый MIME-тип файла"
             );
@@ -633,11 +619,9 @@ public class DocumentService {
 
         if (
                 dotIndex < 0
-                        ||
-                        dotIndex
-                                == fileName.length() - 1
+                        || dotIndex
+                        == fileName.length() - 1
         ) {
-
             throw new IllegalArgumentException(
                     "Файл должен иметь расширение"
             );
@@ -670,38 +654,26 @@ public class DocumentService {
 
                     case "jpg", "jpeg" ->
                             bytes.length >= 3
-                                    && (bytes[0] & 0xFF)
-                                            == 0xFF
-                                    && (bytes[1] & 0xFF)
-                                            == 0xD8
-                                    && (bytes[2] & 0xFF)
-                                            == 0xFF;
+                                    && (bytes[0] & 0xFF) == 0xFF
+                                    && (bytes[1] & 0xFF) == 0xD8
+                                    && (bytes[2] & 0xFF) == 0xFF;
 
                     case "png" ->
                             bytes.length >= 8
-                                    && (bytes[0] & 0xFF)
-                                            == 0x89
-                                    && bytes[1]
-                                            == 0x50
-                                    && bytes[2]
-                                            == 0x4E
-                                    && bytes[3]
-                                            == 0x47
-                                    && bytes[4]
-                                            == 0x0D
-                                    && bytes[5]
-                                            == 0x0A
-                                    && bytes[6]
-                                            == 0x1A
-                                    && bytes[7]
-                                            == 0x0A;
+                                    && (bytes[0] & 0xFF) == 0x89
+                                    && bytes[1] == 0x50
+                                    && bytes[2] == 0x4E
+                                    && bytes[3] == 0x47
+                                    && bytes[4] == 0x0D
+                                    && bytes[5] == 0x0A
+                                    && bytes[6] == 0x1A
+                                    && bytes[7] == 0x0A;
 
                     default ->
                             false;
                 };
 
         if (!valid) {
-
             throw new IllegalArgumentException(
                     "Содержимое файла не соответствует его расширению"
             );
@@ -728,9 +700,7 @@ public class DocumentService {
                             )
                     );
 
-        } catch (
-                NoSuchAlgorithmException exception
-        ) {
+        } catch (NoSuchAlgorithmException exception) {
 
             throw new IllegalStateException(
                     "SHA-256 недоступен",

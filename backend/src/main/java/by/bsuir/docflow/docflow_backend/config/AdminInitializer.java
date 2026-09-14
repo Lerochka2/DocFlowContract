@@ -20,44 +20,131 @@ public class AdminInitializer implements CommandLineRunner {
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder
     ) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userRepository =
+                userRepository;
+
+        this.roleRepository =
+                roleRepository;
+
+        this.passwordEncoder =
+                passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
 
-        if (userRepository.existsByLogin("admin")) {
+        createUserIfMissing(
+                "admin",
+                "Администратор системы",
+                "ADMIN",
+                "DOCFLOW_ADMIN_PASSWORD"
+        );
+
+        createUserIfMissing(
+                "operator",
+                "Делопроизводитель",
+                "DOCUMENT_OPERATOR",
+                "DOCFLOW_OPERATOR_PASSWORD"
+        );
+
+        createUserIfMissing(
+                "lawyer",
+                "Юрист",
+                "LAWYER",
+                "DOCFLOW_LAWYER_PASSWORD"
+        );
+
+        createUserIfMissing(
+                "manager",
+                "Менеджер по договорам",
+                "CONTRACT_MANAGER",
+                "DOCFLOW_MANAGER_PASSWORD"
+        );
+    }
+
+    private void createUserIfMissing(
+            String login,
+            String fullName,
+            String roleCode,
+            String passwordEnvironmentVariable
+    ) {
+
+        if (
+                userRepository.existsByLogin(
+                        login
+                )
+        ) {
             return;
         }
 
-        String adminPassword = System.getenv("DOCFLOW_ADMIN_PASSWORD");
-
-        if (adminPassword == null || adminPassword.isBlank()) {
-            System.out.println(
-                    "DOCFLOW_ADMIN_PASSWORD is not set. Admin user was not created."
-            );
-            return;
-        }
-
-        Role adminRole = roleRepository.findByCode("ADMIN")
-                .orElseThrow(() ->
-                        new IllegalStateException("ADMIN role not found")
+        String rawPassword =
+                System.getenv(
+                        passwordEnvironmentVariable
                 );
 
-        AppUser admin = new AppUser();
+        if (
+                rawPassword == null
+                        || rawPassword.isBlank()
+        ) {
 
-        admin.setLogin("admin");
-        admin.setFullName("Администратор системы");
-        admin.setPasswordHash(
-                passwordEncoder.encode(adminPassword)
+            System.out.println(
+                    passwordEnvironmentVariable
+                            + " is not set. User '"
+                            + login
+                            + "' was not created."
+            );
+
+            return;
+        }
+
+        Role role =
+                roleRepository
+                        .findByCode(
+                                roleCode
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                roleCode
+                                                        + " role not found"
+                                        )
+                        );
+
+        AppUser user =
+                new AppUser();
+
+        user.setLogin(
+                login
         );
-        admin.setRole(adminRole);
-        admin.setEnabled(true);
 
-        userRepository.save(admin);
+        user.setFullName(
+                fullName
+        );
 
-        System.out.println("Default administrator account created.");
+        user.setPasswordHash(
+                passwordEncoder.encode(
+                        rawPassword
+                )
+        );
+
+        user.setRole(
+                role
+        );
+
+        user.setEnabled(
+                true
+        );
+
+        userRepository.save(
+                user
+        );
+
+        System.out.println(
+                "System user '"
+                        + login
+                        + "' with role "
+                        + roleCode
+                        + " created."
+        );
     }
 }

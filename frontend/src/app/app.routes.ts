@@ -46,6 +46,10 @@ import {
   authGuard
 } from './core/auth/auth.guard';
 
+import {
+  roleGuard
+} from './core/auth/role.guard';
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -72,19 +76,56 @@ export const routes: Routes = [
       },
       {
         path: 'ai-analysis',
-        component: AiAnalysisWorkspace
+        component: AiAnalysisWorkspace,
+        canActivate: [
+          roleGuard
+        ],
+        data: {
+          roles: [
+            'ADMIN',
+            'DOCUMENT_OPERATOR'
+          ]
+        }
       },
       {
         path: 'review',
-        component: ReviewQueue
+        component: ReviewQueue,
+        canActivate: [
+          roleGuard
+        ],
+        data: {
+          roles: [
+            'ADMIN',
+            'DOCUMENT_OPERATOR'
+          ]
+        }
       },
       {
         path: 'routing',
-        component: RoutingWorkspace
+        component: RoutingWorkspace,
+        canActivate: [
+          roleGuard
+        ],
+        data: {
+          roles: [
+            'ADMIN',
+            'LAWYER',
+            'CONTRACT_MANAGER'
+          ]
+        }
       },
       {
         path: 'sed',
-        component: SedWorkspace
+        component: SedWorkspace,
+        canActivate: [
+          roleGuard
+        ],
+        data: {
+          roles: [
+            'ADMIN',
+            'DOCUMENT_OPERATOR'
+          ]
+        }
       },
       {
         path: 'settings',

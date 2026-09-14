@@ -3,7 +3,6 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.ai.AiProcessingResultResponse;
 import by.bsuir.docflow.docflow_backend.entity.AiProcessingResult;
 import by.bsuir.docflow.docflow_backend.repository.AiProcessingResultRepository;
-import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,36 +14,53 @@ import java.util.List;
 public class AiProcessingQueryService {
 
     private final AiProcessingResultRepository aiProcessingResultRepository;
-    private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public AiProcessingQueryService(
             AiProcessingResultRepository aiProcessingResultRepository,
-            DocumentRepository documentRepository
+            DocumentAccessService documentAccessService
     ) {
-        this.aiProcessingResultRepository = aiProcessingResultRepository;
-        this.documentRepository = documentRepository;
+        this.aiProcessingResultRepository =
+                aiProcessingResultRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
-    public List<AiProcessingResultResponse> getHistory(Long documentId) {
+    public List<AiProcessingResultResponse> getHistory(
+            Long documentId
+    ) {
 
-        ensureDocumentExists(documentId);
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         return aiProcessingResultRepository
-                .findByDocumentIdOrderByCreatedAtDesc(documentId)
+                .findByDocumentIdOrderByCreatedAtDesc(
+                        documentId
+                )
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public AiProcessingResultResponse getLatest(Long documentId) {
+    public AiProcessingResultResponse getLatest(
+            Long documentId
+    ) {
 
-        ensureDocumentExists(documentId);
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         AiProcessingResult result =
                 aiProcessingResultRepository
-                        .findFirstByDocumentIdOrderByCreatedAtDesc(documentId)
+                        .findFirstByDocumentIdOrderByCreatedAtDesc(
+                                documentId
+                        )
                         .orElseThrow(
                                 () -> new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
@@ -54,19 +70,9 @@ public class AiProcessingQueryService {
                                 )
                         );
 
-        return toResponse(result);
-    }
-
-    private void ensureDocumentExists(Long documentId) {
-
-        if (!documentRepository.existsById(documentId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Документ с ID "
-                            + documentId
-                            + " не найден"
-            );
-        }
+        return toResponse(
+                result
+        );
     }
 
     private AiProcessingResultResponse toResponse(

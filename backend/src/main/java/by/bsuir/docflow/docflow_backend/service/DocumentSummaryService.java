@@ -25,24 +25,33 @@ public class DocumentSummaryService {
     private final DocumentRouteRepository documentRouteRepository;
     private final DocumentLinkRepository documentLinkRepository;
     private final SedDispatchRepository sedDispatchRepository;
+    private final DocumentAccessService documentAccessService;
 
     public DocumentSummaryService(
             DocumentRepository documentRepository,
             AiProcessingResultRepository aiProcessingResultRepository,
             DocumentRouteRepository documentRouteRepository,
             DocumentLinkRepository documentLinkRepository,
-            SedDispatchRepository sedDispatchRepository
+            SedDispatchRepository sedDispatchRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentRepository =
                 documentRepository;
+
         this.aiProcessingResultRepository =
                 aiProcessingResultRepository;
+
         this.documentRouteRepository =
                 documentRouteRepository;
+
         this.documentLinkRepository =
                 documentLinkRepository;
+
         this.sedDispatchRepository =
                 sedDispatchRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +70,11 @@ public class DocumentSummaryService {
                                 )
                         );
 
+        documentAccessService
+                .requireAccess(
+                        document
+                );
+
         AiProcessingResult latestAi =
                 aiProcessingResultRepository
                         .findAll()
@@ -69,7 +83,9 @@ public class DocumentSummaryService {
                                 result ->
                                         result.getDocument() != null
                                                 && documentId.equals(
-                                                        result.getDocument().getId()
+                                                        result
+                                                                .getDocument()
+                                                                .getId()
                                                 )
                         )
                         .max(
@@ -101,11 +117,19 @@ public class DocumentSummaryService {
                         .orElse(null);
 
         int linkedDocumentsCount =
-                documentLinkRepository
+                (int) documentLinkRepository
                         .findByContractDocumentIdOrderByCreatedAtDesc(
                                 documentId
                         )
-                        .size();
+                        .stream()
+                        .filter(
+                                link ->
+                                        documentAccessService
+                                                .canAccess(
+                                                        link.getChildDocument()
+                                                )
+                        )
+                        .count();
 
         return new DocumentSummaryResponse(
                 document.getId(),

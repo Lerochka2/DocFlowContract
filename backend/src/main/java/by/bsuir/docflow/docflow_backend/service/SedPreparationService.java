@@ -21,18 +21,25 @@ public class SedPreparationService {
     private final DocumentRepository documentRepository;
     private final DocumentLinkRepository documentLinkRepository;
     private final DocumentRouteRepository documentRouteRepository;
+    private final DocumentAccessService documentAccessService;
 
     public SedPreparationService(
             DocumentRepository documentRepository,
             DocumentLinkRepository documentLinkRepository,
-            DocumentRouteRepository documentRouteRepository
+            DocumentRouteRepository documentRouteRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.documentRepository =
                 documentRepository;
+
         this.documentLinkRepository =
                 documentLinkRepository;
+
         this.documentRouteRepository =
                 documentRouteRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional
@@ -51,6 +58,11 @@ public class SedPreparationService {
                                 )
                         );
 
+        documentAccessService
+                .requireAccess(
+                        document
+                );
+
         if (document.getDocumentType() == null) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
@@ -58,9 +70,17 @@ public class SedPreparationService {
             );
         }
 
-        validateStatus(document);
-        validateMetadata(document);
-        validateLink(document);
+        validateStatus(
+                document
+        );
+
+        validateMetadata(
+                document
+        );
+
+        validateLink(
+                document
+        );
 
         DocumentRoute activeRoute =
                 documentRouteRepository
@@ -129,9 +149,11 @@ public class SedPreparationService {
             Document document
     ) {
 
-        if (isBlank(
-                document.getDocumentNumber()
-        )) {
+        if (
+                isBlank(
+                        document.getDocumentNumber()
+                )
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Не заполнен номер документа"
@@ -145,9 +167,11 @@ public class SedPreparationService {
             );
         }
 
-        if (isBlank(
-                document.getSubject()
-        )) {
+        if (
+                isBlank(
+                        document.getSubject()
+                )
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Не заполнен предмет документа"
@@ -162,14 +186,20 @@ public class SedPreparationService {
                         document.getCurrency()
                 );
 
-        if (amountSpecified && !currencySpecified) {
+        if (
+                amountSpecified
+                        && !currencySpecified
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Для указанной суммы необходимо указать валюту"
             );
         }
 
-        if (!amountSpecified && currencySpecified) {
+        if (
+                !amountSpecified
+                        && currencySpecified
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Для указанной валюты необходимо указать сумму"
@@ -205,6 +235,7 @@ public class SedPreparationService {
     private boolean isBlank(
             String value
     ) {
+
         return value == null
                 || value.isBlank();
     }

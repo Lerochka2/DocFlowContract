@@ -5,17 +5,28 @@
     <div>
 
       <span class="eyebrow">
-        КОНФИГУРАЦИЯ DOCFLOW
+        НАСТРОЙКИ DOCFLOW
       </span>
 
       <h1>
         Настройки
       </h1>
 
-      <p>
-        Параметры интерфейса, сведения о пользователе
-        и текущая конфигурация обработки документов.
-      </p>
+      @if (isAdmin()) {
+
+        <p>
+          Параметры интерфейса, сведения о пользователе
+          и системная конфигурация обработки документов.
+        </p>
+
+      } @else {
+
+        <p>
+          Персональные параметры интерфейса
+          и сведения о текущей учетной записи.
+        </p>
+
+      }
 
     </div>
 
@@ -63,7 +74,7 @@
             </h2>
 
             <p>
-              Настройте внешний вид рабочего пространства.
+              Настройте внешний вид своего рабочего пространства.
             </p>
 
           </div>
@@ -161,337 +172,341 @@
       </section>
 
 
-      <section class="settings-card">
+      @if (isAdmin()) {
 
-        <div class="card-heading">
+        <section class="settings-card">
 
-          <div class="heading-icon ai">
-            AI
-          </div>
+          <div class="card-heading">
 
-          <div>
-
-            <span class="section-eyebrow">
-              AI-КЛАССИФИКАЦИЯ
-            </span>
-
-            <h2>
-              Параметры модели
-            </h2>
-
-            <p>
-              Серверная конфигурация интеллектуального анализа.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="system-grid">
-
-          <div class="system-item">
-
-            <span>
-              Метод классификации
-            </span>
-
-            <strong>
-              TF-IDF + Logistic Regression
-            </strong>
-
-            <small>
-              Серверный параметр
-            </small>
-
-          </div>
-
-
-          <div class="system-item">
-
-            <span>
-              Порог уверенности
-            </span>
-
-            <strong class="highlight">
-              80%
-            </strong>
-
-            <small>
-              Ниже порога требуется ручная проверка
-            </small>
-
-          </div>
-
-
-          <div class="system-item">
-
-            <span>
-              Количество классов
-            </span>
-
-            <strong>
-              4
-            </strong>
-
-            <small>
-              Договоры, соглашения и приложения
-            </small>
-
-          </div>
-
-
-          <div class="system-item">
-
-            <span>
-              Режим обработки
-            </span>
-
-            <strong class="status-value">
-              <i></i>
-              Активен
-            </strong>
-
-            <small>
-              AI-сервис доступен для обработки
-            </small>
-
-          </div>
-
-        </div>
-
-
-        <div class="readonly-note">
-
-          <span>
-            i
-          </span>
-
-          <p>
-            Эти параметры задаются на стороне AI-сервиса
-            и отображаются здесь только для просмотра.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <section class="settings-card">
-
-        <div class="card-heading">
-
-          <div class="heading-icon routing">
-            ↗
-          </div>
-
-          <div>
-
-            <span class="section-eyebrow">
-              МАРШРУТИЗАЦИЯ
-            </span>
-
-            <h2>
-              Правила маршрутов
-            </h2>
-
-            <p>
-              Текущая логика направления документов
-              после классификации.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="routing-rules">
-
-          <div class="routing-rule">
-
-            <span class="document-type contract">
-              Договор
-            </span>
-
-            <span class="arrow">
-              →
-            </span>
-
-            <strong>
-              Менеджер по договорам
-            </strong>
-
-          </div>
-
-
-          <div class="routing-rule">
-
-            <span class="document-type change">
-              Доп. соглашение — изменение
-            </span>
-
-            <span class="arrow">
-              →
-            </span>
-
-            <strong>
-              Юрист
-            </strong>
-
-          </div>
-
-
-          <div class="routing-rule">
-
-            <span class="document-type prolongation">
-              Доп. соглашение — продление
-            </span>
-
-            <span class="arrow">
-              →
-            </span>
-
-            <strong>
-              Менеджер по договорам
-            </strong>
-
-          </div>
-
-
-          <div class="routing-rule">
-
-            <span class="document-type appendix">
-              Приложение
-            </span>
-
-            <span class="arrow">
-              →
-            </span>
-
-            <strong>
-              Менеджер по договорам
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div class="readonly-note">
-
-          <span>
-            i
-          </span>
-
-          <p>
-            Маршрут формируется автоматически после принятия
-            результата классификации или завершения ручной проверки.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <section class="settings-card">
-
-        <div class="card-heading">
-
-          <div class="heading-icon sed">
-            S
-          </div>
-
-          <div>
-
-            <span class="section-eyebrow">
-              ИНТЕГРАЦИЯ
-            </span>
-
-            <h2>
-              Корпоративная СЭД
-            </h2>
-
-            <p>
-              Параметры текущего тестового контура отправки.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="integration-status">
-
-          <div>
-
-            <span class="integration-dot"></span>
+            <div class="heading-icon ai">
+              AI
+            </div>
 
             <div>
 
-              <strong>
-                Тестовый контур активен
-              </strong>
-
-              <span>
-                Документы могут быть подготовлены
-                и зарегистрированы через текущий адаптер СЭД.
+              <span class="section-eyebrow">
+                AI-КЛАССИФИКАЦИЯ
               </span>
+
+              <h2>
+                Параметры модели
+              </h2>
+
+              <p>
+                Серверная конфигурация интеллектуального анализа.
+              </p>
 
             </div>
 
           </div>
 
 
-          <span class="status-badge">
-            ACTIVE
-          </span>
+          <div class="system-grid">
 
-        </div>
+            <div class="system-item">
+
+              <span>
+                Метод классификации
+              </span>
+
+              <strong>
+                TF-IDF + Logistic Regression
+              </strong>
+
+              <small>
+                Серверный параметр
+              </small>
+
+            </div>
 
 
-        <div class="integration-details">
+            <div class="system-item">
 
-          <div>
+              <span>
+                Порог уверенности
+              </span>
 
-            <span>
-              Поддерживаемая операция
-            </span>
+              <strong class="highlight">
+                80%
+              </strong>
 
-            <strong>
-              Регистрация документа
-            </strong>
+              <small>
+                Ниже порога требуется ручная проверка
+              </small>
+
+            </div>
+
+
+            <div class="system-item">
+
+              <span>
+                Количество классов
+              </span>
+
+              <strong>
+                4
+              </strong>
+
+              <small>
+                Договоры, соглашения и приложения
+              </small>
+
+            </div>
+
+
+            <div class="system-item">
+
+              <span>
+                Режим обработки
+              </span>
+
+              <strong class="status-value">
+                <i></i>
+                Активен
+              </strong>
+
+              <small>
+                AI-сервис доступен для обработки
+              </small>
+
+            </div>
 
           </div>
 
 
-          <div>
+          <div class="readonly-note">
 
             <span>
-              Результат успешной отправки
+              i
             </span>
 
-            <strong>
-              Внешний SED-ID
-            </strong>
+            <p>
+              Эти параметры задаются на стороне AI-сервиса
+              и отображаются здесь только для просмотра.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <section class="settings-card">
+
+          <div class="card-heading">
+
+            <div class="heading-icon routing">
+              ↗
+            </div>
+
+            <div>
+
+              <span class="section-eyebrow">
+                МАРШРУТИЗАЦИЯ
+              </span>
+
+              <h2>
+                Правила маршрутов
+              </h2>
+
+              <p>
+                Текущая логика направления документов
+                после классификации.
+              </p>
+
+            </div>
 
           </div>
 
 
-          <div>
+          <div class="routing-rules">
 
-            <span>
-              История отправок
-            </span>
+            <div class="routing-rule">
 
-            <strong>
-              Сохраняется
-            </strong>
+              <span class="document-type contract">
+                Договор
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Менеджер по договорам
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type change">
+                Доп. соглашение — изменение
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type prolongation">
+                Доп. соглашение — продление
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Менеджер по договорам
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type appendix">
+                Приложение
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Менеджер по договорам
+              </strong>
+
+            </div>
 
           </div>
 
-        </div>
 
-      </section>
+          <div class="readonly-note">
+
+            <span>
+              i
+            </span>
+
+            <p>
+              Маршрут формируется автоматически после принятия
+              результата классификации или завершения ручной проверки.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <section class="settings-card">
+
+          <div class="card-heading">
+
+            <div class="heading-icon sed">
+              S
+            </div>
+
+            <div>
+
+              <span class="section-eyebrow">
+                ИНТЕГРАЦИЯ
+              </span>
+
+              <h2>
+                Корпоративная СЭД
+              </h2>
+
+              <p>
+                Параметры текущего тестового контура отправки.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="integration-status">
+
+            <div>
+
+              <span class="integration-dot"></span>
+
+              <div>
+
+                <strong>
+                  Тестовый контур активен
+                </strong>
+
+                <span>
+                  Документы могут быть подготовлены
+                  и зарегистрированы через текущий адаптер СЭД.
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <span class="status-badge">
+              ACTIVE
+            </span>
+
+          </div>
+
+
+          <div class="integration-details">
+
+            <div>
+
+              <span>
+                Поддерживаемая операция
+              </span>
+
+              <strong>
+                Регистрация документа
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Результат успешной отправки
+              </span>
+
+              <strong>
+                Внешний SED-ID
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                История отправок
+              </span>
+
+              <strong>
+                Сохраняется
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      }
 
     </div>
 
@@ -572,7 +587,7 @@
               </dt>
 
               <dd>
-                {{ currentUser?.role || '—' }}
+                {{ getRoleLabel() }}
               </dd>
 
             </div>

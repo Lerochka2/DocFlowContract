@@ -63,6 +63,14 @@ export class SettingsWorkspace
     this.loadUser();
   }
 
+  isAdmin(): boolean {
+
+    return (
+      this.currentUser?.role
+      === 'ADMIN'
+    );
+  }
+
   save(): void {
 
     this.saving = true;
@@ -160,10 +168,16 @@ export class SettingsWorkspace
     ) {
 
       case 'ADMIN':
-        return 'Администратор';
+        return 'Администратор системы';
 
-      case 'USER':
-        return 'Пользователь';
+      case 'DOCUMENT_OPERATOR':
+        return 'Делопроизводитель';
+
+      case 'LAWYER':
+        return 'Юрист';
+
+      case 'CONTRACT_MANAGER':
+        return 'Менеджер по договорам';
 
       default:
         return 'Пользователь системы';

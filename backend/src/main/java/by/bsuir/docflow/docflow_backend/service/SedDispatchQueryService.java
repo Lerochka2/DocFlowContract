@@ -3,8 +3,6 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.SedDispatchResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.SedDispatch;
-import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
-import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import by.bsuir.docflow.docflow_backend.repository.SedDispatchRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,16 +15,17 @@ import java.util.List;
 public class SedDispatchQueryService {
 
     private final SedDispatchRepository sedDispatchRepository;
-    private final DocumentRepository documentRepository;
+    private final DocumentAccessService documentAccessService;
 
     public SedDispatchQueryService(
             SedDispatchRepository sedDispatchRepository,
-            DocumentRepository documentRepository
+            DocumentAccessService documentAccessService
     ) {
         this.sedDispatchRepository =
                 sedDispatchRepository;
-        this.documentRepository =
-                documentRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
     @Transactional(readOnly = true)
@@ -34,9 +33,10 @@ public class SedDispatchQueryService {
             Long documentId
     ) {
 
-        ensureDocumentExists(
-                documentId
-        );
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         return sedDispatchRepository
                 .findByDocumentIdOrderByCreatedAtDesc(
@@ -52,9 +52,10 @@ public class SedDispatchQueryService {
             Long documentId
     ) {
 
-        ensureDocumentExists(
-                documentId
-        );
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         SedDispatch dispatch =
                 sedDispatchRepository
@@ -73,21 +74,6 @@ public class SedDispatchQueryService {
         return toResponse(
                 dispatch
         );
-    }
-
-    private void ensureDocumentExists(
-            Long documentId
-    ) {
-
-        if (!documentRepository.existsById(
-                documentId
-        )) {
-            throw new DocumentNotFoundException(
-                    "Документ с ID "
-                            + documentId
-                            + " не найден"
-            );
-        }
     }
 
     private SedDispatchResponse toResponse(

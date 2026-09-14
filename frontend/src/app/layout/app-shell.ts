@@ -138,6 +138,78 @@ export class AppShell
     this.searchSubject.complete();
   }
 
+  isAdmin(): boolean {
+
+    return (
+      this.currentUser?.role
+      === 'ADMIN'
+    );
+  }
+
+  isOperator(): boolean {
+
+    return (
+      this.currentUser?.role
+      === 'DOCUMENT_OPERATOR'
+    );
+  }
+
+  isSpecialist(): boolean {
+
+    return (
+      this.currentUser?.role
+      === 'LAWYER'
+      ||
+      this.currentUser?.role
+      === 'CONTRACT_MANAGER'
+    );
+  }
+
+  canUseAiWorkspace(): boolean {
+
+    return (
+      this.isAdmin()
+      ||
+      this.isOperator()
+    );
+  }
+
+  canUseReviewWorkspace(): boolean {
+
+    return (
+      this.isAdmin()
+      ||
+      this.isOperator()
+    );
+  }
+
+  canUseRoutingWorkspace(): boolean {
+
+    return (
+      this.isAdmin()
+      ||
+      this.isSpecialist()
+    );
+  }
+
+  canUseSedWorkspace(): boolean {
+
+    return (
+      this.isAdmin()
+      ||
+      this.isOperator()
+    );
+  }
+
+  getRoutingMenuLabel(): string {
+
+    if (this.isSpecialist()) {
+      return 'Мои задачи';
+    }
+
+    return 'Маршрутизация';
+  }
+
   onSearchInput(): void {
 
     const query =
@@ -171,7 +243,6 @@ export class AppShell
     if (
       this.searchQuery.trim().length >= 2
     ) {
-
       this.searchOpen = true;
     }
   }
@@ -453,8 +524,14 @@ export class AppShell
       case 'ADMIN':
         return 'Администратор';
 
-      case 'USER':
-        return 'Пользователь';
+      case 'DOCUMENT_OPERATOR':
+        return 'Делопроизводитель';
+
+      case 'LAWYER':
+        return 'Юрист';
+
+      case 'CONTRACT_MANAGER':
+        return 'Менеджер по договорам';
 
       default:
         return 'Пользователь системы';
@@ -486,7 +563,6 @@ export class AppShell
       if (
         this.searchQuery.trim().length >= 2
       ) {
-
         this.searchOpen = true;
       }
 
@@ -608,6 +684,8 @@ export class AppShell
           this.currentUser =
             user;
 
+          this.loadNotifications();
+
           this.changeDetectorRef
             .markForCheck();
         },
@@ -629,6 +707,31 @@ export class AppShell
 
     const notifications:
       SystemNotification[] = [];
+
+    if (this.isSpecialist()) {
+
+      const taskCount =
+        dashboard.linked
+        +
+        dashboard.verified;
+
+      if (taskCount > 0) {
+
+        notifications.push({
+          id: 'assigned-tasks',
+          title: 'Документы требуют обработки',
+          message:
+            'Есть назначенные вам документы, которые необходимо проверить и подготовить к отправке.',
+          count:
+            taskCount,
+          type: 'link',
+          route: '/routing',
+          actionLabel: 'Открыть мои задачи'
+        });
+      }
+
+      return notifications;
+    }
 
     if (
       dashboard.reviewRequired > 0
