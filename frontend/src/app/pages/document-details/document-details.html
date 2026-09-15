@@ -1768,6 +1768,148 @@
                 </div>
               }
 
+              <div class="comments-panel">
+
+                <div class="comments-header">
+
+                  <div>
+                    <span class="comments-eyebrow">
+                      ОБСУЖДЕНИЕ
+                    </span>
+
+                    <h3>
+                      Комментарии и замечания
+                    </h3>
+
+                    <p>
+                      Внутреннее обсуждение документа между участниками процесса.
+                    </p>
+                  </div>
+
+                  <span class="comments-count">
+                    {{ documentComments.length }}
+                  </span>
+
+                </div>
+
+
+                <div class="comment-compose">
+
+                  <textarea
+                    [(ngModel)]="newComment"
+                    rows="3"
+                    maxlength="2000"
+                    placeholder="Добавьте комментарий или замечание..."
+                    [disabled]="submittingComment"
+                  ></textarea>
+
+                  <div class="comment-compose-footer">
+
+                    <span>
+                      {{ newComment.length }}/2000
+                    </span>
+
+                    <button
+                      type="button"
+                      class="comment-send-button"
+                      [disabled]="
+                        submittingComment
+                        ||
+                        !newComment.trim()
+                      "
+                      (click)="addComment()"
+                    >
+                      @if (submittingComment) {
+                        Отправляем...
+                      } @else {
+                        Добавить комментарий
+                      }
+                    </button>
+
+                  </div>
+
+                </div>
+
+
+                @if (commentErrorMessage) {
+
+                  <div class="comment-message comment-message-error">
+                    {{ commentErrorMessage }}
+                  </div>
+                }
+
+
+                @if (commentSuccessMessage) {
+
+                  <div class="comment-message comment-message-success">
+                    {{ commentSuccessMessage }}
+                  </div>
+                }
+
+
+                <div class="comments-history">
+
+                  @if (loadingComments) {
+
+                    <div class="comments-loading">
+                      Загружаем комментарии...
+                    </div>
+
+                  } @else if (documentComments.length === 0) {
+
+                    <div class="comments-empty">
+
+                      <strong>
+                        Комментариев пока нет
+                      </strong>
+
+                      <span>
+                        Первый комментарий можно оставить выше.
+                      </span>
+
+                    </div>
+
+                  } @else {
+
+                    @for (
+                      item of documentComments;
+                      track item.id
+                    ) {
+
+                      <article class="comment-item">
+
+                        <div class="comment-avatar">
+                          {{ item.userFullName.charAt(0) }}
+                        </div>
+
+                        <div class="comment-content">
+
+                          <div class="comment-meta">
+
+                            <strong>
+                              {{ item.userFullName }}
+                            </strong>
+
+                            <time>
+                              {{ formatDateTime(item.createdAt) }}
+                            </time>
+
+                          </div>
+
+                          <p>
+                            {{ item.comment }}
+                          </p>
+
+                        </div>
+
+                      </article>
+                    }
+                  }
+
+                </div>
+
+              </div>
+
               @if (sedErrorMessage) {
 
                 <div class="link-error">

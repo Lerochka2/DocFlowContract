@@ -97,6 +97,18 @@ export interface DocumentDecisionResponse {
   userFullName: string;
   createdAt: string | null;
 }
+export interface DocumentCommentRequest {
+  comment: string;
+}
+
+export interface DocumentCommentResponse {
+  id: number;
+  documentId: number;
+  userId: number;
+  userFullName: string;
+  comment: string;
+  createdAt: string;
+}
 export interface DocumentSummary {
   documentId: number;
   fileId: number | null;
@@ -386,6 +398,29 @@ export class WorkspaceService {
     );
   }
 
+  getDocumentComments(
+    documentId: number
+  ): Observable<DocumentCommentResponse[]> {
+
+    return this.http.get<DocumentCommentResponse[]>(
+      `${this.documentsApiUrl}/${documentId}/comments`
+    );
+  }
+
+  addDocumentComment(
+    documentId: number,
+    comment: string
+  ): Observable<DocumentCommentResponse> {
+
+    const request: DocumentCommentRequest = {
+      comment
+    };
+
+    return this.http.post<DocumentCommentResponse>(
+      `${this.documentsApiUrl}/${documentId}/comments`,
+      request
+    );
+  }
   resubmitDocumentForReview(
     documentId: number
   ): Observable<string> {

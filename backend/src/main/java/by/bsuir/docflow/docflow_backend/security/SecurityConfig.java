@@ -253,6 +253,21 @@ public class SecurityConfig {
                                 "CONTRACT_MANAGER"
                         )
                         /*
+                         * Document comments.
+                         * Object-level access is checked in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/comments"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
                          * Prepare document for SED.
                          * Object-level access is checked in service layer.
                          */

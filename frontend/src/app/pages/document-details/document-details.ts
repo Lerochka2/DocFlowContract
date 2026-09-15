@@ -30,6 +30,7 @@ import {
 
 import {
   ContractCandidate,
+  DocumentCommentResponse,
   DocumentDecisionCode,
   DocumentDecisionResponse,
   DocumentMetadata,
@@ -88,6 +89,15 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   decisionErrorMessage = '';
   decisionSuccessMessage = '';
+
+  documentComments: DocumentCommentResponse[] = [];
+  newComment = '';
+
+  loadingComments = false;
+  submittingComment = false;
+
+  commentErrorMessage = '';
+  commentSuccessMessage = '';
 
   previewLoading = false;
   previewErrorMessage = '';
@@ -188,6 +198,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.loadDocumentPreview();
           this.loadDecisionHistory();
+          this.loadDocumentComments();
 
           this.changeDetectorRef
             .markForCheck();
@@ -434,6 +445,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           );
 
           this.loadDecisionHistory();
+          this.loadDocumentComments();
 
           this.changeDetectorRef
             .markForCheck();
@@ -863,6 +875,149 @@ export class DocumentDetails implements OnInit, OnDestroy {
               error
             )
             ?? 'Не удалось привязать документ к договору.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  loadDocumentComments(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.loadingComments
+    ) {
+      return;
+    }
+
+    this.loadingComments = true;
+
+    this.workspaceService
+      .getDocumentComments(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingComments = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: comments => {
+
+          this.documentComments =
+            comments;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.documentComments = [];
+
+          this.commentErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось загрузить комментарии.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  addComment(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.submittingComment
+    ) {
+      return;
+    }
+
+    const normalizedComment =
+      this.newComment.trim();
+
+    if (!normalizedComment) {
+
+      this.commentErrorMessage =
+        'Введите текст комментария.';
+
+      return;
+    }
+
+    if (
+      normalizedComment.length > 2000
+    ) {
+
+      this.commentErrorMessage =
+        'Комментарий не должен превышать 2000 символов.';
+
+      return;
+    }
+
+    this.submittingComment = true;
+
+    this.commentErrorMessage = '';
+    this.commentSuccessMessage = '';
+
+    this.workspaceService
+      .addDocumentComment(
+        this.documentId,
+        normalizedComment
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.submittingComment = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: comment => {
+
+          this.documentComments = [
+            ...this.documentComments,
+            comment
+          ];
+
+          this.newComment = '';
+
+          this.commentSuccessMessage =
+            'Комментарий добавлен.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.commentErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось добавить комментарий.';
 
           this.changeDetectorRef
             .markForCheck();
