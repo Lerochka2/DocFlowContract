@@ -77,6 +77,26 @@ export interface DocumentSedSummary {
   sentAt: string | null;
 }
 
+export type DocumentDecisionCode =
+  | 'APPROVE'
+  | 'RETURN_FOR_CORRECTION'
+  | 'REJECT';
+
+export interface DocumentDecisionRequest {
+  decision: DocumentDecisionCode;
+  comment: string | null;
+}
+
+export interface DocumentDecisionResponse {
+  id: number;
+  documentId: number;
+  decision: DocumentDecisionCode;
+  documentStatus: string;
+  comment: string | null;
+  userId: number;
+  userFullName: string;
+  createdAt: string | null;
+}
 export interface DocumentSummary {
   documentId: number;
   fileId: number | null;
@@ -340,6 +360,41 @@ export class WorkspaceService {
     );
   }
 
+  decideDocument(
+    documentId: number,
+    decision: DocumentDecisionCode,
+    comment: string | null
+  ): Observable<DocumentDecisionResponse> {
+
+    const request: DocumentDecisionRequest = {
+      decision,
+      comment
+    };
+
+    return this.http.post<DocumentDecisionResponse>(
+      `${this.documentsApiUrl}/${documentId}/decision`,
+      request
+    );
+  }
+
+  getDocumentDecisions(
+    documentId: number
+  ): Observable<DocumentDecisionResponse[]> {
+
+    return this.http.get<DocumentDecisionResponse[]>(
+      `${this.documentsApiUrl}/${documentId}/decisions`
+    );
+  }
+
+  resubmitDocumentForReview(
+    documentId: number
+  ): Observable<string> {
+
+    return this.http.post<string>(
+      `${this.documentsApiUrl}/${documentId}/resubmit-for-review`,
+      null
+    );
+  }
   prepareDocumentForSed(
     documentId: number
   ): Observable<SedPreparationResponse> {

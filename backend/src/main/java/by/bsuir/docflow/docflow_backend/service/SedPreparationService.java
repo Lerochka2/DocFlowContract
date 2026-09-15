@@ -119,32 +119,16 @@ public class SedPreparationService {
             Document document
     ) {
 
-        DocumentType type =
-                document.getDocumentType();
-
-        DocumentStatus status =
-                document.getStatus();
-
-        if (type == DocumentType.CONTRACT) {
-
-            if (status != DocumentStatus.VERIFIED) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "Основной договор должен иметь статус VERIFIED перед подготовкой к отправке в СЭД"
-                );
-            }
-
-            return;
-        }
-
-        if (status != DocumentStatus.LINKED) {
+        if (
+                document.getStatus()
+                        != DocumentStatus.APPROVED
+        ) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Связанный документ должен иметь статус LINKED перед подготовкой к отправке в СЭД"
+                    "Документ должен быть согласован специалистом перед подготовкой к отправке в СЭД"
             );
         }
     }
-
     private void validateMetadata(
             Document document
     ) {

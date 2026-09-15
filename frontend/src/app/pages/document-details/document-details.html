@@ -1489,6 +1489,285 @@
               </div>
 
 
+              @if (
+                canMakeDocumentDecision
+                ||
+                canResubmitForReview
+                ||
+                decisionHistory.length > 0
+              ) {
+
+                <div class="decision-panel">
+
+                  <div class="decision-panel-header">
+
+                    <div>
+
+                      <span class="decision-eyebrow">
+                        СОГЛАСОВАНИЕ
+                      </span>
+
+                      <h3>
+                        Решение по документу
+                      </h3>
+
+                    </div>
+
+                    @if (document.status === 'APPROVED') {
+
+                      <span class="decision-status decision-approved">
+                        Согласован
+                      </span>
+
+                    } @else if (
+                      document.status === 'RETURNED_FOR_CORRECTION'
+                    ) {
+
+                      <span class="decision-status decision-returned">
+                        На доработке
+                      </span>
+
+                    } @else if (
+                      document.status === 'REJECTED'
+                    ) {
+
+                      <span class="decision-status decision-rejected">
+                        Отклонён
+                      </span>
+                    }
+
+                  </div>
+
+
+                  @if (canMakeDocumentDecision) {
+
+                    <div class="decision-form">
+
+                      <label class="decision-comment-field">
+
+                        <span>
+                          Комментарий
+                        </span>
+
+                        <textarea
+                          [(ngModel)]="decisionComment"
+                          rows="4"
+                          maxlength="2000"
+                          placeholder="Добавьте замечание или комментарий к решению"
+                          [disabled]="decidingDocument"
+                        ></textarea>
+
+                        <small>
+                          При возврате на доработку или отклонении комментарий обязателен.
+                          {{ decisionComment.length }}/2000
+                        </small>
+
+                      </label>
+
+
+                      <div class="decision-actions">
+
+                        <button
+                          class="decision-button decision-button-approve"
+                          type="button"
+                          [disabled]="decidingDocument"
+                          (click)="submitDocumentDecision('APPROVE')"
+                        >
+                          @if (decidingDocument) {
+                            Сохраняем...
+                          } @else {
+                            Согласовать
+                          }
+                        </button>
+
+
+                        <button
+                          class="decision-button decision-button-return"
+                          type="button"
+                          [disabled]="
+                            decidingDocument
+                            ||
+                            !decisionComment.trim()
+                          "
+                          (click)="submitDocumentDecision('RETURN_FOR_CORRECTION')"
+                        >
+                          Вернуть на доработку
+                        </button>
+
+
+                        <button
+                          class="decision-button decision-button-reject"
+                          type="button"
+                          [disabled]="
+                            decidingDocument
+                            ||
+                            !decisionComment.trim()
+                          "
+                          (click)="submitDocumentDecision('REJECT')"
+                        >
+                          Отклонить
+                        </button>
+
+                      </div>
+
+                    </div>
+                  }
+
+
+                  @if (canResubmitForReview) {
+
+                    <div class="decision-resubmit">
+
+                      <div>
+
+                        <strong>
+                          Документ возвращён на доработку
+                        </strong>
+
+                        <span>
+                          Исправьте указанные замечания и повторно направьте документ специалисту.
+                        </span>
+
+                      </div>
+
+                      <button
+                        class="decision-resubmit-button"
+                        type="button"
+                        [disabled]="resubmittingDocument"
+                        (click)="resubmitForReview()"
+                      >
+                        @if (resubmittingDocument) {
+                          Направляем...
+                        } @else {
+                          Повторно направить на проверку
+                        }
+                      </button>
+
+                    </div>
+                  }
+
+
+                  @if (decisionErrorMessage) {
+
+                    <div class="decision-message decision-message-error">
+                      {{ decisionErrorMessage }}
+                    </div>
+                  }
+
+
+                  @if (decisionSuccessMessage) {
+
+                    <div class="decision-message decision-message-success">
+                      {{ decisionSuccessMessage }}
+                    </div>
+                  }
+
+
+                  <div class="decision-history">
+
+                    <div class="decision-history-header">
+
+                      <div>
+
+                        <strong>
+                          История рассмотрения
+                        </strong>
+
+                        <span>
+                          Решения специалистов и замечания по документу
+                        </span>
+
+                      </div>
+
+                      @if (loadingDecisionHistory) {
+
+                        <span class="decision-history-loading">
+                          Обновляем...
+                        </span>
+                      }
+
+                    </div>
+
+
+                    @if (
+                      !loadingDecisionHistory
+                      &&
+                      decisionHistory.length === 0
+                    ) {
+
+                      <div class="decision-history-empty">
+                        Решений по документу пока нет.
+                      </div>
+                    }
+
+
+                    @if (decisionHistory.length > 0) {
+
+                      <div class="decision-history-list">
+
+                        @for (
+                          item of decisionHistory;
+                          track item.id
+                        ) {
+
+                          <article class="decision-history-item">
+
+                            <div class="decision-history-marker"></div>
+
+                            <div class="decision-history-content">
+
+                              <div class="decision-history-top">
+
+                                <div>
+
+                                  <strong>
+                                    {{ item.userFullName }}
+                                  </strong>
+
+                                  <span
+                                    class="decision-history-badge"
+                                    [class.approved]="
+                                      item.decision === 'APPROVE'
+                                    "
+                                    [class.returned]="
+                                      item.decision === 'RETURN_FOR_CORRECTION'
+                                    "
+                                    [class.rejected]="
+                                      item.decision === 'REJECT'
+                                    "
+                                  >
+                                    {{ getDecisionLabel(item.decision) }}
+                                  </span>
+
+                                </div>
+
+                                <time>
+                                  {{ formatDateTime(item.createdAt) }}
+                                </time>
+
+                              </div>
+
+
+                              @if (item.comment) {
+
+                                <p>
+                                  {{ item.comment }}
+                                </p>
+                              }
+
+                            </div>
+
+                          </article>
+                        }
+
+                      </div>
+                    }
+
+                  </div>
+
+                </div>
+              }
+
               @if (sedErrorMessage) {
 
                 <div class="link-error">

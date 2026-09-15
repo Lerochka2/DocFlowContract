@@ -228,6 +228,31 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Resubmit corrected document for specialist review.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/resubmit-for-review"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+                        /*
+                         * Specialist decision:
+                         * approve / return for correction / reject.
+                         * Object-level access is checked in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/decision"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+                        /*
                          * Prepare document for SED.
                          * Object-level access is checked in service layer.
                          */

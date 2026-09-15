@@ -161,6 +161,25 @@ public class DocumentMetadataService {
 
         if (
                 document.getStatus()
+                        == DocumentStatus.APPROVED
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Согласованный документ нельзя изменять. Для изменения требуется новый цикл обработки"
+            );
+        }
+
+        if (
+                document.getStatus()
+                        == DocumentStatus.REJECTED
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Отклонённый документ нельзя изменять"
+            );
+        }
+        if (
+                document.getStatus()
                         == DocumentStatus.READY_FOR_SED
         ) {
             throw new ResponseStatusException(

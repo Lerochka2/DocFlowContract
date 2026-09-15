@@ -30,6 +30,8 @@ import {
 
 import {
   ContractCandidate,
+  DocumentDecisionCode,
+  DocumentDecisionResponse,
   DocumentMetadata,
   DocumentMetadataRequest,
   DocumentSummary,
@@ -76,6 +78,16 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   preparingForSed = false;
   sendingToSed = false;
+
+  decisionHistory: DocumentDecisionResponse[] = [];
+  decisionComment = '';
+
+  loadingDecisionHistory = false;
+  decidingDocument = false;
+  resubmittingDocument = false;
+
+  decisionErrorMessage = '';
+  decisionSuccessMessage = '';
 
   previewLoading = false;
   previewErrorMessage = '';
@@ -175,6 +187,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           );
 
           this.loadDocumentPreview();
+          this.loadDecisionHistory();
 
           this.changeDetectorRef
             .markForCheck();
@@ -420,6 +433,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
             document
           );
 
+          this.loadDecisionHistory();
+
           this.changeDetectorRef
             .markForCheck();
         },
@@ -528,10 +543,19 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canEditMetadataByRole(): boolean {
 
-    return (
+    if (
       this.isAdminUser
       ||
       this.isSpecialistUser
+    ) {
+      return true;
+    }
+
+    return (
+      this.isOperatorUser
+      &&
+      this.document?.status
+        === 'RETURNED_FOR_CORRECTION'
     );
   }
 
@@ -846,6 +870,308 @@ export class DocumentDetails implements OnInit, OnDestroy {
       });
   }
 
+  loadDecisionHistory(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.loadingDecisionHistory
+    ) {
+      return;
+    }
+
+    this.loadingDecisionHistory = true;
+
+    this.workspaceService
+      .getDocumentDecisions(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingDecisionHistory = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: history => {
+
+          this.decisionHistory =
+            history;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: () => {
+
+          this.decisionHistory = [];
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  get canMakeDocumentDecision(): boolean {
+
+    return (
+      (
+        this.isAdminUser
+        ||
+        this.isSpecialistUser
+      )
+      &&
+      (
+        this.document?.status === 'VERIFIED'
+        ||
+        this.document?.status === 'LINKED'
+      )
+    );
+  }
+
+
+  submitDocumentDecision(
+    decision: DocumentDecisionCode
+  ): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canMakeDocumentDecision
+      ||
+      this.decidingDocument
+    ) {
+      return;
+    }
+
+    const normalizedComment =
+      this.decisionComment.trim();
+
+    if (
+      (
+        decision === 'RETURN_FOR_CORRECTION'
+        ||
+        decision === 'REJECT'
+      )
+      &&
+      !normalizedComment
+    ) {
+
+      this.decisionErrorMessage =
+        'Укажите комментарий с причиной возврата или отклонения.';
+
+      return;
+    }
+
+    let confirmationMessage =
+      'Согласовать документ?';
+
+    if (
+      decision === 'RETURN_FOR_CORRECTION'
+    ) {
+
+      confirmationMessage =
+        'Вернуть документ делопроизводителю на доработку?';
+
+    } else if (
+      decision === 'REJECT'
+    ) {
+
+      confirmationMessage =
+        'Отклонить документ? Документ не сможет продолжить текущий процесс обработки.';
+    }
+
+    const confirmed =
+      window.confirm(
+        confirmationMessage
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.decidingDocument = true;
+
+    this.decisionErrorMessage = '';
+    this.decisionSuccessMessage = '';
+
+    this.workspaceService
+      .decideDocument(
+        this.documentId,
+        decision,
+        normalizedComment || null
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.decidingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          if (
+            decision === 'APPROVE'
+          ) {
+
+            this.decisionSuccessMessage =
+              'Документ согласован специалистом.';
+
+          } else if (
+            decision === 'RETURN_FOR_CORRECTION'
+          ) {
+
+            this.decisionSuccessMessage =
+              'Документ возвращён на доработку.';
+
+          } else {
+
+            this.decisionSuccessMessage =
+              'Документ отклонён.';
+          }
+
+          this.decisionComment = '';
+
+          this.editingMetadata = false;
+          this.metadataForm = null;
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.decisionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось сохранить решение по документу.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  getDecisionLabel(
+    decision: string
+  ): string {
+
+    switch (decision) {
+
+      case 'APPROVE':
+        return 'Согласовано';
+
+      case 'RETURN_FOR_CORRECTION':
+        return 'Возвращено на доработку';
+
+      case 'REJECT':
+        return 'Отклонено';
+
+      default:
+        return decision;
+    }
+  }
+
+  get canResubmitForReview(): boolean {
+
+    return (
+      (
+        this.isAdminUser
+        ||
+        this.isOperatorUser
+      )
+      &&
+      this.document?.status
+        === 'RETURNED_FOR_CORRECTION'
+    );
+  }
+
+
+  resubmitForReview(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canResubmitForReview
+      ||
+      this.resubmittingDocument
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        'Повторно направить исправленный документ специалисту на проверку?'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.resubmittingDocument = true;
+
+    this.decisionErrorMessage = '';
+    this.decisionSuccessMessage = '';
+
+    this.workspaceService
+      .resubmitDocumentForReview(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.resubmittingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.decisionSuccessMessage =
+            'Документ повторно направлен специалисту на проверку.';
+
+          this.editingMetadata = false;
+          this.metadataForm = null;
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.decisionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось повторно направить документ на проверку.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
   prepareForSed(): void {
 
     if (
@@ -983,24 +1309,12 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canPrepareForSed(): boolean {
 
-    if (
-      !this.document
-      ||
-      !this.canPrepareForSedByRole
-    ) {
-      return false;
-    }
-
-    if (
-      this.document.documentType === 'CONTRACT'
-    ) {
-
-      return this.document.status
-        === 'VERIFIED';
-    }
-
-    return this.document.status
-      === 'LINKED';
+    return (
+      this.canPrepareForSedByRole
+      &&
+      this.document?.status
+        === 'APPROVED'
+    );
   }
 
   get canSendToSed(): boolean {
@@ -1144,6 +1458,10 @@ export class DocumentDetails implements OnInit, OnDestroy {
     }
 
     if (
+      this.document.status === 'APPROVED'
+      ||
+      this.document.status === 'REJECTED'
+      ||
       this.document.status === 'READY_FOR_SED'
       ||
       this.document.status === 'SENT_TO_SED'
@@ -1548,6 +1866,15 @@ export class DocumentDetails implements OnInit, OnDestroy {
       case 'VERIFIED':
         return 'Проверен';
 
+      case 'APPROVED':
+        return 'Согласован';
+
+      case 'RETURNED_FOR_CORRECTION':
+        return 'На доработке';
+
+      case 'REJECTED':
+        return 'Отклонён';
+
       case 'READY_FOR_SED':
         return 'Готов к отправке';
 
@@ -1573,13 +1900,16 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
       case 'SENT_TO_SED':
       case 'VERIFIED':
+      case 'APPROVED':
       case 'READY_FOR_SED':
         return 'green';
 
       case 'LINK_REQUIRED':
+      case 'RETURNED_FOR_CORRECTION':
         return 'orange';
 
       case 'REVIEW_REQUIRED':
+      case 'REJECTED':
       case 'PROCESSING_FAILED':
       case 'SED_ERROR':
         return 'red';
