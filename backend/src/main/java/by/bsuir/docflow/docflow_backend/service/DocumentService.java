@@ -6,6 +6,7 @@ import by.bsuir.docflow.docflow_backend.dto.document.DocumentUploadResponse;
 import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.StoredFile;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
@@ -49,6 +50,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final AppUserRepository userRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
     private final Path storageRoot;
 
     public DocumentService(
@@ -56,6 +58,7 @@ public class DocumentService {
             DocumentRepository documentRepository,
             AppUserRepository userRepository,
             DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService,
             @Value("${app.storage.path}") String storagePath
     ) {
         this.storedFileRepository =
@@ -69,6 +72,9 @@ public class DocumentService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
 
         this.storageRoot =
                 Paths.get(storagePath)
@@ -271,6 +277,21 @@ public class DocumentService {
                             .save(
                                     document
                             );
+
+            documentAuditService.recordUserEvent(
+                    document,
+                    DocumentAuditEventType.DOCUMENT_UPLOADED,
+                    "Документ загружен в систему",
+                    "Имя файла: "
+                            + storedFile.getOriginalName()
+                            + "\nРазмер: "
+                            + storedFile.getSizeBytes()
+                            + " байт"
+                            + "\nSHA-256: "
+                            + storedFile.getSha256Checksum()
+                            + "\nНачальный статус: "
+                            + document.getStatus().name()
+            );
 
             return new DocumentUploadResponse(
                     document.getId(),

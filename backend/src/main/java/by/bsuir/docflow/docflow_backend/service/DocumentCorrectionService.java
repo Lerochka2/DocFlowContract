@@ -1,7 +1,7 @@
 package by.bsuir.docflow.docflow_backend.service;
 
-import by.bsuir.docflow.docflow_backend.dto.DocumentDecisionResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -18,11 +18,13 @@ public class DocumentCorrectionService {
     private final DocumentRepository documentRepository;
     private final DocumentLinkRepository documentLinkRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentCorrectionService(
             DocumentRepository documentRepository,
             DocumentLinkRepository documentLinkRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -32,6 +34,9 @@ public class DocumentCorrectionService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -77,8 +82,10 @@ public class DocumentCorrectionService {
                 document.getDocumentType()
                         == DocumentType.CONTRACT
         ) {
+
             targetStatus =
                     DocumentStatus.VERIFIED;
+
         } else {
 
             boolean linkExists =
@@ -104,6 +111,13 @@ public class DocumentCorrectionService {
 
         documentRepository.save(
                 document
+        );
+
+        documentAuditService.recordUserEvent(
+                document,
+                DocumentAuditEventType.RESUBMITTED_FOR_REVIEW,
+                "Документ повторно направлен специалисту на проверку",
+                "Новый статус: " + targetStatus.name()
         );
 
         return targetStatus;

@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.dto.DocumentDecisionResponse;
 import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentDecisionRecord;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentDecision;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -28,12 +29,14 @@ public class DocumentDecisionService {
     private final DocumentDecisionRepository documentDecisionRepository;
     private final AppUserRepository appUserRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentDecisionService(
             DocumentRepository documentRepository,
             DocumentDecisionRepository documentDecisionRepository,
             AppUserRepository appUserRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -46,6 +49,9 @@ public class DocumentDecisionService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -135,6 +141,17 @@ public class DocumentDecisionService {
                         record
                 );
 
+        documentAuditService.recordUserEvent(
+                document,
+                resolveAuditEventType(
+                        request.decision()
+                ),
+                resolveAuditDescription(
+                        request.decision()
+                ),
+                comment
+        );
+
         return new DocumentDecisionResponse(
                 savedRecord.getId(),
                 document.getId(),
@@ -187,6 +204,7 @@ public class DocumentDecisionService {
                 )
                 .toList();
     }
+
     private void validateCurrentStatus(
             Document document
     ) {
@@ -254,6 +272,40 @@ public class DocumentDecisionService {
 
             case REJECT ->
                     DocumentStatus.REJECTED;
+        };
+    }
+
+    private DocumentAuditEventType resolveAuditEventType(
+            DocumentDecision decision
+    ) {
+
+        return switch (decision) {
+
+            case APPROVE ->
+                    DocumentAuditEventType.SPECIALIST_APPROVED;
+
+            case RETURN_FOR_CORRECTION ->
+                    DocumentAuditEventType.RETURNED_FOR_CORRECTION;
+
+            case REJECT ->
+                    DocumentAuditEventType.REJECTED;
+        };
+    }
+
+    private String resolveAuditDescription(
+            DocumentDecision decision
+    ) {
+
+        return switch (decision) {
+
+            case APPROVE ->
+                    "Документ согласован специалистом";
+
+            case RETURN_FOR_CORRECTION ->
+                    "Документ возвращён на доработку";
+
+            case REJECT ->
+                    "Документ отклонён специалистом";
         };
     }
 

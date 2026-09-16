@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.dto.ManualReviewResponse;
 import by.bsuir.docflow.docflow_backend.entity.AiProcessingResult;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -23,13 +24,15 @@ public class DocumentReviewService {
     private final AiProcessingResultRepository aiProcessingResultRepository;
     private final DocumentMetadataExtractionService
             documentMetadataExtractionService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentReviewService(
             DocumentRepository documentRepository,
             DocumentRoutingService documentRoutingService,
             AiProcessingResultRepository aiProcessingResultRepository,
             DocumentMetadataExtractionService
-                    documentMetadataExtractionService
+                    documentMetadataExtractionService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -42,6 +45,9 @@ public class DocumentReviewService {
 
         this.documentMetadataExtractionService =
                 documentMetadataExtractionService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -81,15 +87,30 @@ public class DocumentReviewService {
             );
         }
 
+        AiProcessingResult latestAiResult =
+                getLatestAiResult(
+                        document.getId()
+                );
+
+        DocumentType predictedType =
+                latestAiResult == null
+                        ? null
+                        : latestAiResult.getPredictedType();
+
         DocumentType selectedType =
                 request.documentType();
+
+        boolean classificationConfirmed =
+                predictedType != null
+                        && predictedType == selectedType;
 
         document.setDocumentType(
                 selectedType
         );
 
         enrichMetadataFromLatestAiResult(
-                document
+                document,
+                latestAiResult
         );
 
         if (
@@ -110,6 +131,13 @@ public class DocumentReviewService {
                             document
                     );
 
+            recordClassificationAudit(
+                    document,
+                    predictedType,
+                    selectedType,
+                    classificationConfirmed
+            );
+
             return new ManualReviewResponse(
                     document.getId(),
                     document.getDocumentType().name(),
@@ -127,6 +155,13 @@ public class DocumentReviewService {
                 document
         );
 
+        recordClassificationAudit(
+                document,
+                predictedType,
+                selectedType,
+                classificationConfirmed
+        );
+
         return new ManualReviewResponse(
                 document.getId(),
                 document.getDocumentType().name(),
@@ -136,16 +171,21 @@ public class DocumentReviewService {
         );
     }
 
-    private void enrichMetadataFromLatestAiResult(
-            Document document
+    private AiProcessingResult getLatestAiResult(
+            Long documentId
     ) {
 
-        AiProcessingResult latestResult =
-                aiProcessingResultRepository
-                        .findFirstByDocumentIdOrderByCreatedAtDesc(
-                                document.getId()
-                        )
-                        .orElse(null);
+        return aiProcessingResultRepository
+                .findFirstByDocumentIdOrderByCreatedAtDesc(
+                        documentId
+                )
+                .orElse(null);
+    }
+
+    private void enrichMetadataFromLatestAiResult(
+            Document document,
+            AiProcessingResult latestResult
+    ) {
 
         if (latestResult == null) {
             return;
@@ -166,5 +206,57 @@ public class DocumentReviewService {
                         document,
                         recognizedText
                 );
+    }
+
+    private void recordClassificationAudit(
+            Document document,
+            DocumentType predictedType,
+            DocumentType selectedType,
+            boolean classificationConfirmed
+    ) {
+
+        DocumentAuditEventType eventType =
+                classificationConfirmed
+                        ? DocumentAuditEventType.CLASSIFICATION_CONFIRMED
+                        : DocumentAuditEventType.CLASSIFICATION_CHANGED;
+
+        String description =
+                classificationConfirmed
+                        ? "AI-классификация подтверждена вручную"
+                        : "AI-классификация изменена вручную";
+
+        String details =
+                "Тип, предложенный AI: "
+                        + formatDocumentType(
+                                predictedType
+                        )
+                        + "\nИтоговый тип: "
+                        + formatDocumentType(
+                                selectedType
+                        )
+                        + "\nСтатус документа после проверки: "
+                        + (
+                                document.getStatus() == null
+                                        ? "не указан"
+                                        : document.getStatus().name()
+                        );
+
+        documentAuditService.recordUserEvent(
+                document,
+                eventType,
+                description,
+                details
+        );
+    }
+
+    private String formatDocumentType(
+            DocumentType documentType
+    ) {
+
+        if (documentType == null) {
+            return "не указан";
+        }
+
+        return documentType.name();
     }
 }

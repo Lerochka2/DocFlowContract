@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.dto.DocumentLinkResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentLink;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -21,18 +22,25 @@ public class DocumentLinkService {
     private final DocumentRepository documentRepository;
     private final DocumentLinkRepository documentLinkRepository;
     private final DocumentRoutingService documentRoutingService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentLinkService(
             DocumentRepository documentRepository,
             DocumentLinkRepository documentLinkRepository,
-            DocumentRoutingService documentRoutingService
+            DocumentRoutingService documentRoutingService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
+
         this.documentLinkRepository =
                 documentLinkRepository;
+
         this.documentRoutingService =
                 documentRoutingService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -168,6 +176,15 @@ public class DocumentLinkService {
                         childDocument
                 );
 
+        documentAuditService.recordUserEvent(
+                childDocument,
+                DocumentAuditEventType.DOCUMENT_LINKED,
+                "Документ привязан к основному договору",
+                buildContractDetails(
+                        contractDocument
+                )
+        );
+
         return new DocumentLinkResponse(
                 savedLink.getId(),
                 childDocument.getId(),
@@ -179,6 +196,48 @@ public class DocumentLinkService {
                 route.getRoutingStatus().name(),
                 savedLink.getLinkedAt()
         );
+    }
+
+    private String buildContractDetails(
+            Document contractDocument
+    ) {
+
+        StringBuilder details =
+                new StringBuilder();
+
+        details.append(
+                "Основной договор: "
+        );
+
+        if (
+                contractDocument.getDocumentNumber() != null
+                        && !contractDocument.getDocumentNumber().isBlank()
+        ) {
+            details.append("№ ")
+                    .append(
+                            contractDocument.getDocumentNumber()
+                    );
+        } else {
+            details.append(
+                    "номер не указан"
+            );
+        }
+
+        if (
+                contractDocument.getDocumentDate() != null
+        ) {
+            details.append(" от ")
+                    .append(
+                            contractDocument.getDocumentDate()
+                    );
+        }
+
+        details.append("\nID договора: ")
+                .append(
+                        contractDocument.getId()
+                );
+
+        return details.toString();
     }
 
     private boolean requiresContractLink(
@@ -206,6 +265,7 @@ public class DocumentLinkService {
         }
 
         return status == DocumentStatus.VERIFIED
+                || status == DocumentStatus.APPROVED
                 || status == DocumentStatus.READY_FOR_SED
                 || status == DocumentStatus.SENT_TO_SED;
     }

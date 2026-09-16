@@ -6,6 +6,7 @@ import by.bsuir.docflow.docflow_backend.dto.ai.AiProcessingResponse;
 import by.bsuir.docflow.docflow_backend.entity.AiProcessingResult;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.enums.AiProcessingStatus;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -34,6 +35,7 @@ public class AiProcessingService {
     private final DocumentRoutingService documentRoutingService;
     private final DocumentMetadataExtractionService
             documentMetadataExtractionService;
+    private final DocumentAuditService documentAuditService;
     private final TransactionTemplate requiresNewTransactionTemplate;
 
     public AiProcessingService(
@@ -43,6 +45,7 @@ public class AiProcessingService {
             DocumentRoutingService documentRoutingService,
             DocumentMetadataExtractionService
                     documentMetadataExtractionService,
+            DocumentAuditService documentAuditService,
             PlatformTransactionManager transactionManager
     ) {
         this.documentRepository =
@@ -59,6 +62,9 @@ public class AiProcessingService {
 
         this.documentMetadataExtractionService =
                 documentMetadataExtractionService;
+
+        this.documentAuditService =
+                documentAuditService;
 
         this.requiresNewTransactionTemplate =
                 new TransactionTemplate(
@@ -118,6 +124,10 @@ public class AiProcessingService {
                                 .getFile()
                                 .getStoragePath()
                 );
+
+        recordAnalysisStarted(
+                documentId
+        );
 
         AiAnalyzeResponse aiResponse;
 
@@ -307,6 +317,17 @@ public class AiProcessingService {
                 document
         );
 
+        documentAuditService.recordSystemEvent(
+                document,
+                DocumentAuditEventType.AI_ANALYSIS_COMPLETED,
+                "AI-анализ документа завершён",
+                buildCompletionDetails(
+                        aiResponse,
+                        processingStatus,
+                        document
+                )
+        );
+
         return new AiProcessingResponse(
                 savedResult.getId(),
                 document.getId(),
@@ -321,6 +342,50 @@ public class AiProcessingService {
                 aiResponse.getProbabilities(),
                 aiResponse.getText()
         );
+    }
+
+    private void recordAnalysisStarted(
+            Long documentId
+    ) {
+
+        requiresNewTransactionTemplate
+                .executeWithoutResult(
+                        transactionStatus -> {
+
+                            Document auditDocument =
+                                    documentRepository
+                                            .findById(documentId)
+                                            .orElseThrow(
+                                                    () ->
+                                                            new DocumentNotFoundException(
+                                                                    "Документ с ID "
+                                                                            + documentId
+                                                                            + " не найден"
+                                                            )
+                                            );
+
+                            String fileName =
+                                    auditDocument.getFile() == null
+                                            ? "не указан"
+                                            : auditDocument
+                                                    .getFile()
+                                                    .getOriginalName();
+
+                            documentAuditService
+                                    .recordSystemEvent(
+                                            auditDocument,
+                                            DocumentAuditEventType
+                                                    .AI_ANALYSIS_STARTED,
+                                            "Запущен AI-анализ документа",
+                                            "Файл: "
+                                                    + fileName
+                                                    + "\nСтатус перед анализом: "
+                                                    + auditDocument
+                                                            .getStatus()
+                                                            .name()
+                                    );
+                        }
+                );
     }
 
     private void markProcessingFailed(
@@ -350,8 +415,83 @@ public class AiProcessingService {
                             documentRepository.save(
                                     failedDocument
                             );
+
+                            documentAuditService
+                                    .recordSystemEvent(
+                                            failedDocument,
+                                            DocumentAuditEventType
+                                                    .AI_ANALYSIS_FAILED,
+                                            "AI-анализ документа завершился ошибкой",
+                                            "Статус: "
+                                                    + DocumentStatus
+                                                            .PROCESSING_FAILED
+                                                            .name()
+                                                    + "\nПричина: AI-сервис недоступен или вернул ошибку"
+                                    );
                         }
                 );
+    }
+
+    private String buildCompletionDetails(
+            AiAnalyzeResponse aiResponse,
+            AiProcessingStatus processingStatus,
+            Document document
+    ) {
+
+        return "Предсказанный тип: "
+                + safeValue(
+                        aiResponse.getPredictedType()
+                )
+                + "\nИтоговый тип AI: "
+                + safeValue(
+                        aiResponse.getDocumentType()
+                )
+                + "\nУверенность: "
+                + safeValue(
+                        aiResponse.getConfidence()
+                )
+                + "\nКлассификация принята автоматически: "
+                + Boolean.TRUE.equals(
+                        aiResponse.getClassificationAccepted()
+                )
+                + "\nТребуется ручная проверка: "
+                + Boolean.TRUE.equals(
+                        aiResponse.getReviewRequired()
+                )
+                + "\nТребуется OCR: "
+                + Boolean.TRUE.equals(
+                        aiResponse.getRequiresOcr()
+                )
+                + "\nСтатус обработки: "
+                + processingStatus.name()
+                + "\nВерсия модели: "
+                + safeValue(
+                        aiResponse.getModelVersion()
+                )
+                + "\nСтатус документа после анализа: "
+                + (
+                        document.getStatus() == null
+                                ? "не указан"
+                                : document.getStatus().name()
+                );
+    }
+
+    private String safeValue(
+            Object value
+    ) {
+
+        if (value == null) {
+            return "не указано";
+        }
+
+        String text =
+                value.toString();
+
+        if (text.isBlank()) {
+            return "не указано";
+        }
+
+        return text;
     }
 
     private void validateAnalysisAllowed(

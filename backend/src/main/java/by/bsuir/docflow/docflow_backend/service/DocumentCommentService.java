@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.dto.DocumentCommentResponse;
 import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentComment;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentCommentRepository;
@@ -25,12 +26,14 @@ public class DocumentCommentService {
     private final DocumentCommentRepository documentCommentRepository;
     private final AppUserRepository appUserRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentCommentService(
             DocumentRepository documentRepository,
             DocumentCommentRepository documentCommentRepository,
             AppUserRepository appUserRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -43,6 +46,9 @@ public class DocumentCommentService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +114,13 @@ public class DocumentCommentService {
                 documentCommentRepository.save(
                         entity
                 );
+
+        documentAuditService.recordUserEvent(
+                document,
+                DocumentAuditEventType.COMMENT_ADDED,
+                "Добавлен комментарий к документу",
+                comment
+        );
 
         return toResponse(
                 saved

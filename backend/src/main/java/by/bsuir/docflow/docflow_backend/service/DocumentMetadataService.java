@@ -3,6 +3,7 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataRequest;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
@@ -13,7 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @Service
 public class DocumentMetadataService {
@@ -21,11 +25,13 @@ public class DocumentMetadataService {
     private final DocumentRepository documentRepository;
     private final SedDispatchRepository sedDispatchRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
 
     public DocumentMetadataService(
             DocumentRepository documentRepository,
             SedDispatchRepository sedDispatchRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -35,6 +41,9 @@ public class DocumentMetadataService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -63,10 +72,93 @@ public class DocumentMetadataService {
                 request
         );
 
-        document.setDocumentNumber(
+        String newDocumentNumber =
                 normalizeText(
                         request.documentNumber()
-                )
+                );
+
+        String newCurrency =
+                normalizeCurrency(
+                        request.currency()
+                );
+
+        String newSubject =
+                normalizeText(
+                        request.subject()
+                );
+
+        String newReferencedContractNumber =
+                normalizeText(
+                        request.referencedContractNumber()
+                );
+
+        List<String> changes =
+                new ArrayList<>();
+
+        addChange(
+                changes,
+                "Номер документа",
+                document.getDocumentNumber(),
+                newDocumentNumber
+        );
+
+        addChange(
+                changes,
+                "Дата документа",
+                document.getDocumentDate(),
+                request.documentDate()
+        );
+
+        addAmountChange(
+                changes,
+                document.getAmount(),
+                request.amount()
+        );
+
+        addChange(
+                changes,
+                "Валюта",
+                document.getCurrency(),
+                newCurrency
+        );
+
+        addChange(
+                changes,
+                "Предмет документа",
+                document.getSubject(),
+                newSubject
+        );
+
+        addChange(
+                changes,
+                "Дата начала действия",
+                document.getValidFrom(),
+                request.validFrom()
+        );
+
+        addChange(
+                changes,
+                "Дата окончания действия",
+                document.getValidTo(),
+                request.validTo()
+        );
+
+        addChange(
+                changes,
+                "Номер основного договора",
+                document.getReferencedContractNumber(),
+                newReferencedContractNumber
+        );
+
+        addChange(
+                changes,
+                "Дата основного договора",
+                document.getReferencedContractDate(),
+                request.referencedContractDate()
+        );
+
+        document.setDocumentNumber(
+                newDocumentNumber
         );
 
         document.setDocumentDate(
@@ -78,15 +170,11 @@ public class DocumentMetadataService {
         );
 
         document.setCurrency(
-                normalizeCurrency(
-                        request.currency()
-                )
+                newCurrency
         );
 
         document.setSubject(
-                normalizeText(
-                        request.subject()
-                )
+                newSubject
         );
 
         document.setValidFrom(
@@ -98,9 +186,7 @@ public class DocumentMetadataService {
         );
 
         document.setReferencedContractNumber(
-                normalizeText(
-                        request.referencedContractNumber()
-                )
+                newReferencedContractNumber
         );
 
         document.setReferencedContractDate(
@@ -111,6 +197,19 @@ public class DocumentMetadataService {
                 documentRepository.save(
                         document
                 );
+
+        if (!changes.isEmpty()) {
+
+            documentAuditService.recordUserEvent(
+                    savedDocument,
+                    DocumentAuditEventType.METADATA_UPDATED,
+                    "Изменены реквизиты документа",
+                    String.join(
+                            "\n",
+                            changes
+                    )
+            );
+        }
 
         return toResponse(
                 savedDocument
@@ -178,6 +277,7 @@ public class DocumentMetadataService {
                     "Отклонённый документ нельзя изменять"
             );
         }
+
         if (
                 document.getStatus()
                         == DocumentStatus.READY_FOR_SED
@@ -259,6 +359,94 @@ public class DocumentMetadataService {
                     "Код валюты должен состоять из 3 символов"
             );
         }
+    }
+
+    private void addChange(
+            List<String> changes,
+            String fieldName,
+            Object oldValue,
+            Object newValue
+    ) {
+
+        if (
+                Objects.equals(
+                        oldValue,
+                        newValue
+                )
+        ) {
+            return;
+        }
+
+        changes.add(
+                fieldName
+                        + ": "
+                        + formatValue(oldValue)
+                        + " → "
+                        + formatValue(newValue)
+        );
+    }
+
+    private void addAmountChange(
+            List<String> changes,
+            BigDecimal oldValue,
+            BigDecimal newValue
+    ) {
+
+        boolean equal;
+
+        if (
+                oldValue == null
+                        && newValue == null
+        ) {
+            equal = true;
+
+        } else if (
+                oldValue == null
+                        || newValue == null
+        ) {
+            equal = false;
+
+        } else {
+            equal =
+                    oldValue.compareTo(
+                            newValue
+                    ) == 0;
+        }
+
+        if (equal) {
+            return;
+        }
+
+        changes.add(
+                "Сумма: "
+                        + formatValue(oldValue)
+                        + " → "
+                        + formatValue(newValue)
+        );
+    }
+
+    private String formatValue(
+            Object value
+    ) {
+
+        if (value == null) {
+            return "не указано";
+        }
+
+        if (value instanceof BigDecimal number) {
+
+            return number
+                    .stripTrailingZeros()
+                    .toPlainString();
+        }
+
+        String text =
+                value.toString()
+                        .trim();
+
+        return text.isEmpty()
+                ? "не указано"
+                : text;
     }
 
     private String normalizeText(

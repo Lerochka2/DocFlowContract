@@ -3,6 +3,7 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.SedDispatchResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.SedDispatch;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.SedDispatchStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
@@ -21,15 +22,21 @@ public class SedDispatchService {
 
     private final DocumentRepository documentRepository;
     private final SedDispatchRepository sedDispatchRepository;
+    private final DocumentAuditService documentAuditService;
 
     public SedDispatchService(
             DocumentRepository documentRepository,
-            SedDispatchRepository sedDispatchRepository
+            SedDispatchRepository sedDispatchRepository,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
+
         this.sedDispatchRepository =
                 sedDispatchRepository;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -98,6 +105,18 @@ public class SedDispatchService {
 
         documentRepository.save(
                 document
+        );
+
+        documentAuditService.recordUserEvent(
+                document,
+                DocumentAuditEventType.SENT_TO_SED,
+                "Документ отправлен в корпоративную СЭД",
+                "Внешний ID: "
+                        + externalDocumentId
+                        + "\nСтатус отправки: "
+                        + savedDispatch.getDispatchStatus().name()
+                        + "\nОтвет СЭД: "
+                        + savedDispatch.getResponseMessage()
         );
 
         return toResponse(

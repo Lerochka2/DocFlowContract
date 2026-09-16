@@ -3,6 +3,7 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.SedPreparationResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
@@ -22,12 +23,14 @@ public class SedPreparationService {
     private final DocumentLinkRepository documentLinkRepository;
     private final DocumentRouteRepository documentRouteRepository;
     private final DocumentAccessService documentAccessService;
+    private final DocumentAuditService documentAuditService;
 
     public SedPreparationService(
             DocumentRepository documentRepository,
             DocumentLinkRepository documentLinkRepository,
             DocumentRouteRepository documentRouteRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            DocumentAuditService documentAuditService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -40,6 +43,9 @@ public class SedPreparationService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.documentAuditService =
+                documentAuditService;
     }
 
     @Transactional
@@ -104,6 +110,16 @@ public class SedPreparationService {
                         document
                 );
 
+        documentAuditService.recordUserEvent(
+                savedDocument,
+                DocumentAuditEventType.PREPARED_FOR_SED,
+                "Документ подготовлен к отправке в СЭД",
+                "Маршрут: "
+                        + activeRoute.getRoutingTarget().name()
+                        + "\nСтатус: "
+                        + savedDocument.getStatus().name()
+        );
+
         return new SedPreparationResponse(
                 savedDocument.getId(),
                 savedDocument.getDocumentType().name(),
@@ -129,6 +145,7 @@ public class SedPreparationService {
             );
         }
     }
+
     private void validateMetadata(
             Document document
     ) {
