@@ -1,0 +1,236 @@
+<article class="audit-shell">
+
+  <header class="audit-header">
+
+    <div class="audit-heading">
+
+      <span class="audit-eyebrow">
+        ИСТОРИЯ ДЕЙСТВИЙ
+      </span>
+
+      <h2>
+        Журнал обработки документа
+      </h2>
+
+      <p>
+        Полная последовательность действий пользователей и системы DocFlow.
+      </p>
+
+    </div>
+
+
+    <div class="audit-count">
+
+      <strong>
+        {{ events.length }}
+      </strong>
+
+      <span>
+        событий
+      </span>
+
+    </div>
+
+  </header>
+
+
+  @if (
+    loading
+    &&
+    events.length === 0
+  ) {
+
+    <div class="audit-state">
+      Загружаем историю документа...
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="audit-state error">
+
+      <div>
+
+        <strong>
+          Историю не удалось загрузить
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="retry.emit()"
+      >
+        Повторить
+      </button>
+
+    </div>
+
+  } @else if (
+    events.length === 0
+  ) {
+
+    <div class="audit-state">
+
+      <strong>
+        История пока пуста
+      </strong>
+
+      <span>
+        Действия с документом будут автоматически отображаться здесь.
+      </span>
+
+    </div>
+
+  } @else {
+
+    <div class="audit-timeline">
+
+      @for (
+        item of events;
+        track item.id
+      ) {
+
+        <div class="audit-event">
+
+          <div class="audit-meta">
+
+            <time>
+              {{ formatDateTime(item.createdAt) }}
+            </time>
+
+            <strong>
+              {{ item.actorName }}
+            </strong>
+
+            <span
+              class="actor-type"
+              [class.system]="item.actorType === 'SYSTEM'"
+            >
+              {{ getActorTypeLabel(item) }}
+            </span>
+
+          </div>
+
+
+          <div class="audit-rail">
+
+            <span
+              [class]="
+                'audit-marker ' +
+                getEventTone(item.eventType)
+              "
+            >
+              {{ getEventIcon(item.eventType) }}
+            </span>
+
+          </div>
+
+
+          <section
+            [class]="
+              'audit-event-card ' +
+              getEventTone(item.eventType)
+            "
+          >
+
+            <div class="audit-event-top">
+
+              <span
+                [class]="
+                  'audit-event-badge ' +
+                  getEventTone(item.eventType)
+                "
+              >
+                {{ getEventLabel(item.eventType) }}
+              </span>
+
+            </div>
+
+
+            <p class="audit-description">
+              {{ item.description }}
+            </p>
+
+
+            @if (
+              getPrimaryDetails(item).length > 0
+            ) {
+
+              <div class="audit-details">
+
+                @for (
+                  detail of getPrimaryDetails(item);
+                  track $index
+                ) {
+
+                  <div class="audit-detail">
+
+                    <span>
+                      {{ detail.label }}
+                    </span>
+
+                    <strong>
+                      {{ detail.value }}
+                    </strong>
+
+                  </div>
+
+                }
+
+              </div>
+
+            }
+
+
+            @if (
+              getTechnicalDetails(item).length > 0
+            ) {
+
+              <details class="audit-technical">
+
+                <summary>
+                  Технические данные
+                </summary>
+
+                <div class="audit-technical-list">
+
+                  @for (
+                    detail of getTechnicalDetails(item);
+                    track $index
+                  ) {
+
+                    <div>
+
+                      <span>
+                        {{ detail.label }}
+                      </span>
+
+                      <strong>
+                        {{ detail.value }}
+                      </strong>
+
+                    </div>
+
+                  }
+
+                </div>
+
+              </details>
+
+            }
+
+          </section>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</article>

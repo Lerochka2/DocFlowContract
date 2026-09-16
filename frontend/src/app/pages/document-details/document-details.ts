@@ -30,6 +30,7 @@ import {
 
 import {
   ContractCandidate,
+  DocumentAuditEventResponse,
   DocumentCommentResponse,
   DocumentDecisionCode,
   DocumentDecisionResponse,
@@ -44,11 +45,16 @@ import {
   AuthService
 } from '../../core/auth/auth.service';
 
+import {
+  DocumentAuditTimelineComponent
+} from './document-audit-timeline/document-audit-timeline';
+
 @Component({
   selector: 'app-document-details',
   standalone: true,
   imports: [
-    FormsModule
+    FormsModule,
+    DocumentAuditTimelineComponent
   ],
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'
@@ -98,6 +104,10 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   commentErrorMessage = '';
   commentSuccessMessage = '';
+
+  auditHistory: DocumentAuditEventResponse[] = [];
+  loadingAudit = false;
+  auditErrorMessage = '';
 
   previewLoading = false;
   previewErrorMessage = '';
@@ -199,6 +209,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           this.loadDocumentPreview();
           this.loadDecisionHistory();
           this.loadDocumentComments();
+          this.loadDocumentAudit();
 
           this.changeDetectorRef
             .markForCheck();
@@ -446,6 +457,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.loadDecisionHistory();
           this.loadDocumentComments();
+          this.loadDocumentAudit();
 
           this.changeDetectorRef
             .markForCheck();
@@ -939,6 +951,196 @@ export class DocumentDetails implements OnInit, OnDestroy {
   }
 
 
+  loadDocumentAudit(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.loadingAudit
+    ) {
+      return;
+    }
+
+    this.loadingAudit = true;
+    this.auditErrorMessage = '';
+
+    this.workspaceService
+      .getDocumentAudit(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingAudit = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: history => {
+
+          this.auditHistory =
+            history;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.auditHistory = [];
+
+          this.auditErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось загрузить историю действий.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  getAuditEventLabel(
+    eventType: string
+  ): string {
+
+    switch (eventType) {
+
+      case 'DOCUMENT_UPLOADED':
+        return 'Документ загружен';
+
+      case 'AI_ANALYSIS_STARTED':
+        return 'AI-анализ запущен';
+
+      case 'AI_ANALYSIS_COMPLETED':
+        return 'AI-анализ завершён';
+
+      case 'AI_ANALYSIS_FAILED':
+        return 'Ошибка AI-анализа';
+
+      case 'CLASSIFICATION_CONFIRMED':
+        return 'Классификация подтверждена';
+
+      case 'CLASSIFICATION_CHANGED':
+        return 'Классификация изменена';
+
+      case 'METADATA_UPDATED':
+        return 'Реквизиты изменены';
+
+      case 'DOCUMENT_LINKED':
+        return 'Привязан к договору';
+
+      case 'SPECIALIST_APPROVED':
+        return 'Документ согласован';
+
+      case 'RETURNED_FOR_CORRECTION':
+        return 'Возвращён на доработку';
+
+      case 'REJECTED':
+        return 'Документ отклонён';
+
+      case 'RESUBMITTED_FOR_REVIEW':
+        return 'Повторно направлен на проверку';
+
+      case 'COMMENT_ADDED':
+        return 'Добавлен комментарий';
+
+      case 'PREPARED_FOR_SED':
+        return 'Подготовлен к СЭД';
+
+      case 'SENT_TO_SED':
+        return 'Отправлен в СЭД';
+
+      case 'SED_SEND_FAILED':
+        return 'Ошибка отправки в СЭД';
+
+      case 'DOCUMENT_ARCHIVED':
+        return 'Документ архивирован';
+
+      case 'DOCUMENT_RESTORED':
+        return 'Документ восстановлен';
+
+      default:
+        return eventType;
+    }
+  }
+
+
+  getAuditEventClass(
+    eventType: string
+  ): string {
+
+    switch (eventType) {
+
+      case 'AI_ANALYSIS_STARTED':
+      case 'AI_ANALYSIS_COMPLETED':
+        return 'ai';
+
+      case 'DOCUMENT_LINKED':
+      case 'CLASSIFICATION_CONFIRMED':
+      case 'SPECIALIST_APPROVED':
+      case 'PREPARED_FOR_SED':
+      case 'SENT_TO_SED':
+      case 'DOCUMENT_RESTORED':
+        return 'success';
+
+      case 'RETURNED_FOR_CORRECTION':
+      case 'RESUBMITTED_FOR_REVIEW':
+        return 'warning';
+
+      case 'AI_ANALYSIS_FAILED':
+      case 'REJECTED':
+      case 'SED_SEND_FAILED':
+        return 'danger';
+
+      default:
+        return 'neutral';
+    }
+  }
+
+
+  getAuditDetailsLines(
+    details: string | null
+  ): string[] {
+
+    if (!details) {
+      return [];
+    }
+
+    return details
+      .split(/\r?\n/)
+      .map(
+        line => line.trim()
+      )
+      .filter(
+        line => Boolean(line)
+      );
+  }
+
+
+  getAuditActorLabel(
+    event: DocumentAuditEventResponse
+  ): string {
+
+    if (
+      event.actorType === 'SYSTEM'
+    ) {
+      return event.actorName || 'Система DocFlow';
+    }
+
+    return event.actorName || 'Пользователь';
+  }
+
+
   addComment(): void {
 
     if (
@@ -1004,6 +1206,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.commentSuccessMessage =
             'Комментарий добавлен.';
+
+          this.loadDocumentAudit();
 
           this.changeDetectorRef
             .markForCheck();
@@ -1789,6 +1993,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.metadataSuccessMessage =
             'Реквизиты документа сохранены.';
+
+          this.loadDocumentAudit();
 
           this.changeDetectorRef
             .markForCheck();

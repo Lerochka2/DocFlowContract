@@ -109,6 +109,22 @@ export interface DocumentCommentResponse {
   comment: string;
   createdAt: string;
 }
+
+export type AuditActorType =
+  | 'USER'
+  | 'SYSTEM';
+
+export interface DocumentAuditEventResponse {
+  id: number;
+  documentId: number;
+  eventType: string;
+  actorType: AuditActorType;
+  userId: number | null;
+  actorName: string;
+  description: string;
+  details: string | null;
+  createdAt: string;
+}
 export interface DocumentSummary {
   documentId: number;
   fileId: number | null;
@@ -404,6 +420,15 @@ export class WorkspaceService {
 
     return this.http.get<DocumentCommentResponse[]>(
       `${this.documentsApiUrl}/${documentId}/comments`
+    );
+  }
+
+  getDocumentAudit(
+    documentId: number
+  ): Observable<DocumentAuditEventResponse[]> {
+
+    return this.http.get<DocumentAuditEventResponse[]>(
+      `${this.documentsApiUrl}/${documentId}/audit`
     );
   }
 

@@ -1991,6 +1991,14 @@
 
       </div>
 
+
+      <app-document-audit-timeline
+        [events]="auditHistory"
+        [loading]="loadingAudit"
+        [errorMessage]="auditErrorMessage"
+        (retry)="loadDocumentAudit()"
+      >
+      </app-document-audit-timeline>
     </section>
 
   }
