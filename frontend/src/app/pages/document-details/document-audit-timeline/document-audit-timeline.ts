@@ -54,6 +54,9 @@ export class DocumentAuditTimelineComponent {
       case 'AI_ANALYSIS_FAILED':
         return 'Ошибка AI-анализа';
 
+      case 'RISK_ANALYSIS_COMPLETED':
+        return 'Анализ рисков';
+
       case 'CLASSIFICATION_CONFIRMED':
         return 'Классификация подтверждена';
 
@@ -110,6 +113,7 @@ export class DocumentAuditTimelineComponent {
 
       case 'AI_ANALYSIS_STARTED':
       case 'AI_ANALYSIS_COMPLETED':
+      case 'RISK_ANALYSIS_COMPLETED':
         return 'ai';
 
       case 'CLASSIFICATION_CONFIRMED':
@@ -146,6 +150,7 @@ export class DocumentAuditTimelineComponent {
 
       case 'AI_ANALYSIS_STARTED':
       case 'AI_ANALYSIS_COMPLETED':
+      case 'RISK_ANALYSIS_COMPLETED':
         return 'AI';
 
       case 'CLASSIFICATION_CONFIRMED':
@@ -236,7 +241,8 @@ export class DocumentAuditTimelineComponent {
   ): AuditDetail[] {
 
     return this.parseDetails(
-      event.details
+      event.details,
+      event.eventType
     ).filter(
       detail =>
         !this.isTechnicalDetail(
@@ -251,26 +257,34 @@ export class DocumentAuditTimelineComponent {
   ): AuditDetail[] {
 
     return this.parseDetails(
-      event.details
+      event.details,
+      event.eventType
     ).filter(
       detail =>
         this.isTechnicalDetail(
           detail.label
         )
+        &&
+        detail.label !== 'Анализатор'
     );
   }
 
 
   private parseDetails(
-    details: string | null
+    details: string | null,
+    eventType: string
   ): AuditDetail[] {
 
     if (!details) {
       return [];
     }
 
-    return details
-      .split(/\r?\n/)
+    const detailLines =
+      eventType === 'RISK_ANALYSIS_COMPLETED'
+        ? details.split(/\r?\n|;\s*/)
+        : details.split(/\r?\n/);
+
+    return detailLines
       .map(
         line => line.trim()
       )
@@ -351,6 +365,15 @@ export class DocumentAuditTimelineComponent {
       case 'Статус перед анализом':
         return 'Статус до анализа';
 
+      case 'индекс риска':
+        return 'Индекс риска';
+
+      case 'найдено условий':
+        return 'Найдено условий';
+
+      case 'анализатор':
+        return 'Анализатор';
+
       default:
         return label;
     }
@@ -368,6 +391,21 @@ export class DocumentAuditTimelineComponent {
 
     if (value === 'false') {
       return 'Нет';
+    }
+
+    if (label === 'Уровень риска') {
+
+      switch (value) {
+
+        case 'HIGH':
+          return 'Высокий риск';
+
+        case 'MEDIUM':
+          return 'Средний риск';
+
+        case 'LOW':
+          return 'Низкий риск';
+      }
     }
 
     const documentType =
@@ -520,6 +558,8 @@ export class DocumentAuditTimelineComponent {
 
     return (
       label === 'SHA-256'
+      ||
+      label === 'Анализатор'
       ||
       label === 'Модель'
       ||

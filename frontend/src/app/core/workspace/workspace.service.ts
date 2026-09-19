@@ -131,6 +131,27 @@ export interface DocumentAuditEventResponse {
   details: string | null;
   createdAt: string;
 }
+export interface AiRiskFinding {
+  code: string;
+  title: string;
+  severity: string;
+  weight: number;
+  evidence: string;
+  explanation: string;
+  recommendation: string;
+}
+
+export interface AiRiskAnalysis {
+  analysisId: number;
+  riskLevel: string;
+  riskScore: number;
+  riskCount: number;
+  risks: AiRiskFinding[];
+  summary: string;
+  analyzerVersion: string;
+  analyzedAt: string;
+}
+
 export interface DocumentSummary {
   documentId: number;
   fileId: number | null;
@@ -517,6 +538,25 @@ export class WorkspaceService {
     return this.http.post<DocumentUploadResponse>(
       `${this.documentsApiUrl}/upload`,
       formData
+    );
+  }
+
+  getLatestContractRiskAnalysis(
+    documentId: number
+  ): Observable<AiRiskAnalysis | null> {
+
+    return this.http.get<AiRiskAnalysis | null>(
+      `${this.documentsApiUrl}/${documentId}/risk-analysis`
+    );
+  }
+
+  analyzeContractRisks(
+    documentId: number
+  ): Observable<AiRiskAnalysis> {
+
+    return this.http.post<AiRiskAnalysis>(
+      `${this.documentsApiUrl}/${documentId}/risk-analysis`,
+      null
     );
   }
 

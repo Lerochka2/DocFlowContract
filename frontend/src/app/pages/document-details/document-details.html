@@ -831,6 +831,18 @@
       </div>
 
 
+      @if (
+        document.documentType === 'CONTRACT'
+      ) {
+
+        <app-contract-risk-analysis
+          [documentId]="document.documentId"
+        >
+        </app-contract-risk-analysis>
+
+      }
+
+
       <article class="panel preview-panel">
 
         <div class="preview-heading">

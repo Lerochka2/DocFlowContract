@@ -1,0 +1,273 @@
+<article class="risk-card">
+
+  <div class="risk-heading">
+
+    <div>
+
+      <span class="risk-eyebrow">
+        ИНТЕЛЛЕКТУАЛЬНАЯ ПРОВЕРКА
+      </span>
+
+      <h2>
+        AI-анализ рисков договора
+      </h2>
+
+      <p>
+        Проверка текста договора на потенциально рискованные условия.
+      </p>
+
+    </div>
+
+    <span class="risk-ai-badge">
+      AI
+    </span>
+
+  </div>
+
+
+  @if (!result) {
+
+    <div class="risk-start">
+
+      <div class="risk-start-icon">
+        ✦
+      </div>
+
+      <div class="risk-start-content">
+
+        <strong>
+          Анализ ещё не выполнен
+        </strong>
+
+        <span>
+          Система проверит текст договора и выделит условия,
+          требующие дополнительного внимания.
+        </span>
+
+      </div>
+
+      <button
+        type="button"
+        class="risk-button"
+        [disabled]="loading"
+        (click)="analyze()"
+      >
+        @if (loading) {
+          Выполняется анализ...
+        } @else {
+          Провести анализ
+        }
+      </button>
+
+    </div>
+
+  }
+
+
+  @if (errorMessage) {
+
+    <div class="risk-error">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  @if (result) {
+
+    <div
+      class="risk-overview"
+      [class.low]="riskLevelClass === 'low'"
+      [class.medium]="riskLevelClass === 'medium'"
+      [class.high]="riskLevelClass === 'high'"
+    >
+
+      <div class="risk-level">
+
+        <span>
+          Общий уровень
+        </span>
+
+        <strong>
+          {{ riskLevelLabel }}
+        </strong>
+
+      </div>
+
+      <div class="risk-score">
+
+        <span>
+          Индекс риска
+        </span>
+
+        <strong>
+          {{ result.riskScore }}/100
+        </strong>
+
+      </div>
+
+      <div class="risk-count">
+
+        <span>
+          Найдено условий
+        </span>
+
+        <strong>
+          {{ result.riskCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    @if (result.risks.length > 0) {
+
+      <p class="risk-summary">
+        {{ result.summary }}
+      </p>
+
+    }
+
+
+    @if (result.risks.length === 0) {
+
+      <div class="risk-empty">
+
+        <div class="risk-empty-icon">
+          ✓
+        </div>
+
+        <div>
+
+          <strong>
+            Существенные рискованные условия не обнаружены
+          </strong>
+
+          <span>
+            По текущему набору правил договор не содержит
+            явно выраженных условий повышенного риска.
+          </span>
+
+        </div>
+
+      </div>
+
+    } @else {
+
+      <div class="risk-findings">
+
+        @for (risk of result.risks; track risk.code) {
+
+          <section
+            class="risk-finding"
+            [class.finding-high]="risk.severity === 'HIGH'"
+            [class.finding-medium]="risk.severity === 'MEDIUM'"
+            [class.finding-low]="risk.severity === 'LOW'"
+          >
+
+            <div class="risk-finding-heading">
+
+              <div>
+
+                <span class="risk-severity">
+                  {{ getSeverityLabel(risk) }}
+                </span>
+
+                <h3>
+                  {{ risk.title }}
+                </h3>
+
+              </div>
+
+              <span class="risk-weight">
+                +{{ risk.weight }}
+              </span>
+
+            </div>
+
+
+            <div class="risk-evidence">
+
+              <span>
+                Фрагмент договора
+              </span>
+
+              <p>
+                «{{ risk.evidence }}»
+              </p>
+
+            </div>
+
+
+            <div class="risk-description">
+
+              <div>
+
+                <span>
+                  Почему стоит проверить
+                </span>
+
+                <p>
+                  {{ risk.explanation }}
+                </p>
+
+              </div>
+
+              <div>
+
+                <span>
+                  Рекомендация
+                </span>
+
+                <p>
+                  {{ risk.recommendation }}
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        }
+
+      </div>
+
+    }
+
+
+    <div class="risk-footer">
+
+      <div class="risk-footer-info">
+
+        <strong class="risk-analyzed-at">
+          Последний анализ:
+          {{ formatAnalyzedAt(result.analyzedAt) }}
+        </strong>
+
+        <span>
+          Результат носит справочный характер
+          и требует проверки специалистом.
+        </span>
+
+      </div>
+
+      <button
+        type="button"
+        class="risk-button secondary"
+        [disabled]="loading"
+        (click)="analyze()"
+      >
+        @if (loading) {
+          Выполняется...
+        } @else {
+          Повторить анализ
+        }
+      </button>
+
+    </div>
+
+  }
+
+</article>

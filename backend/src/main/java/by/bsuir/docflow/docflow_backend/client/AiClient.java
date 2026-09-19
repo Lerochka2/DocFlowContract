@@ -1,6 +1,7 @@
 package by.bsuir.docflow.docflow_backend.client;
 
 import by.bsuir.docflow.docflow_backend.dto.ai.AiAnalyzeResponse;
+import by.bsuir.docflow.docflow_backend.dto.ai.AiRiskAnalysisResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
@@ -13,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 
 @Component
 public class AiClient {
@@ -119,38 +121,11 @@ public class AiClient {
                 )
                 .build();
 
-        HttpResponse<String> response;
-
-        try {
-            response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers
-                            .ofString()
-            );
-        } catch (IOException exception) {
-            throw new IllegalStateException(
-                    "Ошибка соединения с AI-сервисом",
-                    exception
-            );
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-
-            throw new IllegalStateException(
-                    "Запрос к AI-сервису был прерван",
-                    exception
-            );
-        }
-
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
-
-            throw new IllegalStateException(
-                    "AI-сервис вернул HTTP "
-                            + response.statusCode()
-                            + ": "
-                            + response.body()
-            );
-        }
+        HttpResponse<String> response =
+                send(
+                        request,
+                        "AI-анализа документа"
+                );
 
         try {
             return jsonMapper.readValue(
@@ -163,5 +138,126 @@ public class AiClient {
                     exception
             );
         }
+    }
+
+    public AiRiskAnalysisResponse analyzeRisks(
+            String text
+    ) {
+
+        if (
+                text == null
+                        || text.isBlank()
+        ) {
+            throw new IllegalArgumentException(
+                    "Текст договора для анализа рисков отсутствует"
+            );
+        }
+
+        String requestBody;
+
+        try {
+            requestBody =
+                    jsonMapper.writeValueAsString(
+                            Map.of(
+                                    "text",
+                                    text
+                            )
+                    );
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Не удалось сформировать запрос анализа рисков",
+                    exception
+            );
+        }
+
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(
+                        URI.create(
+                                aiBaseUrl
+                                        + "/analyze-risks-text"
+                        )
+                )
+                .version(HttpClient.Version.HTTP_1_1)
+                .timeout(
+                        Duration.ofSeconds(60)
+                )
+                .header(
+                        "Content-Type",
+                        "application/json; charset=UTF-8"
+                )
+                .header(
+                        "Accept",
+                        "application/json"
+                )
+                .POST(
+                        HttpRequest.BodyPublishers
+                                .ofString(
+                                        requestBody
+                                )
+                )
+                .build();
+
+        HttpResponse<String> response =
+                send(
+                        request,
+                        "AI-анализа рисков"
+                );
+
+        try {
+            return jsonMapper.readValue(
+                    response.body(),
+                    AiRiskAnalysisResponse.class
+            );
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Не удалось разобрать результат анализа рисков",
+                    exception
+            );
+        }
+    }
+
+    private HttpResponse<String> send(
+            HttpRequest request,
+            String operation
+    ) {
+
+        HttpResponse<String> response;
+
+        try {
+            response = httpClient.send(
+                    request,
+                    HttpResponse.BodyHandlers
+                            .ofString()
+            );
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Ошибка соединения с AI-сервисом при выполнении "
+                            + operation,
+                    exception
+            );
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+
+            throw new IllegalStateException(
+                    "Запрос к AI-сервису был прерван при выполнении "
+                            + operation,
+                    exception
+            );
+        }
+
+        if (
+                response.statusCode() < 200
+                        || response.statusCode() >= 300
+        ) {
+            throw new IllegalStateException(
+                    "AI-сервис вернул HTTP "
+                            + response.statusCode()
+                            + ": "
+                            + response.body()
+            );
+        }
+
+        return response;
     }
 }

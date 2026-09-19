@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
+from app.services.contract_risk_analyzer import ContractRiskAnalyzer
 from app.services.document_classifier import DocumentClassifier
 from app.services.pdf_text_extractor import PdfTextExtractor
 
@@ -10,12 +11,20 @@ CONFIDENCE_THRESHOLD = 0.80
 
 pdf_text_extractor = PdfTextExtractor()
 document_classifier = DocumentClassifier()
+contract_risk_analyzer = ContractRiskAnalyzer()
 
 
 class ClassificationRequest(BaseModel):
     text: str = Field(
         min_length=1,
         description="Распознанный текст документа",
+    )
+
+
+class RiskAnalysisRequest(BaseModel):
+    text: str = Field(
+        min_length=1,
+        description="Распознанный текст договора",
     )
 
 
@@ -76,6 +85,30 @@ def classify_text(
         ) from exception
 
     return format_classification_result(result)
+
+
+@app.post("/analyze-risks-text")
+def analyze_risks_text(
+    request: RiskAnalysisRequest
+) -> dict:
+    try:
+        result = contract_risk_analyzer.analyze(
+            request.text
+        )
+    except ValueError as exception:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exception),
+        ) from exception
+
+    return {
+        "riskLevel": result["risk_level"],
+        "riskScore": result["risk_score"],
+        "riskCount": result["risk_count"],
+        "risks": result["risks"],
+        "summary": result["summary"],
+        "analyzerVersion": result["analyzer_version"],
+    }
 
 
 @app.post("/analyze")

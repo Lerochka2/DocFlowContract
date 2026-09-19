@@ -53,13 +53,18 @@ import {
   ContractExpirationCardComponent
 } from './contract-expiration-card/contract-expiration-card';
 
+import {
+  ContractRiskAnalysisComponent
+} from './contract-risk-analysis/contract-risk-analysis';
+
 @Component({
   selector: 'app-document-details',
   standalone: true,
   imports: [
     FormsModule,
     DocumentAuditTimelineComponent,
-    ContractExpirationCardComponent
+    ContractExpirationCardComponent,
+    ContractRiskAnalysisComponent
   ],
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'

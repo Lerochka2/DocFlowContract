@@ -177,6 +177,21 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Contract risk analysis.
+                         * Object-level access is checked in service layer.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/risk-analysis"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
                          * Manual AI review
                          */
                         .requestMatchers(
@@ -238,6 +253,7 @@ public class SecurityConfig {
                                 "ADMIN",
                                 "DOCUMENT_OPERATOR"
                         )
+
                         /*
                          * Specialist decision:
                          * approve / return for correction / reject.
@@ -252,6 +268,7 @@ public class SecurityConfig {
                                 "LAWYER",
                                 "CONTRACT_MANAGER"
                         )
+
                         /*
                          * Document comments.
                          * Object-level access is checked in service layer.
