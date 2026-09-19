@@ -50,7 +50,9 @@ export class Dashboard implements OnInit {
     readyForSed: 0,
     sentToSed: 0,
     processingFailed: 0,
-    sedError: 0
+    sedError: 0,
+    expiringSoonContracts: 0,
+    expiredContracts: 0
   };
 
   documents: WorkspaceDocument[] = [];

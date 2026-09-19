@@ -29,6 +29,8 @@ export interface WorkspaceDashboard {
   sentToSed: number;
   processingFailed: number;
   sedError: number;
+  expiringSoonContracts: number;
+  expiredContracts: number;
 }
 
 export interface WorkspaceDocument {

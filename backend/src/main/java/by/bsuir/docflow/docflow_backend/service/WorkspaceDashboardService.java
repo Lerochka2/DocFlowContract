@@ -2,6 +2,7 @@ package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.dto.WorkspaceDashboardResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.ContractExpirationStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
@@ -14,16 +15,21 @@ public class WorkspaceDashboardService {
 
     private final DocumentRepository documentRepository;
     private final DocumentAccessService documentAccessService;
+    private final ContractExpirationService contractExpirationService;
 
     public WorkspaceDashboardService(
             DocumentRepository documentRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            ContractExpirationService contractExpirationService
     ) {
         this.documentRepository =
                 documentRepository;
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.contractExpirationService =
+                contractExpirationService;
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +92,16 @@ public class WorkspaceDashboardService {
                 countByStatus(
                         documents,
                         DocumentStatus.SED_ERROR
+                ),
+
+                countByExpirationStatus(
+                        documents,
+                        ContractExpirationStatus.EXPIRING_SOON
+                ),
+
+                countByExpirationStatus(
+                        documents,
+                        ContractExpirationStatus.EXPIRED
                 )
         );
     }
@@ -100,6 +116,23 @@ public class WorkspaceDashboardService {
                 .filter(
                         document ->
                                 document.getStatus()
+                                        == status
+                )
+                .count();
+    }
+
+    private long countByExpirationStatus(
+            List<Document> documents,
+            ContractExpirationStatus status
+    ) {
+
+        return documents
+                .stream()
+                .filter(
+                        document ->
+                                contractExpirationService
+                                        .calculate(document)
+                                        .status()
                                         == status
                 )
                 .count();

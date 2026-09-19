@@ -11,6 +11,8 @@ public record WorkspaceDashboardResponse(
         long readyForSed,
         long sentToSed,
         long processingFailed,
-        long sedError
+        long sedError,
+        long expiringSoonContracts,
+        long expiredContracts
 ) {
 }

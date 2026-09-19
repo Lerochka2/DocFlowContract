@@ -318,6 +318,89 @@
     </section>
 
 
+    <section class="contract-control panel">
+
+      <div class="contract-control-heading">
+
+        <div>
+          <h2>
+            Контроль сроков договоров
+          </h2>
+
+          <p>
+            Автоматический контроль даты окончания действия договоров
+          </p>
+        </div>
+
+        <span class="contract-control-label">
+          Актуально на сегодня
+        </span>
+
+      </div>
+
+
+      <div class="contract-control-grid">
+
+        <div
+          class="contract-control-item expiring"
+          [class.has-items]="dashboard.expiringSoonContracts > 0"
+        >
+
+          <div class="contract-control-icon">
+            ◷
+          </div>
+
+          <div class="contract-control-info">
+
+            <span>
+              Скоро истекают
+            </span>
+
+            <strong>
+              {{ dashboard.expiringSoonContracts }}
+            </strong>
+
+            <small>
+              срок завершится в ближайшие 30 дней
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="contract-control-item expired"
+          [class.has-items]="dashboard.expiredContracts > 0"
+        >
+
+          <div class="contract-control-icon">
+            !
+          </div>
+
+          <div class="contract-control-info">
+
+            <span>
+              Срок истёк
+            </span>
+
+            <strong>
+              {{ dashboard.expiredContracts }}
+            </strong>
+
+            <small>
+              договоров с истёкшей датой действия
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
     <section class="analytics-grid">
 
       <article class="panel classification-panel">
