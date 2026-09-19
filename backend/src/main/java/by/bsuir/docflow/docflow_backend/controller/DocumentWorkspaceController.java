@@ -31,12 +31,16 @@ public class DocumentWorkspaceController {
             String type,
 
             @RequestParam(required = false)
-            String status
+            String status,
+
+            @RequestParam(required = false)
+            String expirationStatus
     ) {
         return documentWorkspaceService.search(
                 query,
                 type,
-                status
+                status,
+                expirationStatus
         );
     }
 }

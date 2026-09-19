@@ -49,12 +49,17 @@ import {
   DocumentAuditTimelineComponent
 } from './document-audit-timeline/document-audit-timeline';
 
+import {
+  ContractExpirationCardComponent
+} from './contract-expiration-card/contract-expiration-card';
+
 @Component({
   selector: 'app-document-details',
   standalone: true,
   imports: [
     FormsModule,
-    DocumentAuditTimelineComponent
+    DocumentAuditTimelineComponent,
+    ContractExpirationCardComponent
   ],
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'
@@ -1994,7 +1999,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           this.metadataSuccessMessage =
             'Реквизиты документа сохранены.';
 
-          this.loadDocumentAudit();
+          this.refreshDocumentSummary();
 
           this.changeDetectorRef
             .markForCheck();

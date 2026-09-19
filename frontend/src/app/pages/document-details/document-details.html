@@ -568,6 +568,20 @@
 
             </div>
 
+
+            @if (
+              document.documentType === 'CONTRACT'
+            ) {
+
+              <app-contract-expiration-card
+                [status]="document.expirationStatus"
+                [daysUntilExpiration]="document.daysUntilExpiration"
+                [validTo]="document.validTo"
+              >
+              </app-contract-expiration-card>
+
+            }
+
           }
 
         </article>

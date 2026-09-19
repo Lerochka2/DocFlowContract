@@ -19,6 +19,9 @@ public record DocumentSummaryResponse(
         LocalDate validFrom,
         LocalDate validTo,
 
+        String expirationStatus,
+        Long daysUntilExpiration,
+
         AiSummary ai,
         RoutingSummary routing,
         LinkSummary link,

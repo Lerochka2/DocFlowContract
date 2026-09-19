@@ -2,6 +2,7 @@ package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.dto.DocumentWorkspaceItemResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.enums.ContractExpirationStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
@@ -19,23 +20,29 @@ public class DocumentWorkspaceService {
 
     private final DocumentRepository documentRepository;
     private final DocumentAccessService documentAccessService;
+    private final ContractExpirationService contractExpirationService;
 
     public DocumentWorkspaceService(
             DocumentRepository documentRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            ContractExpirationService contractExpirationService
     ) {
         this.documentRepository =
                 documentRepository;
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.contractExpirationService =
+                contractExpirationService;
     }
 
     @Transactional(readOnly = true)
     public List<DocumentWorkspaceItemResponse> search(
             String query,
             String type,
-            String status
+            String status,
+            String expirationStatus
     ) {
 
         DocumentType documentType =
@@ -46,6 +53,11 @@ public class DocumentWorkspaceService {
         DocumentStatus documentStatus =
                 parseDocumentStatus(
                         status
+                );
+
+        ContractExpirationStatus parsedExpirationStatus =
+                parseExpirationStatus(
+                        expirationStatus
                 );
 
         String normalizedQuery =
@@ -72,6 +84,14 @@ public class DocumentWorkspaceService {
                                 documentStatus == null
                                         || document.getStatus()
                                         == documentStatus
+                )
+                .filter(
+                        document ->
+                                parsedExpirationStatus == null
+                                        || contractExpirationService
+                                                .calculate(document)
+                                                .status()
+                                        == parsedExpirationStatus
                 )
                 .filter(
                         document ->
@@ -229,9 +249,48 @@ public class DocumentWorkspaceService {
         }
     }
 
+    private ContractExpirationStatus parseExpirationStatus(
+            String value
+    ) {
+
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
+            return null;
+        }
+
+        try {
+
+            return ContractExpirationStatus.valueOf(
+                    value
+                            .trim()
+                            .toUpperCase(
+                                    Locale.ROOT
+                            )
+            );
+
+        } catch (
+                IllegalArgumentException exception
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Неизвестный статус срока действия: "
+                            + value
+            );
+        }
+    }
+
     private DocumentWorkspaceItemResponse toResponse(
             Document document
     ) {
+
+        ContractExpirationService.ExpirationInfo expirationInfo =
+                contractExpirationService
+                        .calculate(
+                                document
+                        );
 
         return new DocumentWorkspaceItemResponse(
                 document.getId(),
@@ -260,6 +319,13 @@ public class DocumentWorkspaceService {
                 document.getSubject(),
                 document.getAmount(),
                 document.getCurrency(),
+
+                expirationInfo.status() == null
+                        ? null
+                        : expirationInfo.status().name(),
+
+                expirationInfo.daysUntilExpiration(),
+
                 document.getCreatedAt(),
                 document.getUpdatedAt()
         );

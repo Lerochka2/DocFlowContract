@@ -97,9 +97,10 @@
 .filters {
   display: grid;
   grid-template-columns:
-    minmax(280px, 1.6fr)
-    minmax(220px, 0.8fr)
-    minmax(210px, 0.8fr)
+    minmax(260px, 1.5fr)
+    minmax(190px, 0.8fr)
+    minmax(190px, 0.8fr)
+    minmax(180px, 0.75fr)
     auto
     auto;
   gap: 11px;
@@ -551,4 +552,47 @@
     100px
     110px
     130px;
+}
+
+/* Contract expiration in documents list */
+
+.document-type-cell {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expiration-mini {
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 7px;
+  color: #687386;
+  background: #f0f2f5;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.expiration-mini.active {
+  color: #34745b;
+  background: #eaf7f1;
+}
+
+.expiration-mini.expiring {
+  color: #876521;
+  background: #fff3d7;
+}
+
+.expiration-mini.expired {
+  color: #9f4c57;
+  background: #ffedef;
+}
+
+.expiration-mini.unspecified {
+  color: #707988;
+  background: #eef0f3;
 }

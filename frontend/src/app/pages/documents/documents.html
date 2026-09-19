@@ -183,6 +183,33 @@
         </option>
 
       </select>
+<select
+        name="expirationStatus"
+        [(ngModel)]="selectedExpirationStatus"
+        title="Фильтр по сроку действия договоров"
+      >
+
+        <option value="">
+          Все сроки договоров
+        </option>
+
+        <option value="ACTIVE">
+          Действующие
+        </option>
+
+        <option value="EXPIRING_SOON">
+          Скоро истекают
+        </option>
+
+        <option value="EXPIRED">
+          Истёкшие
+        </option>
+
+        <option value="NOT_SPECIFIED">
+          Срок не указан
+        </option>
+
+      </select>
 
 
       <button
@@ -381,9 +408,32 @@
               </div>
 
 
-              <span class="document-type">
-                {{ getDocumentTypeLabel(document.documentType) }}
-              </span>
+              <div class="document-type-cell">
+
+                <span class="document-type">
+                  {{ getDocumentTypeLabel(document.documentType) }}
+                </span>
+
+                @if (
+                  document.documentType === 'CONTRACT'
+                  &&
+                  document.expirationStatus
+                ) {
+
+                  <span
+                    [class]="
+                      'expiration-mini ' +
+                      getExpirationClass(
+                        document.expirationStatus
+                      )
+                    "
+                  >
+                    {{ getExpirationLabel(document) }}
+                  </span>
+
+                }
+
+              </div>
 
 
               <span

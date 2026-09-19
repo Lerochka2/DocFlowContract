@@ -67,6 +67,7 @@ export class Documents implements OnInit {
   query = '';
   selectedType = '';
   selectedStatus = '';
+  selectedExpirationStatus = '';
 
   loading = true;
   uploading = false;
@@ -125,7 +126,8 @@ export class Documents implements OnInit {
       .getDocuments(
         this.query,
         this.selectedType,
-        this.selectedStatus
+        this.selectedStatus,
+        this.selectedExpirationStatus
       )
       .subscribe({
 
@@ -171,6 +173,7 @@ export class Documents implements OnInit {
     this.query = '';
     this.selectedType = '';
     this.selectedStatus = '';
+    this.selectedExpirationStatus = '';
 
     this.loadDocuments();
   }
@@ -817,6 +820,133 @@ export class Documents implements OnInit {
         return 'Не определён';
     }
   }
+
+  getExpirationLabel(
+    document: WorkspaceDocument
+  ): string {
+
+    if (
+      document.documentType !== 'CONTRACT'
+    ) {
+      return '';
+    }
+
+    const days =
+      document.daysUntilExpiration;
+
+    switch (
+      document.expirationStatus
+    ) {
+
+      case 'ACTIVE':
+
+        if (
+          days === null
+          ||
+          days === undefined
+        ) {
+          return 'Действует';
+        }
+
+        return `Действует · ${days} ${this.getDaysWord(days)}`;
+
+      case 'EXPIRING_SOON':
+
+        if (days === 0) {
+          return 'Истекает сегодня';
+        }
+
+        if (
+          days === null
+          ||
+          days === undefined
+        ) {
+          return 'Скоро истекает';
+        }
+
+        return `Истекает · ${days} ${this.getDaysWord(days)}`;
+
+      case 'EXPIRED':
+
+        if (
+          days === null
+          ||
+          days === undefined
+        ) {
+          return 'Срок истёк';
+        }
+
+        const daysAgo =
+          Math.abs(days);
+
+        return `Истёк · ${daysAgo} ${this.getDaysWord(daysAgo)} назад`;
+
+      case 'NOT_SPECIFIED':
+        return 'Срок не указан';
+
+      default:
+        return '';
+    }
+  }
+
+
+  getExpirationClass(
+    status: string | null
+  ): string {
+
+    switch (status) {
+
+      case 'ACTIVE':
+        return 'active';
+
+      case 'EXPIRING_SOON':
+        return 'expiring';
+
+      case 'EXPIRED':
+        return 'expired';
+
+      default:
+        return 'unspecified';
+    }
+  }
+
+
+  private getDaysWord(
+    value: number
+  ): string {
+
+    const absolute =
+      Math.abs(value);
+
+    const lastTwo =
+      absolute % 100;
+
+    const last =
+      absolute % 10;
+
+    if (
+      lastTwo >= 11
+      &&
+      lastTwo <= 14
+    ) {
+      return 'дней';
+    }
+
+    if (last === 1) {
+      return 'день';
+    }
+
+    if (
+      last >= 2
+      &&
+      last <= 4
+    ) {
+      return 'дня';
+    }
+
+    return 'дней';
+  }
+
 
   getStatusLabel(
     status: string | null

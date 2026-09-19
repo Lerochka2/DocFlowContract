@@ -42,6 +42,10 @@ export interface WorkspaceDocument {
   subject: string | null;
   amount: number | null;
   currency: string | null;
+
+  expirationStatus: string | null;
+  daysUntilExpiration: number | null;
+
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -139,6 +143,9 @@ export interface DocumentSummary {
   subject: string | null;
   validFrom: string | null;
   validTo: string | null;
+
+  expirationStatus: string | null;
+  daysUntilExpiration: number | null;
 
   ai: DocumentAiSummary | null;
   routing: DocumentRoutingSummary | null;
@@ -282,7 +289,8 @@ export class WorkspaceService {
   getDocuments(
     query?: string,
     type?: string,
-    status?: string
+    status?: string,
+    expirationStatus?: string
   ): Observable<WorkspaceDocument[]> {
 
     let params =
@@ -309,6 +317,14 @@ export class WorkspaceService {
       params = params.set(
         'status',
         status.trim()
+      );
+    }
+
+    if (expirationStatus?.trim()) {
+
+      params = params.set(
+        'expirationStatus',
+        expirationStatus.trim()
       );
     }
 

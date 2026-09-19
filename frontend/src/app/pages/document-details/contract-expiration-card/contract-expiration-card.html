@@ -1,0 +1,37 @@
+<section
+  [class]="
+    'expiration-card ' +
+    statusClass
+  "
+>
+
+  <div class="expiration-header">
+
+    <span class="expiration-label">
+      СРОК ДЕЙСТВИЯ ДОГОВОРА
+    </span>
+
+    <span class="expiration-status">
+      {{ statusLabel }}
+    </span>
+
+  </div>
+
+
+  <div class="expiration-content">
+
+    <strong>
+      {{ message }}
+    </strong>
+
+    @if (validTo) {
+
+      <span class="expiration-date">
+        до {{ formatDate(validTo) }}
+      </span>
+
+    }
+
+  </div>
+
+</section>

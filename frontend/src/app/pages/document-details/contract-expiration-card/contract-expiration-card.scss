@@ -1,0 +1,103 @@
+:host {
+  display: block;
+}
+
+.expiration-card {
+  padding: 15px 17px;
+  border: 1px solid #dfe5e3;
+  border-left: 4px solid #73ad93;
+  border-radius: 12px;
+  background: #f8fbfa;
+}
+
+.expiration-header,
+.expiration-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.expiration-label {
+  color: #7d8a88;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.expiration-status {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #37745b;
+  background: #e5f4ed;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.expiration-content {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(95, 130, 115, 0.13);
+}
+
+.expiration-content strong {
+  color: #526760;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.expiration-date {
+  flex: 0 0 auto;
+  color: #40584f;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.expiration-card.expiring {
+  border-color: #eedcae;
+  border-left-color: #d4a844;
+  background: #fffbf2;
+}
+
+.expiration-card.expiring .expiration-status {
+  color: #82621f;
+  background: #fff0c8;
+}
+
+.expiration-card.expired {
+  border-color: #efd5d8;
+  border-left-color: #cf6c77;
+  background: #fff8f9;
+}
+
+.expiration-card.expired .expiration-status {
+  color: #9b4751;
+  background: #fde7ea;
+}
+
+.expiration-card.unspecified {
+  border-color: #e2e5ea;
+  border-left-color: #a6aebb;
+  background: #fafbfc;
+}
+
+.expiration-card.unspecified .expiration-status {
+  color: #6d7685;
+  background: #eef0f3;
+}
+
+@media (max-width: 620px) {
+
+  .expiration-header,
+  .expiration-content {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .expiration-date {
+    flex: initial;
+  }
+}

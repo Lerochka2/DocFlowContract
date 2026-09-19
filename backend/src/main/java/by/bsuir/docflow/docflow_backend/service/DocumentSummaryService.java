@@ -26,6 +26,7 @@ public class DocumentSummaryService {
     private final DocumentLinkRepository documentLinkRepository;
     private final SedDispatchRepository sedDispatchRepository;
     private final DocumentAccessService documentAccessService;
+    private final ContractExpirationService contractExpirationService;
 
     public DocumentSummaryService(
             DocumentRepository documentRepository,
@@ -33,7 +34,8 @@ public class DocumentSummaryService {
             DocumentRouteRepository documentRouteRepository,
             DocumentLinkRepository documentLinkRepository,
             SedDispatchRepository sedDispatchRepository,
-            DocumentAccessService documentAccessService
+            DocumentAccessService documentAccessService,
+            ContractExpirationService contractExpirationService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -52,6 +54,9 @@ public class DocumentSummaryService {
 
         this.documentAccessService =
                 documentAccessService;
+
+        this.contractExpirationService =
+                contractExpirationService;
     }
 
     @Transactional(readOnly = true)
@@ -131,6 +136,12 @@ public class DocumentSummaryService {
                         )
                         .count();
 
+        ContractExpirationService.ExpirationInfo expirationInfo =
+                contractExpirationService
+                        .calculate(
+                                document
+                        );
+
         return new DocumentSummaryResponse(
                 document.getId(),
 
@@ -157,6 +168,12 @@ public class DocumentSummaryService {
                 document.getSubject(),
                 document.getValidFrom(),
                 document.getValidTo(),
+
+                expirationInfo.status() == null
+                        ? null
+                        : expirationInfo.status().name(),
+
+                expirationInfo.daysUntilExpiration(),
 
                 toAiSummary(
                         latestAi

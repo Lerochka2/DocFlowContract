@@ -15,6 +15,10 @@ public record DocumentWorkspaceItemResponse(
         String subject,
         BigDecimal amount,
         String currency,
+
+        String expirationStatus,
+        Long daysUntilExpiration,
+
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
