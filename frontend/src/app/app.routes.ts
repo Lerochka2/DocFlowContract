@@ -7,6 +7,10 @@ import {
 } from './layout/app-shell';
 
 import {
+  Home
+} from './pages/home/home';
+
+import {
   Dashboard
 } from './pages/dashboard/dashboard';
 
@@ -66,6 +70,10 @@ export const routes: Routes = [
       authGuard
     ],
     children: [
+      {
+        path: 'home',
+        component: Home
+      },
       {
         path: 'dashboard',
         component: Dashboard
@@ -150,12 +158,12 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard'
+        redirectTo: 'home'
       }
     ]
   },
   {
     path: '**',
-    redirectTo: 'dashboard'
+    redirectTo: 'home'
   }
 ];

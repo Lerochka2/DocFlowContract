@@ -1,0 +1,703 @@
+<section class="home">
+
+  @if (loading) {
+
+    <section class="home-state">
+
+      <div class="state-loader"></div>
+
+      <div>
+        <strong>
+          Загружаем рабочее пространство
+        </strong>
+
+        <span>
+          Подготавливаем актуальные данные DocFlow...
+        </span>
+      </div>
+
+    </section>
+
+  } @else if (errorMessage) {
+
+    <section class="home-state error">
+
+      <div class="state-icon">
+        !
+      </div>
+
+      <div>
+
+        <strong>
+          Не удалось загрузить главную страницу
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+        <button
+          type="button"
+          (click)="loadHome()"
+        >
+          Повторить
+        </button>
+
+      </div>
+
+    </section>
+
+  } @else {
+
+    <!-- GREETING -->
+
+    <section class="welcome-card">
+
+      <div class="welcome-grid"></div>
+
+      <div class="welcome-copy">
+
+        <div class="welcome-meta">
+
+          <span class="role-pill">
+            {{ roleLabel }}
+          </span>
+
+          <span class="today">
+            {{ todayLabel }}
+          </span>
+
+        </div>
+
+        <h1>
+          Добро пожаловать,
+          {{ greetingName }}!
+        </h1>
+
+        <p>
+          Здесь собраны документы, задачи и события,
+          которые требуют вашего внимания сегодня.
+        </p>
+
+      </div>
+
+
+      <div class="welcome-ai">
+
+        <div class="ai-orbit orbit-one"></div>
+        <div class="ai-orbit orbit-two"></div>
+
+        <div class="ai-core">
+          AI
+        </div>
+
+        <div class="ai-caption">
+          <span>✦</span>
+
+          <div>
+            <strong>
+              DocFlow AI
+            </strong>
+
+            <small>
+              Анализирует документы и помогает
+              управлять процессом обработки
+            </small>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- QUICK ACTIONS -->
+
+    <section class="section-block">
+
+      <div class="section-heading">
+
+        <div>
+          <span class="section-eyebrow">
+            БЫСТРЫЙ ДОСТУП
+          </span>
+
+          <h2>
+            Что хотите сделать?
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="quick-actions">
+
+        @if (
+          isAdmin
+          ||
+          isOperator
+        ) {
+
+          <a
+            class="quick-action primary"
+            routerLink="/documents"
+          >
+
+            <span class="quick-icon">
+              ↑
+            </span>
+
+            <div>
+              <strong>
+                Загрузить документ
+              </strong>
+
+              <span>
+                Добавить договор или дополнительное соглашение
+              </span>
+            </div>
+
+            <b>→</b>
+
+          </a>
+
+        }
+
+
+        @if (
+          isAdmin
+          ||
+          isOperator
+        ) {
+
+          <a
+            class="quick-action"
+            routerLink="/ai-analysis"
+          >
+
+            <span class="quick-icon ai">
+              AI
+            </span>
+
+            <div>
+              <strong>
+                AI-анализ
+              </strong>
+
+              <span>
+                Просмотреть результаты интеллектуальной обработки
+              </span>
+            </div>
+
+            <b>→</b>
+
+          </a>
+
+        }
+
+
+        @if (
+          isAdmin
+          ||
+          isOperator
+        ) {
+
+          <a
+            class="quick-action"
+            routerLink="/review"
+          >
+
+            <span class="quick-icon review">
+              ✓
+            </span>
+
+            <div>
+              <strong>
+                Ручная проверка
+              </strong>
+
+              <span>
+                Проверить документы с низкой уверенностью AI
+              </span>
+            </div>
+
+            <b>→</b>
+
+          </a>
+
+        }
+
+
+        @if (
+          isAdmin
+          ||
+          isSpecialist
+        ) {
+
+          <a
+            class="quick-action"
+            routerLink="/routing"
+          >
+
+            <span class="quick-icon routing">
+              ⇢
+            </span>
+
+            <div>
+              <strong>
+                @if (isSpecialist) {
+                  Мои задачи
+                } @else {
+                  Маршрутизация
+                }
+              </strong>
+
+              <span>
+                @if (isSpecialist) {
+                  Открыть документы, назначенные вашей роли
+                } @else {
+                  Просмотреть распределение документов
+                }
+              </span>
+            </div>
+
+            <b>→</b>
+
+          </a>
+
+        }
+
+
+        <a
+          class="quick-action"
+          routerLink="/dashboard"
+        >
+
+          <span class="quick-icon analytics">
+            ▦
+          </span>
+
+          <div>
+            <strong>
+              Аналитика
+            </strong>
+
+            <span>
+              Перейти к статистике и показателям DocFlow
+            </span>
+          </div>
+
+          <b>→</b>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ATTENTION -->
+
+    <section class="section-block">
+
+      <div class="section-heading">
+
+        <div>
+          <span class="section-eyebrow">
+            АКТУАЛЬНО СЕЙЧАС
+          </span>
+
+          <h2>
+            Требует внимания
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="attention-grid">
+
+        <article
+          class="attention-card"
+          [class.active]="attentionCount > 0"
+        >
+
+          <div class="attention-icon tasks">
+            !
+          </div>
+
+          <div>
+
+            <span>
+              @if (isSpecialist) {
+                Документы в работе
+              } @else {
+                Требуют действий
+              }
+            </span>
+
+            <strong>
+              {{ attentionCount }}
+            </strong>
+
+            <small>
+              @if (isSpecialist) {
+                ожидают вашей обработки
+              } @else {
+                проверки, привязки или исправления
+              }
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article
+          class="attention-card"
+          [class.active]="unreadNotifications > 0"
+        >
+
+          <div class="attention-icon notifications">
+            ◉
+          </div>
+
+          <div>
+
+            <span>
+              Новые уведомления
+            </span>
+
+            <strong>
+              {{ unreadNotifications }}
+            </strong>
+
+            <small>
+              непрочитанных событий
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article
+          class="attention-card"
+          [class.active]="dashboard.expiringSoonContracts > 0"
+        >
+
+          <div class="attention-icon expiring">
+            ◷
+          </div>
+
+          <div>
+
+            <span>
+              Скоро истекают
+            </span>
+
+            <strong>
+              {{ dashboard.expiringSoonContracts }}
+            </strong>
+
+            <small>
+              договоров в ближайшие 30 дней
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article
+          class="attention-card danger"
+          [class.active]="dashboard.expiredContracts > 0"
+        >
+
+          <div class="attention-icon expired">
+            !
+          </div>
+
+          <div>
+
+            <span>
+              Срок действия истёк
+            </span>
+
+            <strong>
+              {{ dashboard.expiredContracts }}
+            </strong>
+
+            <small>
+              договоров требуют контроля
+            </small>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- MAIN CONTENT -->
+
+    <section class="home-grid">
+
+      <!-- RECENT DOCUMENTS -->
+
+      <article class="home-panel recent-panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <span class="section-eyebrow">
+              ПОСЛЕДНЯЯ АКТИВНОСТЬ
+            </span>
+
+            <h2>
+              Последние документы
+            </h2>
+
+          </div>
+
+          <a
+            routerLink="/documents"
+            class="panel-link"
+          >
+            Все документы →
+          </a>
+
+        </div>
+
+
+        <div class="recent-list">
+
+          @for (
+            document of recentDocuments;
+            track document.documentId
+          ) {
+
+            <button
+              class="recent-document"
+              type="button"
+              (click)="openDocument(document.documentId)"
+            >
+
+              <span class="document-icon">
+                PDF
+              </span>
+
+
+              <span class="document-main">
+
+                <strong>
+                  {{ getDocumentTitle(document) }}
+                </strong>
+
+                <span>
+                  {{ document.originalName || 'Документ' }}
+                </span>
+
+              </span>
+
+
+              <span class="document-type">
+                {{
+                  getDocumentTypeLabel(
+                    document.documentType
+                  )
+                }}
+              </span>
+
+
+              <span
+                [class]="
+                  'document-status ' +
+                  getStatusClass(
+                    document.status
+                  )
+                "
+              >
+                {{
+                  getStatusLabel(
+                    document.status
+                  )
+                }}
+              </span>
+
+
+              <span class="document-arrow">
+                →
+              </span>
+
+            </button>
+
+          } @empty {
+
+            <div class="empty-list">
+
+              <span class="empty-icon">
+                ▤
+              </span>
+
+              <div>
+
+                <strong>
+                  Документов пока нет
+                </strong>
+
+                <span>
+                  После загрузки они появятся здесь.
+                </span>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      </article>
+
+
+      <!-- AI CARD -->
+
+      <aside class="home-panel ai-panel">
+
+        <div class="ai-panel-head">
+
+          <span class="ai-panel-icon">
+            ✦
+          </span>
+
+          <div>
+
+            <span class="section-eyebrow">
+              DOCFLOW AI
+            </span>
+
+            <h2>
+              Интеллектуальная обработка
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <p class="ai-description">
+          AI помогает автоматически определить тип документа,
+          извлечь реквизиты и подготовить его к дальнейшему
+          маршруту.
+        </p>
+
+
+        <div class="ai-feature-list">
+
+          <div class="ai-feature">
+
+            <span>01</span>
+
+            <div>
+              <strong>
+                Классификация
+              </strong>
+
+              <small>
+                Определение типа документа
+              </small>
+            </div>
+
+          </div>
+
+
+          <div class="ai-feature">
+
+            <span>02</span>
+
+            <div>
+              <strong>
+                Извлечение данных
+              </strong>
+
+              <small>
+                Номер, дата, сумма и реквизиты
+              </small>
+            </div>
+
+          </div>
+
+
+          <div class="ai-feature">
+
+            <span>03</span>
+
+            <div>
+              <strong>
+                Анализ рисков
+              </strong>
+
+              <small>
+                Выявление потенциально опасных условий
+              </small>
+            </div>
+
+          </div>
+
+
+          <div class="ai-feature">
+
+            <span>04</span>
+
+            <div>
+              <strong>
+                Маршрутизация
+              </strong>
+
+              <small>
+                Направление документа нужному специалисту
+              </small>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        @if (
+          isAdmin
+          ||
+          isOperator
+        ) {
+
+          <a
+            class="ai-panel-action"
+            routerLink="/ai-analysis"
+          >
+            Открыть AI-анализ
+            <span>→</span>
+          </a>
+
+        } @else {
+
+          <a
+            class="ai-panel-action"
+            routerLink="/routing"
+          >
+            Открыть мои задачи
+            <span>→</span>
+          </a>
+
+        }
+
+      </aside>
+
+    </section>
+
+  }
+
+</section>

@@ -84,7 +84,7 @@ export class Login {
           const returnUrl =
             this.route.snapshot.queryParamMap.get(
               'returnUrl'
-            ) ?? '/dashboard';
+            ) ?? '/home';
 
           void this.router.navigateByUrl(
             returnUrl
