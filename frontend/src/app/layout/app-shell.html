@@ -559,19 +559,36 @@
                   </strong>
 
                   <span>
-                    Актуальные задачи DocFlow
+                    События и действия в DocFlow
                   </span>
 
                 </div>
 
 
-                <button
-                  type="button"
-                  [disabled]="notificationsLoading"
-                  (click)="loadNotifications()"
-                >
-                  ↻
-                </button>
+                <div class="notifications-header-actions">
+
+                  <button
+                    type="button"
+                    title="Отметить все как прочитанные"
+                    [disabled]="
+                      notificationsLoading
+                      || notificationCount === 0
+                    "
+                    (click)="markAllNotificationsAsRead()"
+                  >
+                    ✓
+                  </button>
+
+                  <button
+                    type="button"
+                    title="Обновить уведомления"
+                    [disabled]="notificationsLoading"
+                    (click)="loadNotifications()"
+                  >
+                    ↻
+                  </button>
+
+                </div>
 
               </div>
 
@@ -589,7 +606,7 @@
                     </strong>
 
                     <span>
-                      Проверяем текущее состояние документов...
+                      Загружаем последние события...
                     </span>
 
                   </div>
@@ -633,7 +650,7 @@
                     </strong>
 
                     <span>
-                      Сейчас нет документов, требующих вашего внимания.
+                      Новых событий пока нет.
                     </span>
 
                   </div>
@@ -651,6 +668,7 @@
 
                     <button
                       class="notification-item"
+                      [class.unread]="!notification.read"
                       type="button"
                       (click)="openNotification(notification)"
                     >
@@ -658,29 +676,16 @@
                       <span
                         [class]="
                           'notification-icon ' +
-                          notification.type
+                          getNotificationVisualType(
+                            notification.type
+                          )
                         "
                       >
-
-                        @switch (notification.type) {
-
-                          @case ('review') {
-                            ✓
-                          }
-
-                          @case ('link') {
-                            ⛓
-                          }
-
-                          @case ('sed') {
-                            S
-                          }
-
-                          @default {
-                            !
-                          }
-                        }
-
+                        {{
+                          getNotificationIcon(
+                            notification.type
+                          )
+                        }}
                       </span>
 
 
@@ -692,9 +697,14 @@
                             {{ notification.title }}
                           </strong>
 
-                          <b>
-                            {{ notification.count }}
-                          </b>
+                          @if (!notification.read) {
+
+                            <i
+                              class="notification-unread-dot"
+                              title="Непрочитанное"
+                            ></i>
+
+                          }
 
                         </span>
 
@@ -702,8 +712,16 @@
                           {{ notification.message }}
                         </span>
 
+                        <span class="notification-meta">
+                          {{
+                            formatNotificationDate(
+                              notification.createdAt
+                            )
+                          }}
+                        </span>
+
                         <span class="notification-action">
-                          {{ notification.actionLabel }}
+                          {{ notification.actionLabel || 'Открыть' }}
                           →
                         </span>
 
@@ -719,7 +737,7 @@
                 <div class="notifications-footer">
 
                   <span>
-                    Всего требует внимания
+                    Непрочитанных
                   </span>
 
                   <strong>

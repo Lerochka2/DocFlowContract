@@ -25,6 +25,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   finalize,
+  forkJoin,
   of,
   switchMap,
   takeUntil
@@ -40,24 +41,14 @@ import {
 } from '../core/settings/ui-preferences.service';
 
 import {
-  WorkspaceDashboard,
   WorkspaceDocument,
   WorkspaceService
 } from '../core/workspace/workspace.service';
 
-interface SystemNotification {
-  id: string;
-  title: string;
-  message: string;
-  count: number;
-  type:
-    | 'review'
-    | 'link'
-    | 'sed'
-    | 'error';
-  route: string;
-  actionLabel: string;
-}
+import {
+  NotificationService,
+  UserNotification
+} from '../core/notifications/notification.service';
 
 @Component({
   selector: 'app-shell',
@@ -93,11 +84,13 @@ export class AppShell
   searchErrorMessage = '';
 
   notifications:
-    SystemNotification[] = [];
+    UserNotification[] = [];
 
   notificationsOpen = false;
   notificationsLoading = false;
   notificationsErrorMessage = '';
+
+  private notificationUnreadCount = 0;
 
   private readonly searchSubject =
     new Subject<string>();
@@ -111,6 +104,9 @@ export class AppShell
 
     private readonly workspaceService:
       WorkspaceService,
+
+    private readonly notificationService:
+      NotificationService,
 
     private readonly router:
       Router,
@@ -309,8 +305,15 @@ export class AppShell
     this.notificationsLoading = true;
     this.notificationsErrorMessage = '';
 
-    this.workspaceService
-      .getDashboard()
+    forkJoin({
+      notifications:
+        this.notificationService
+          .getNotifications(),
+
+      unread:
+        this.notificationService
+          .getUnreadCount()
+    })
       .pipe(
         finalize(
           () => {
@@ -324,12 +327,13 @@ export class AppShell
       )
       .subscribe({
 
-        next: dashboard => {
+        next: result => {
 
           this.notifications =
-            this.buildNotifications(
-              dashboard
-            );
+            result.notifications;
+
+          this.notificationUnreadCount =
+            result.unread.unreadCount;
 
           this.changeDetectorRef
             .markForCheck();
@@ -338,7 +342,7 @@ export class AppShell
         error: () => {
 
           this.notificationsErrorMessage =
-            'Не удалось обновить уведомления.';
+            'Не удалось загрузить уведомления.';
 
           this.changeDetectorRef
             .markForCheck();
@@ -347,30 +351,112 @@ export class AppShell
   }
 
   openNotification(
-    notification: SystemNotification
+    notification: UserNotification
   ): void {
 
     this.notificationsOpen = false;
 
-    void this.router.navigate(
-      [
-        notification.route
-      ]
-    );
+    if (!notification.read) {
+
+      this.notificationService
+        .markAsRead(
+          notification.id
+        )
+        .subscribe({
+
+          next: updatedNotification => {
+
+            this.notifications =
+              this.notifications.map(
+                item =>
+                  item.id
+                  === updatedNotification.id
+                    ? updatedNotification
+                    : item
+              );
+
+            this.notificationUnreadCount =
+              Math.max(
+                0,
+                this.notificationUnreadCount - 1
+              );
+
+            this.changeDetectorRef
+              .markForCheck();
+          },
+
+          error: () => {
+
+            this.loadNotifications();
+          }
+        });
+    }
+
+    const route =
+      notification.route?.trim();
+
+    if (route) {
+
+      void this.router.navigateByUrl(
+        route
+      );
+
+      return;
+    }
+
+    if (notification.documentId) {
+
+      void this.router.navigate(
+        [
+          '/documents',
+          notification.documentId
+        ]
+      );
+    }
+  }
+
+  markAllNotificationsAsRead(): void {
+
+    if (
+      this.notificationUnreadCount === 0
+    ) {
+      return;
+    }
+
+    this.notificationService
+      .markAllAsRead()
+      .subscribe({
+
+        next: () => {
+
+          this.notifications =
+            this.notifications.map(
+              notification => ({
+                ...notification,
+                read: true
+              })
+            );
+
+          this.notificationUnreadCount = 0;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: () => {
+
+          this.notificationsErrorMessage =
+            'Не удалось отметить уведомления прочитанными.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
   }
 
   get notificationCount(): number {
 
-    return this.notifications
-      .reduce(
-        (
-          total,
-          notification
-        ) =>
-          total
-          + notification.count,
-        0
-      );
+    return this.notificationUnreadCount;
   }
 
   get notificationBadge(): string {
@@ -472,6 +558,104 @@ export class AppShell
       default:
         return 'neutral';
     }
+  }
+
+  getNotificationVisualType(
+    type: string
+  ): 'review' | 'link' | 'sed' | 'error' {
+
+    switch (type) {
+
+      case 'DOCUMENT_ASSIGNED':
+      case 'LINK_REQUIRED':
+        return 'link';
+
+      case 'DOCUMENT_APPROVED':
+      case 'READY_FOR_SED':
+        return 'sed';
+
+      case 'DOCUMENT_RETURNED':
+      case 'AI_REVIEW_REQUIRED':
+      case 'CONTRACT_EXPIRING':
+        return 'review';
+
+      case 'DOCUMENT_REJECTED':
+      case 'CONTRACT_EXPIRED':
+      case 'SED_ERROR':
+      case 'PROCESSING_ERROR':
+      default:
+        return 'error';
+    }
+  }
+
+  getNotificationIcon(
+    type: string
+  ): string {
+
+    switch (type) {
+
+      case 'DOCUMENT_ASSIGNED':
+        return '→';
+
+      case 'DOCUMENT_APPROVED':
+        return '✓';
+
+      case 'DOCUMENT_RETURNED':
+        return '↩';
+
+      case 'DOCUMENT_REJECTED':
+        return '!';
+
+      case 'AI_REVIEW_REQUIRED':
+        return 'AI';
+
+      case 'LINK_REQUIRED':
+        return '⛓';
+
+      case 'CONTRACT_EXPIRING':
+        return '⌛';
+
+      case 'CONTRACT_EXPIRED':
+        return '!';
+
+      case 'READY_FOR_SED':
+        return 'S';
+
+      case 'SED_ERROR':
+      case 'PROCESSING_ERROR':
+      default:
+        return '!';
+    }
+  }
+
+  formatNotificationDate(
+    createdAt: string
+  ): string {
+
+    if (!createdAt) {
+      return '';
+    }
+
+    const date =
+      new Date(createdAt);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return createdAt;
+    }
+
+    return new Intl.DateTimeFormat(
+      'ru-RU',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+    ).format(date);
   }
 
   logout(): void {
@@ -699,125 +883,5 @@ export class AppShell
           );
         }
       });
-  }
-
-  private buildNotifications(
-    dashboard: WorkspaceDashboard
-  ): SystemNotification[] {
-
-    const notifications:
-      SystemNotification[] = [];
-
-    if (this.isSpecialist()) {
-
-      const taskCount =
-        dashboard.linked
-        +
-        dashboard.verified;
-
-      if (taskCount > 0) {
-
-        notifications.push({
-          id: 'assigned-tasks',
-          title: 'Документы требуют обработки',
-          message:
-            'Есть назначенные вам документы, которые необходимо проверить и подготовить к отправке.',
-          count:
-            taskCount,
-          type: 'link',
-          route: '/routing',
-          actionLabel: 'Открыть мои задачи'
-        });
-      }
-
-      return notifications;
-    }
-
-    if (
-      dashboard.reviewRequired > 0
-    ) {
-
-      notifications.push({
-        id: 'review-required',
-        title: 'Требуется ручная проверка',
-        message:
-          'AI не смог автоматически подтвердить классификацию.',
-        count:
-          dashboard.reviewRequired,
-        type: 'review',
-        route: '/review',
-        actionLabel: 'Перейти к проверке'
-      });
-    }
-
-    if (
-      dashboard.linkRequired > 0
-    ) {
-
-      notifications.push({
-        id: 'link-required',
-        title: 'Нужна привязка к договору',
-        message:
-          'Есть документы, для которых необходимо выбрать основной договор.',
-        count:
-          dashboard.linkRequired,
-        type: 'link',
-        route: '/documents',
-        actionLabel: 'Открыть документы'
-      });
-    }
-
-    if (
-      dashboard.readyForSed > 0
-    ) {
-
-      notifications.push({
-        id: 'ready-for-sed',
-        title: 'Готовы к отправке в СЭД',
-        message:
-          'Документы прошли проверки и ожидают регистрации в корпоративной СЭД.',
-        count:
-          dashboard.readyForSed,
-        type: 'sed',
-        route: '/sed',
-        actionLabel: 'Перейти в СЭД'
-      });
-    }
-
-    if (
-      dashboard.processingFailed > 0
-    ) {
-
-      notifications.push({
-        id: 'processing-failed',
-        title: 'Ошибка обработки',
-        message:
-          'Некоторые документы не удалось обработать автоматически.',
-        count:
-          dashboard.processingFailed,
-        type: 'error',
-        route: '/documents',
-        actionLabel: 'Проверить документы'
-      });
-    }
-
-    if (
-      dashboard.sedError > 0
-    ) {
-
-      notifications.push({
-        id: 'sed-error',
-        title: 'Ошибка отправки в СЭД',
-        message:
-          'Есть документы с ошибкой регистрации во внешней СЭД.',
-        count:
-          dashboard.sedError,
-        type: 'error',
-        route: '/sed',
-        actionLabel: 'Открыть СЭД'
-      });
-    }
-
-    return notifications;
   }
 }

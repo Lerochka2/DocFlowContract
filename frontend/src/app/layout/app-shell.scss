@@ -1059,3 +1059,41 @@
     margin-top: 8px;
   }
 }
+.notifications-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.notification-item.unread {
+  background: #f7f9ff;
+  box-shadow:
+    inset 3px 0 0 #6c7fd2;
+}
+
+.notification-item.unread:hover {
+  background: #f2f5ff;
+}
+
+.notification-item.unread
+.notification-title strong {
+  color: #344259;
+  font-weight: 750;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #6178c9;
+}
+
+.notification-meta {
+  display: block;
+  margin-top: 5px;
+  color: #a0a8b4;
+  font-size: 11px;
+  line-height: 1.3;
+}

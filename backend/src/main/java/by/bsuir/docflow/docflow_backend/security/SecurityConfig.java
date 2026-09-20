@@ -311,6 +311,20 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Notifications
+                         */
+                        .requestMatchers(
+                                "/api/notifications",
+                                "/api/notifications/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
                          * Read-only document APIs.
                          * Object-level filtering/access is checked
                          * in service layer.

@@ -8,6 +8,7 @@ import by.bsuir.docflow.docflow_backend.entity.DocumentDecisionRecord;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentDecision;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
+import by.bsuir.docflow.docflow_backend.entity.enums.NotificationType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentDecisionRepository;
@@ -30,13 +31,15 @@ public class DocumentDecisionService {
     private final AppUserRepository appUserRepository;
     private final DocumentAccessService documentAccessService;
     private final DocumentAuditService documentAuditService;
+    private final NotificationService notificationService;
 
     public DocumentDecisionService(
             DocumentRepository documentRepository,
             DocumentDecisionRepository documentDecisionRepository,
             AppUserRepository appUserRepository,
             DocumentAccessService documentAccessService,
-            DocumentAuditService documentAuditService
+            DocumentAuditService documentAuditService,
+            NotificationService notificationService
     ) {
         this.documentRepository =
                 documentRepository;
@@ -52,6 +55,9 @@ public class DocumentDecisionService {
 
         this.documentAuditService =
                 documentAuditService;
+
+        this.notificationService =
+                notificationService;
     }
 
     @Transactional
@@ -152,6 +158,12 @@ public class DocumentDecisionService {
                 comment
         );
 
+        createDecisionNotification(
+                document,
+                savedRecord,
+                comment
+        );
+
         return new DocumentDecisionResponse(
                 savedRecord.getId(),
                 document.getId(),
@@ -205,6 +217,173 @@ public class DocumentDecisionService {
                 .toList();
     }
 
+    private void createDecisionNotification(
+            Document document,
+            DocumentDecisionRecord record,
+            String comment
+    ) {
+
+        AppUser recipient =
+                document.getCreatedBy();
+
+        if (recipient == null) {
+            return;
+        }
+
+        NotificationType notificationType =
+                resolveNotificationType(
+                        record.getDecision()
+                );
+
+        String title =
+                resolveNotificationTitle(
+                        record.getDecision()
+                );
+
+        String message =
+            truncateNotificationMessage(
+                    buildNotificationMessage(
+                            document,
+                            record.getDecision(),
+                            comment
+                    )
+            );
+
+        notificationService.createNotification(
+                recipient,
+                document,
+                notificationType,
+                title,
+                message,
+                "/documents/" + document.getId(),
+                "Открыть документ",
+                "DOCUMENT_DECISION:"
+                        + record.getId()
+        );
+    }
+
+    private NotificationType resolveNotificationType(
+            DocumentDecision decision
+    ) {
+
+        return switch (decision) {
+
+            case APPROVE ->
+                    NotificationType.DOCUMENT_APPROVED;
+
+            case RETURN_FOR_CORRECTION ->
+                    NotificationType.DOCUMENT_RETURNED;
+
+            case REJECT ->
+                    NotificationType.DOCUMENT_REJECTED;
+        };
+    }
+
+    private String resolveNotificationTitle(
+            DocumentDecision decision
+    ) {
+
+        return switch (decision) {
+
+            case APPROVE ->
+                    "Документ согласован";
+
+            case RETURN_FOR_CORRECTION ->
+                    "Документ возвращён на доработку";
+
+            case REJECT ->
+                    "Документ отклонён";
+        };
+    }
+
+    private String buildNotificationMessage(
+            Document document,
+            DocumentDecision decision,
+            String comment
+    ) {
+
+        String documentLabel =
+                buildDocumentLabel(
+                        document
+                );
+
+        String message =
+                switch (decision) {
+
+                    case APPROVE ->
+                            "Специалист согласовал документ: " + documentLabel + ".";
+
+                    case RETURN_FOR_CORRECTION ->
+                            "Специалист вернул документ на доработку: " + documentLabel + ".";
+
+                    case REJECT ->
+                            "Специалист отклонил документ: " + documentLabel + ".";
+                };
+
+        if (
+                comment != null
+                        && !comment.isBlank()
+        ) {
+            message += " Комментарий: "
+                    + comment;
+        }
+
+        return message;
+    }
+
+    private String buildDocumentLabel(
+            Document document
+    ) {
+
+        String typeLabel =
+                switch (
+                        document.getDocumentType()
+                ) {
+
+                    case CONTRACT ->
+                            "Договор";
+
+                    case AMENDMENT_CHANGE,
+                         AMENDMENT_PROLONGATION ->
+                            "Дополнительное соглашение";
+
+                    case APPENDIX ->
+                            "Приложение";
+                };
+
+        if (
+                document.getDocumentNumber()
+                        != null
+                        && !document
+                        .getDocumentNumber()
+                        .isBlank()
+        ) {
+            return typeLabel
+                    + " №"
+                    + document
+                    .getDocumentNumber()
+                    .trim();
+        }
+
+        return typeLabel;
+    }
+
+    private String truncateNotificationMessage(String message) {
+
+        final int maxLength = 1000;
+
+        if (
+                message == null
+                || message.length() <= maxLength
+        ) {
+            return message;
+        }
+
+        return message.substring(
+                0,
+                maxLength - 1
+        ) + "…";
+    }
     private void validateCurrentStatus(
             Document document
     ) {

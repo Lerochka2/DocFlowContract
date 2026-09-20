@@ -1,26 +1,40 @@
 package by.bsuir.docflow.docflow_backend.service;
 
+import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
+import by.bsuir.docflow.docflow_backend.entity.enums.NotificationType;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingTarget;
+import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DocumentRoutingService {
 
     private final DocumentRouteRepository documentRouteRepository;
+    private final AppUserRepository appUserRepository;
+    private final NotificationService notificationService;
 
     public DocumentRoutingService(
-            DocumentRouteRepository documentRouteRepository
+            DocumentRouteRepository documentRouteRepository,
+            AppUserRepository appUserRepository,
+            NotificationService notificationService
     ) {
         this.documentRouteRepository =
                 documentRouteRepository;
+
+        this.appUserRepository =
+                appUserRepository;
+
+        this.notificationService =
+                notificationService;
     }
 
     @Transactional
@@ -103,9 +117,102 @@ public class DocumentRoutingService {
                 routingReason
         );
 
-        return documentRouteRepository.save(
-                newRoute
+        DocumentRoute savedRoute =
+                documentRouteRepository.save(
+                        newRoute
+                );
+
+        createAssignmentNotifications(
+                document,
+                savedRoute
         );
+
+        return savedRoute;
+    }
+
+    private void createAssignmentNotifications(
+            Document document,
+            DocumentRoute route
+    ) {
+
+        if (
+                route.getRoutingTarget()
+                == null
+        ) {
+            return;
+        }
+
+        String roleCode =
+                route.getRoutingTarget().name();
+
+        List<AppUser> recipients =
+                appUserRepository
+                        .findByRoleCodeAndEnabledTrue(
+                                roleCode
+                        );
+
+        String documentLabel =
+                buildDocumentLabel(
+                        document
+                );
+
+        for (AppUser recipient : recipients) {
+
+            String dedupKey =
+                    "DOCUMENT_ASSIGNED:"
+                            + route.getId();
+
+            notificationService
+                    .createNotification(
+                            recipient,
+                            document,
+                            NotificationType.DOCUMENT_ASSIGNED,
+                            "Новый документ назначен вам",
+                            "Вам назначен документ: " + documentLabel + ".",
+                            "/documents/"
+                                    + document.getId(),
+                            "Открыть документ",
+                            dedupKey
+                    );
+        }
+    }
+
+    private String buildDocumentLabel(
+            Document document
+    ) {
+
+        String typeLabel =
+                switch (
+                        document.getDocumentType()
+                ) {
+                    case CONTRACT ->
+                            "Договор";
+
+                    case AMENDMENT_CHANGE ->
+                            "Дополнительное соглашение";
+
+                    case AMENDMENT_PROLONGATION ->
+                            "Дополнительное соглашение";
+
+                    case APPENDIX ->
+                            "Приложение";
+                };
+
+        if (
+                document.getDocumentNumber()
+                        != null
+                && !document
+                .getDocumentNumber()
+                .isBlank()
+        ) {
+            return typeLabel
+                    + " №"
+                    + document
+                    .getDocumentNumber()
+                    .trim();
+        }
+
+        return typeLabel;
     }
 
     private RoutingTarget determineTarget(
