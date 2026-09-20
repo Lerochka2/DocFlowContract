@@ -90,6 +90,39 @@
           {{ getStatusLabel(document.status) }}
         </span>
 
+        @if (canArchiveDocument) {
+
+          <button
+            class="archive-document-button"
+            type="button"
+            [disabled]="archivingDocument"
+            (click)="archiveDocument()"
+          >
+            @if (archivingDocument) {
+              Архивируем...
+            } @else {
+              В архив
+            }
+          </button>
+
+        }
+
+        @if (canRestoreDocument) {
+
+          <button
+            class="restore-document-button"
+            type="button"
+            [disabled]="restoringDocument"
+            (click)="restoreDocument()"
+          >
+            @if (restoringDocument) {
+              Восстанавливаем...
+            } @else {
+              Восстановить
+            }
+          </button>
+
+        }
         @if (canDeleteByRole) {
 
           <button
@@ -148,6 +181,22 @@
 
     }
 
+
+    @if (archiveSuccessMessage) {
+
+      <div class="metadata-message success">
+        {{ archiveSuccessMessage }}
+      </div>
+
+    }
+
+    @if (archiveErrorMessage) {
+
+      <div class="metadata-message error">
+        {{ archiveErrorMessage }}
+      </div>
+
+    }
 
     @if (metadataSuccessMessage) {
 

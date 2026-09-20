@@ -216,6 +216,18 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Archive completed document / restore from archive
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/archive",
+                                "/api/documents/*/restore"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+                        /*
                          * Delete unfinished document
                          */
                         .requestMatchers(

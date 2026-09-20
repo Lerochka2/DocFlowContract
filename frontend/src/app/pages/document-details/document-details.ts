@@ -96,6 +96,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
   preparingForSed = false;
   sendingToSed = false;
 
+  archivingDocument = false;
+  restoringDocument = false;
+
   decisionHistory: DocumentDecisionResponse[] = [];
   decisionComment = '';
 
@@ -139,6 +142,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   sedErrorMessage = '';
   sedSuccessMessage = '';
+
+  archiveErrorMessage = '';
+  archiveSuccessMessage = '';
 
   private documentId: number | null = null;
 
@@ -615,6 +621,16 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
 
   get canDeleteByRole(): boolean {
+
+    return (
+      this.isAdminUser
+      ||
+      this.isOperatorUser
+    );
+  }
+
+
+  get canArchiveByRole(): boolean {
 
     return (
       this.isAdminUser
@@ -1541,6 +1557,167 @@ export class DocumentDetails implements OnInit, OnDestroy {
       });
   }
 
+  get canArchiveDocument(): boolean {
+
+    return (
+      this.canArchiveByRole
+      &&
+      this.document?.status === 'SENT_TO_SED'
+    );
+  }
+
+
+  get canRestoreDocument(): boolean {
+
+    return (
+      this.canArchiveByRole
+      &&
+      this.document?.status === 'ARCHIVED'
+    );
+  }
+
+
+  archiveDocument(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canArchiveDocument
+      ||
+      this.archivingDocument
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        'Переместить документ в архив?\n\n'
+        + 'Документ останется доступен для просмотра, '
+        + 'скачивания и просмотра истории.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.archivingDocument = true;
+
+    this.archiveErrorMessage = '';
+    this.archiveSuccessMessage = '';
+
+    this.workspaceService
+      .archiveDocument(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.archivingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.archiveSuccessMessage =
+            'Документ перемещён в архив.';
+
+          this.editingMetadata = false;
+          this.metadataForm = null;
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.archiveErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось переместить документ в архив.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  restoreDocument(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canRestoreDocument
+      ||
+      this.restoringDocument
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        'Восстановить документ из архива?'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.restoringDocument = true;
+
+    this.archiveErrorMessage = '';
+    this.archiveSuccessMessage = '';
+
+    this.workspaceService
+      .restoreDocument(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.restoringDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.archiveSuccessMessage =
+            'Документ восстановлен из архива.';
+
+          this.refreshDocumentSummary();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.archiveErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось восстановить документ из архива.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
   prepareForSed(): void {
 
     if (
@@ -1730,6 +1907,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
       case 'SENT_TO_SED':
         return 'Документ уже отправлен в корпоративную СЭД.';
 
+      case 'ARCHIVED':
+        return 'Документ находится в архиве и доступен только для просмотра.';
+
       default:
         return 'Документ пока не готов к отправке в СЭД.';
     }
@@ -1835,6 +2015,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
       ||
       this.document.status === 'SENT_TO_SED'
       ||
+      this.document.status === 'ARCHIVED'
+      ||
       this.document.sed !== null
     ) {
       return false;
@@ -1854,6 +2036,13 @@ export class DocumentDetails implements OnInit, OnDestroy {
     ) {
 
       return 'Документ уже подготовлен к отправке в СЭД.';
+    }
+
+    if (
+      this.document.status === 'ARCHIVED'
+    ) {
+
+      return 'Архивный документ доступен только для просмотра.';
     }
 
     if (
@@ -2123,6 +2312,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
     if (
       this.document.status === 'SENT_TO_SED'
+      ||
+      this.document.status === 'ARCHIVED'
     ) {
       return false;
     }
@@ -2146,6 +2337,13 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
     if (!this.document) {
       return '';
+    }
+
+    if (
+      this.document.status === 'ARCHIVED'
+    ) {
+
+      return 'Архивный документ нельзя удалить.';
     }
 
     if (
@@ -2258,6 +2456,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
       case 'SED_ERROR':
         return 'Ошибка СЭД';
 
+      case 'ARCHIVED':
+        return 'В архиве';
+
       default:
         return status || 'Неизвестно';
     }
@@ -2289,6 +2490,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
       case 'UPLOADED':
       case 'AI_PROCESSING':
         return 'violet';
+
+      case 'ARCHIVED':
+        return 'neutral';
 
       default:
         return 'neutral';

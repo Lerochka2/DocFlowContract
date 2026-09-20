@@ -2363,3 +2363,56 @@
     white-space: normal;
   }
 }
+
+/* DOCUMENT ARCHIVE ACTIONS */
+
+.archive-document-button,
+.restore-document-button {
+  height: 39px;
+  padding: 0 15px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 680;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.archive-document-button {
+  color: #6558b8;
+  border: 1px solid #d8d2f2;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.archive-document-button:hover:not(:disabled) {
+  background: #f1effd;
+  border-color: #c6bdeb;
+}
+
+.restore-document-button {
+  color: #28705a;
+  border: 1px solid #c7e3d9;
+  background: #f3faf7;
+}
+
+.restore-document-button:hover:not(:disabled) {
+  background: #e7f6ef;
+  border-color: #add6c8;
+}
+
+.archive-document-button:hover:not(:disabled),
+.restore-document-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.archive-document-button:disabled,
+.restore-document-button:disabled {
+  color: #98a1af;
+  border-color: #e0e4ea;
+  background: #f5f6f8;
+  cursor: wait;
+  transform: none;
+}

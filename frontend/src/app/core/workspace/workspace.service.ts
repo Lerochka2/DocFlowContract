@@ -570,6 +570,43 @@ export class WorkspaceService {
     );
   }
 
+  archiveDocument(
+    documentId: number
+  ): Observable<{
+    documentId: number;
+    status: string;
+    updatedAt: string;
+  }> {
+
+    return this.http.post<{
+      documentId: number;
+      status: string;
+      updatedAt: string;
+    }>(
+      `${this.documentsApiUrl}/${documentId}/archive`,
+      null
+    );
+  }
+
+
+  restoreDocument(
+    documentId: number
+  ): Observable<{
+    documentId: number;
+    status: string;
+    updatedAt: string;
+  }> {
+
+    return this.http.post<{
+      documentId: number;
+      status: string;
+      updatedAt: string;
+    }>(
+      `${this.documentsApiUrl}/${documentId}/restore`,
+      null
+    );
+  }
+
   deleteDocument(
     documentId: number
   ): Observable<void> {
