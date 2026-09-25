@@ -229,6 +229,38 @@ export interface DocumentLinkResponse {
   linkedAt: string;
 }
 
+export type DocumentComparisonStatus =
+  | 'SAME'
+  | 'CHANGED'
+  | 'NOT_SPECIFIED';
+
+
+export interface DocumentFieldComparison {
+  field: string;
+  label: string;
+  contractValue: string | null;
+  additionalValue: string | null;
+  status: DocumentComparisonStatus;
+}
+
+
+export interface DocumentComparison {
+  additionalDocumentId: number;
+  additionalDocumentType: string;
+  additionalDocumentNumber: string | null;
+  additionalDocumentDate: string | null;
+
+  contractDocumentId: number;
+  contractDocumentNumber: string | null;
+  contractDocumentDate: string | null;
+
+  referencedContractMatches: boolean | null;
+
+  changedFieldsCount: number;
+
+  comparisons: DocumentFieldComparison[];
+}
+
 export interface ManualReviewRequest {
   documentType: DocumentTypeCode;
 }
@@ -424,6 +456,15 @@ export class WorkspaceService {
     return this.http.post<DocumentLinkResponse>(
       `${this.documentsApiUrl}/${documentId}/link`,
       request
+    );
+  }
+
+  getDocumentComparison(
+    documentId: number
+  ): Observable<DocumentComparison> {
+
+    return this.http.get<DocumentComparison>(
+      `${this.documentsApiUrl}/${documentId}/comparison`
     );
   }
 

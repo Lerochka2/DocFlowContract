@@ -6,7 +6,27 @@ export interface CurrentUserResponse {
   userId: number;
   login: string;
   fullName: string;
+  email: string | null;
   role: string;
+}
+
+export interface PasswordCodeRequestResponse {
+  maskedEmail: string;
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
+
+
+export interface PasswordCodeVerificationResponse {
+  changeToken: string;
+  expiresInSeconds: number;
+}
+
+
+export interface ConfirmPasswordChangeRequest {
+  changeToken: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 export interface LoginResponse extends CurrentUserResponse {
@@ -55,6 +75,39 @@ export class AuthService {
           );
         })
       );
+  }
+
+  requestPasswordChangeCode():
+    Observable<PasswordCodeRequestResponse> {
+
+    return this.http.post<PasswordCodeRequestResponse>(
+      `${this.apiUrl}/password-change/request-code`,
+      null
+    );
+  }
+
+
+  verifyPasswordChangeCode(
+    code: string
+  ): Observable<PasswordCodeVerificationResponse> {
+
+    return this.http.post<PasswordCodeVerificationResponse>(
+      `${this.apiUrl}/password-change/verify-code`,
+      {
+        code
+      }
+    );
+  }
+
+
+  confirmPasswordChange(
+    request: ConfirmPasswordChangeRequest
+  ): Observable<void> {
+
+    return this.http.put<void>(
+      `${this.apiUrl}/password-change/confirm`,
+      request
+    );
   }
 
   me(): Observable<CurrentUserResponse> {

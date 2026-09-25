@@ -57,9 +57,13 @@ export class UsersWorkspace
   editingUserId: number | null = null;
   editingFullName = '';
 
+  editingEmailUserId: number | null = null;
+  editingEmail = '';
+
   createForm: CreateUserRequest = {
     login: '',
     fullName: '',
+    email: '',
     password: '',
     roleCode: 'DOCUMENT_OPERATOR'
   };
@@ -160,6 +164,10 @@ export class UsersWorkspace
           .toLowerCase()
           .includes(query)
         ||
+        (user.email ?? '')
+          .toLowerCase()
+          .includes(query)
+        ||
         user.roleName
           .toLowerCase()
           .includes(query)
@@ -182,6 +190,11 @@ export class UsersWorkspace
     const fullName =
       this.createForm.fullName.trim();
 
+    const email =
+      (this.createForm.email ?? '')
+        .trim()
+        .toLowerCase();
+
     const password =
       this.createForm.password;
 
@@ -189,6 +202,8 @@ export class UsersWorkspace
       !login
       ||
       !fullName
+      ||
+      !email
       ||
       !password
       ||
@@ -200,6 +215,18 @@ export class UsersWorkspace
 
       return;
     }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(email)
+    ) {
+
+      this.errorMessage =
+        'Некорректный формат email.';
+
+      return;
+    }
+
 
     if (password.length < 8) {
 
@@ -215,6 +242,7 @@ export class UsersWorkspace
       .createUser({
         login,
         fullName,
+        email,
         password,
         roleCode:
           this.createForm.roleCode
@@ -242,6 +270,7 @@ export class UsersWorkspace
           this.createForm = {
             login: '',
             fullName: '',
+            email: '',
             password: '',
             roleCode:
               'DOCUMENT_OPERATOR'
@@ -351,6 +380,110 @@ export class UsersWorkspace
             this.resolveError(
               error,
               'Не удалось изменить ФИО пользователя.'
+            );
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  startEmailEdit(
+    user: AdminUser
+  ): void {
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.editingEmailUserId =
+      user.userId;
+
+    this.editingEmail =
+      user.email ?? '';
+  }
+
+
+  cancelEmailEdit(): void {
+
+    this.editingEmailUserId =
+      null;
+
+    this.editingEmail =
+      '';
+  }
+
+
+  saveEmail(
+    user: AdminUser
+  ): void {
+
+    const email =
+      this.editingEmail
+        .trim()
+        .toLowerCase();
+
+    if (!email) {
+
+      this.errorMessage =
+        'Email не может быть пустым.';
+
+      return;
+    }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(email)
+    ) {
+
+      this.errorMessage =
+        'Некорректный формат email.';
+
+      return;
+    }
+
+    if (
+      email
+      === user.email
+    ) {
+
+      this.cancelEmailEdit();
+
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.userAdminService
+      .updateEmail(
+        user.userId,
+        email
+      )
+      .subscribe({
+
+        next: updated => {
+
+          this.replaceUser(
+            updated
+          );
+
+          this.cancelEmailEdit();
+
+          this.successMessage =
+            `Email пользователя ${updated.login} изменен.`;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.errorMessage =
+            this.resolveError(
+              error,
+              'Не удалось изменить email пользователя.'
             );
 
           this.changeDetectorRef

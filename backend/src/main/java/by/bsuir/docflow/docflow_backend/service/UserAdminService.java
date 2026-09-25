@@ -1,6 +1,7 @@
 package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.dto.user.CreateUserRequest;
+import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserEmailRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserEnabledRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserFullNameRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserRoleRequest;
@@ -81,6 +82,11 @@ public class UserAdminService {
                         "Необходимо указать ФИО"
                 );
 
+        String email =
+                normalizeEmail(
+                        request.email()
+                );
+
         if (
                 userRepository.existsByLogin(
                         login
@@ -91,6 +97,20 @@ public class UserAdminService {
                     HttpStatus.CONFLICT,
                     "Пользователь с логином "
                             + login
+                            + " уже существует"
+            );
+        }
+
+        if (
+                userRepository.existsByEmailIgnoreCase(
+                        email
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Пользователь с email "
+                            + email
                             + " уже существует"
             );
         }
@@ -109,6 +129,10 @@ public class UserAdminService {
 
         user.setFullName(
                 fullName
+        );
+
+        user.setEmail(
+                email
         );
 
         user.setPasswordHash(
@@ -152,6 +176,7 @@ public class UserAdminService {
                         "Необходимо указать ФИО"
                 );
 
+
         user.setFullName(
                 fullName
         );
@@ -162,6 +187,50 @@ public class UserAdminService {
                 )
         );
     }
+
+    @Transactional
+    public UserResponse updateEmail(
+            Long userId,
+            UpdateUserEmailRequest request
+    ) {
+
+        AppUser user =
+                getUser(
+                        userId
+                );
+
+        String email =
+                normalizeEmail(
+                        request.email()
+                );
+
+        if (
+                userRepository
+                        .existsByEmailIgnoreCaseAndIdNot(
+                                email,
+                                userId
+                        )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Пользователь с email "
+                            + email
+                            + " уже существует"
+            );
+        }
+
+        user.setEmail(
+                email
+        );
+
+        return toResponse(
+                userRepository.save(
+                        user
+                )
+        );
+    }
+
 
     @Transactional
     public UserResponse updateRole(
@@ -354,6 +423,38 @@ public class UserAdminService {
         return normalized;
     }
 
+    private String normalizeEmail(
+            String email
+    ) {
+
+        String normalized =
+                normalizeRequiredText(
+                        email,
+                        "Необходимо указать email"
+                )
+                        .toLowerCase(
+                                Locale.ROOT
+                        );
+
+        if (
+                !normalized.matches(
+                        "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$"
+                                .toLowerCase(
+                                        Locale.ROOT
+                                )
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Некорректный формат email"
+            );
+        }
+
+        return normalized;
+    }
+
+
     private String normalizeRequiredText(
             String value,
             String errorMessage
@@ -385,6 +486,7 @@ public class UserAdminService {
                 user.getId(),
                 user.getLogin(),
                 user.getFullName(),
+                user.getEmail(),
                 role == null
                         ? null
                         : role.getCode(),

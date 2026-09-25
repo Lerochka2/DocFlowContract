@@ -507,3 +507,141 @@ tbody tr:hover {
   color: #727e91;
   background: #f8f9fb;
 }
+
+
+/* ==========================================================
+   DOCFLOW USER EMAIL START
+   ========================================================== */
+
+.email-value-line {
+  min-width: 185px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.email-value {
+  max-width: 210px;
+  overflow: hidden;
+  color: #65728a;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-email-button {
+  width: 25px;
+  height: 25px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 7px;
+
+  color: #7e8aa2;
+  background: transparent;
+
+  font-size: 13px;
+  cursor: pointer;
+
+  transition:
+    color .15s ease,
+    background .15s ease;
+}
+
+.edit-email-button:hover {
+  color: #506fd0;
+  background: #eef2fd;
+}
+
+.email-edit {
+  min-width: 210px;
+}
+
+.email-edit input {
+  width: 100%;
+  height: 35px;
+
+  box-sizing: border-box;
+
+  padding: 0 9px;
+
+  border: 1px solid #9eb2eb;
+  border-radius: 8px;
+
+  outline: none;
+
+  color: #28354b;
+  background: #ffffff;
+
+  font: inherit;
+  font-size: 12px;
+
+  box-shadow:
+    0 0 0 3px rgba(74, 111, 216, .07);
+}
+
+.email-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.email-save,
+.email-cancel {
+  height: 26px;
+  padding: 0 9px;
+
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 680;
+
+  cursor: pointer;
+}
+
+.email-save {
+  border: 1px solid #cbd8fa;
+  color: #4664bd;
+  background: #eef3ff;
+}
+
+.email-cancel {
+  border: 1px solid #dfe4eb;
+  color: #727e91;
+  background: #f8f9fb;
+}
+
+
+/* Теперь в форме 5 полей + кнопка */
+
+.create-form {
+  grid-template-columns:
+    minmax(190px, 1.25fr)
+    minmax(135px, .7fr)
+    minmax(200px, 1fr)
+    minmax(150px, .7fr)
+    minmax(190px, .9fr)
+    auto;
+}
+
+@media (max-width: 1400px) {
+
+  .create-form {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+/* ==========================================================
+   DOCFLOW USER EMAIL END
+   ========================================================== */

@@ -12,6 +12,13 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     boolean existsByLogin(String login);
 
+    boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(
+            String email,
+            Long id
+    );
+
     List<AppUser> findByRoleCodeAndEnabledTrue(
             String roleCode
     );

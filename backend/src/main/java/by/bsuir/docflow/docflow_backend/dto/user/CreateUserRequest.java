@@ -1,11 +1,14 @@
 package by.bsuir.docflow.docflow_backend.dto.user;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record CreateUserRequest(
 
-        @NotBlank(message = "Необходимо указать логин")
+        @NotBlank(
+                message = "Необходимо указать логин"
+        )
         @Size(
                 min = 3,
                 max = 100,
@@ -13,14 +16,30 @@ public record CreateUserRequest(
         )
         String login,
 
-        @NotBlank(message = "Необходимо указать ФИО")
+        @NotBlank(
+                message = "Необходимо указать ФИО"
+        )
         @Size(
                 max = 255,
                 message = "ФИО не должно превышать 255 символов"
         )
         String fullName,
 
-        @NotBlank(message = "Необходимо указать пароль")
+        @NotBlank(
+                message = "Необходимо указать email"
+        )
+        @Email(
+                message = "Некорректный формат email"
+        )
+        @Size(
+                max = 255,
+                message = "Email не должен превышать 255 символов"
+        )
+        String email,
+
+        @NotBlank(
+                message = "Необходимо указать пароль"
+        )
         @Size(
                 min = 8,
                 max = 100,
@@ -28,7 +47,10 @@ public record CreateUserRequest(
         )
         String password,
 
-        @NotBlank(message = "Необходимо указать роль")
+        @NotBlank(
+                message = "Необходимо указать роль"
+        )
         String roleCode
+
 ) {
 }

@@ -117,6 +117,24 @@
       <label>
 
         <span>
+          Email
+        </span>
+
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="createForm.email"
+          placeholder="Например, ivanov@company.by"
+          maxlength="255"
+          autocomplete="email"
+        />
+
+      </label>
+
+
+      <label>
+
+        <span>
           Пароль
         </span>
 
@@ -204,7 +222,7 @@
         <input
           type="text"
           [(ngModel)]="searchQuery"
-          placeholder="Поиск по имени, логину или роли..."
+          placeholder="Поиск по имени, логину, email или роли..."
         />
 
       </div>
@@ -242,6 +260,10 @@
 
               <th>
                 Логин
+              </th>
+
+              <th>
+                Email
               </th>
 
               <th>
@@ -371,6 +393,69 @@
                   <span class="login-value">
                     {{ user.login }}
                   </span>
+                </td>
+
+
+                <td>
+
+                  @if (
+                    editingEmailUserId
+                    === user.userId
+                  ) {
+
+                    <div class="email-edit">
+
+                      <input
+                        type="email"
+                        [(ngModel)]="editingEmail"
+                        maxlength="255"
+                        (keydown.enter)="saveEmail(user)"
+                        (keydown.escape)="cancelEmailEdit()"
+                      />
+
+                      <div class="email-edit-actions">
+
+                        <button
+                          type="button"
+                          class="email-save"
+                          (click)="saveEmail(user)"
+                        >
+                          Сохранить
+                        </button>
+
+                        <button
+                          type="button"
+                          class="email-cancel"
+                          (click)="cancelEmailEdit()"
+                        >
+                          Отмена
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  } @else {
+
+                    <div class="email-value-line">
+
+                      <span class="email-value">
+                        {{ user.email || '—' }}
+                      </span>
+
+                      <button
+                        type="button"
+                        class="edit-email-button"
+                        title="Изменить email"
+                        (click)="startEmailEdit(user)"
+                      >
+                        ✎
+                      </button>
+
+                    </div>
+
+                  }
+
                 </td>
 
 

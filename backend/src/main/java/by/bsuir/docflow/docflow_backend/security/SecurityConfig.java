@@ -141,6 +141,19 @@ public class SecurityConfig {
                         )
                         .authenticated()
 
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/password-change/request-code",
+                                "/api/auth/password-change/verify-code"
+                        )
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/auth/password-change/confirm"
+                        )
+                        .authenticated()
+
                         /*
                          * Administration
                          */

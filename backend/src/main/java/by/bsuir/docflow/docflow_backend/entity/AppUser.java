@@ -31,6 +31,9 @@ public class AppUser {
     @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
+    @Column(name = "email", unique = true, length = 255)
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
@@ -94,6 +97,16 @@ public class AppUser {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(
+            String email
+    ) {
+        this.email = email;
     }
 
     public Role getRole() {

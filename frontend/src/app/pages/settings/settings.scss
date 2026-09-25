@@ -650,3 +650,545 @@
     align-items: flex-start;
   }
 }
+
+
+/* ==========================================================
+   DOCFLOW PASSWORD CHANGE STYLES START
+   ========================================================== */
+
+.heading-icon.security {
+  color: #5c63cf;
+  background:
+    linear-gradient(
+      135deg,
+      #eef2ff,
+      #f3efff
+    );
+  border: 1px solid #e0e5fb;
+  font-size: 18px;
+}
+
+.security-card {
+  overflow: hidden;
+}
+
+.password-stepper {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    55px
+    minmax(0, 1fr)
+    55px
+    minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 22px 4px 20px;
+}
+
+.password-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  opacity: .55;
+  transition: .18s ease;
+}
+
+.password-step.active,
+.password-step.done {
+  opacity: 1;
+}
+
+.password-step-number {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid #dde3ed;
+  border-radius: 50%;
+  color: #8994a6;
+  background: #f8f9fc;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.password-step.active .password-step-number {
+  border-color: #b9c8f5;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #4f76df,
+      #725ed1
+    );
+  box-shadow:
+    0 5px 14px
+    rgba(77, 102, 190, .16);
+}
+
+.password-step.done .password-step-number {
+  border-color: #c8e8da;
+  color: #34765e;
+  background: #eaf7f1;
+}
+
+.password-step div {
+  min-width: 0;
+}
+
+.password-step strong,
+.password-step div > span {
+  display: block;
+}
+
+.password-step strong {
+  color: #4a566b;
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.password-step div > span {
+  margin-top: 2px;
+  overflow: hidden;
+  color: #929baa;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.password-step-line {
+  height: 2px;
+  border-radius: 999px;
+  background: #e6eaf1;
+}
+
+.password-step-line.done {
+  background:
+    linear-gradient(
+      90deg,
+      #7f9be8,
+      #83c5ad
+    );
+}
+
+.password-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0 0 16px;
+  padding: 11px 13px;
+  border-radius: 9px;
+}
+
+.password-message > span {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.password-message p {
+  margin: 1px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.password-message.success {
+  border: 1px solid #cee9de;
+  color: #39745e;
+  background: #eff9f5;
+}
+
+.password-message.success > span {
+  color: #ffffff;
+  background: #55a884;
+}
+
+.password-message.error {
+  border: 1px solid #f1d2ce;
+  color: #9e514c;
+  background: #fff5f3;
+}
+
+.password-message.error > span {
+  color: #ffffff;
+  background: #d8756d;
+}
+
+.password-panel {
+  padding-top: 3px;
+}
+
+.password-info-box {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #e4e8f5;
+  border-radius: 11px;
+  background:
+    linear-gradient(
+      135deg,
+      #f8faff,
+      #fbfaff
+    );
+}
+
+.password-info-icon,
+.code-mail-icon {
+  width: 41px;
+  height: 41px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: #596fd0;
+  background: #edf1ff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.password-info-box span,
+.password-info-box strong,
+.password-info-box small {
+  display: block;
+}
+
+.password-info-box span {
+  color: #8993a4;
+  font-size: 12px;
+}
+
+.password-info-box strong {
+  margin-top: 4px;
+  color: #3d4b63;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.password-info-box small {
+  margin-top: 5px;
+  color: #9aa3b0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.password-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 16px;
+}
+
+.password-actions-between {
+  justify-content: space-between;
+}
+
+.password-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.password-primary-button,
+.password-secondary-button,
+.password-link-button {
+  min-height: 39px;
+  padding: 0 15px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 680;
+  cursor: pointer;
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease,
+    opacity .15s ease;
+}
+
+.password-primary-button {
+  border: 0;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #4f75dc,
+      #6b5dcc
+    );
+}
+
+.password-primary-button:hover:not(:disabled) {
+  filter: brightness(.97);
+}
+
+.password-secondary-button {
+  border: 1px solid #dce3ed;
+  color: #667389;
+  background: #ffffff;
+}
+
+.password-secondary-button:hover:not(:disabled) {
+  background: #f8faff;
+}
+
+.password-link-button {
+  border: 0;
+  color: #5973c4;
+  background: transparent;
+}
+
+.password-link-button:hover:not(:disabled) {
+  background: #f3f6fe;
+}
+
+.password-primary-button:disabled,
+.password-secondary-button:disabled,
+.password-link-button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+
+.code-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.code-heading strong {
+  display: block;
+  color: #3e4b61;
+  font-size: 15px;
+}
+
+.code-heading p {
+  margin: 4px 0 0;
+  color: #8e98a8;
+  font-size: 13px;
+}
+
+.code-heading b {
+  color: #6072a9;
+}
+
+.verification-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.verification-code-input {
+  width: 210px;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid #cfd8ed;
+  border-radius: 11px;
+  outline: none;
+  color: #33425c;
+  background: #fbfcff;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 760;
+  letter-spacing: .28em;
+  text-align: center;
+  box-sizing: border-box;
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.verification-code-input:focus {
+  border-color: #8ea7ec;
+  box-shadow:
+    0 0 0 4px
+    rgba(79, 113, 207, .08);
+}
+
+.verification-code-input::placeholder {
+  color: #c5ccda;
+}
+
+.code-timer {
+  min-width: 110px;
+}
+
+.code-timer span,
+.code-timer strong {
+  display: block;
+}
+
+.code-timer span {
+  color: #9aa3b1;
+  font-size: 11px;
+}
+
+.code-timer strong {
+  margin-top: 3px;
+  color: #516cbf;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.code-timer strong.expired,
+.change-token-timer strong.expired {
+  color: #bd625b;
+}
+
+.password-confirmed-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 17px;
+  padding: 13px 14px;
+  border: 1px solid #cfe8de;
+  border-radius: 10px;
+  background: #f1f9f6;
+}
+
+.password-confirmed-note > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #55a584;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.password-confirmed-note strong {
+  display: block;
+  color: #3e755f;
+  font-size: 13px;
+}
+
+.password-confirmed-note p {
+  margin: 3px 0 0;
+  color: #719080;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.password-fields {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.password-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.password-fields label > span {
+  color: #68758a;
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.password-fields input {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  outline: none;
+  color: #2d3b53;
+  background: #fbfcfe;
+  font: inherit;
+  font-size: 13px;
+}
+
+.password-fields input:focus {
+  border-color: #91a9e8;
+  box-shadow:
+    0 0 0 3px
+    rgba(74, 111, 216, .07);
+}
+
+.password-fields small {
+  min-height: 17px;
+  color: #9aa3b0;
+  font-size: 11px;
+}
+
+.password-field-error {
+  color: #b65d56 !important;
+}
+
+.password-field-ok {
+  color: #428064 !important;
+}
+
+.change-token-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: #8d97a7;
+  font-size: 12px;
+}
+
+.change-token-timer strong {
+  color: #5671c1;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 850px) {
+
+  .password-stepper {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .password-step-line {
+    width: 2px;
+    height: 16px;
+    margin-left: 15px;
+  }
+
+  .password-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .password-actions-between,
+  .password-right-actions,
+  .verification-code-wrap {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .verification-code-input {
+    width: 100%;
+  }
+
+  .password-right-actions {
+    width: 100%;
+  }
+
+  .password-primary-button,
+  .password-secondary-button,
+  .password-link-button {
+    width: 100%;
+  }
+}
+
+/* ==========================================================
+   DOCFLOW PASSWORD CHANGE STYLES END
+   ========================================================== */

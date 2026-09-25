@@ -1,4 +1,4 @@
-﻿# IntelliJ IDEA
+# IntelliJ IDEA
 .idea/
 *.iml
 
@@ -38,3 +38,10 @@ backup/*
 # Windows
 Thumbs.db
 Desktop.ini
+/.docflow-mail-email
+/.docflow-mail-password
+/start-backend-mail.ps1
+/start-backend.ps1
+*.bak
+*.bak*
+/backend/comparison.json

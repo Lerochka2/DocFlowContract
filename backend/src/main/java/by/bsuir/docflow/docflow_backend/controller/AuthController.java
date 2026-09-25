@@ -19,26 +19,49 @@ public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+
+    public AuthController(
+            AuthService authService
+    ) {
+        this.authService =
+                authService;
     }
+
 
     @PostMapping("/login")
     public LoginResponse login(
-            @Valid @RequestBody LoginRequest request
+            @Valid
+            @RequestBody
+            LoginRequest request
     ) {
-        return authService.login(request);
+
+        return authService.login(
+                request
+        );
     }
+
 
     @GetMapping("/me")
     public CurrentUserResponse me(
-            @AuthenticationPrincipal Jwt jwt
+            @AuthenticationPrincipal
+            Jwt jwt
     ) {
-        return new CurrentUserResponse(
-                jwt.getClaim("userId"),
-                jwt.getSubject(),
-                jwt.getClaimAsString("fullName"),
-                jwt.getClaimAsString("role")
-        );
+
+        Number userId =
+                jwt.getClaim(
+                        "userId"
+                );
+
+        if (userId == null) {
+
+            throw new IllegalStateException(
+                    "JWT не содержит идентификатор пользователя"
+            );
+        }
+
+        return authService
+                .getCurrentUser(
+                        userId.longValue()
+                );
     }
 }

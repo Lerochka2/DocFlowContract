@@ -15,6 +15,7 @@ export interface AdminUser {
   userId: number;
   login: string;
   fullName: string;
+  email: string | null;
   roleCode: string;
   roleName: string;
   enabled: boolean;
@@ -34,6 +35,7 @@ export interface RoleOption {
 export interface CreateUserRequest {
   login: string;
   fullName: string;
+  email: string;
   password: string;
   roleCode: string;
 }
@@ -96,6 +98,20 @@ export class UserAdminService {
       }
     );
   }
+
+  updateEmail(
+    userId: number,
+    email: string
+  ): Observable<AdminUser> {
+
+    return this.http.patch<AdminUser>(
+      `${this.usersApiUrl}/${userId}/email`,
+      {
+        email
+      }
+    );
+  }
+
 
   updateRole(
     userId: number,

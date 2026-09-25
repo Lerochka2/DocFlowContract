@@ -1204,13 +1204,311 @@
 
               </dl>
 
-              <button
-                class="secondary-button"
-                type="button"
-                (click)="openLinkedContract()"
-              >
-                Открыть договор →
-              </button>
+              <div class="linked-contract-actions">
+
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="openLinkedContract()"
+                >
+                  Открыть договор →
+                </button>
+
+
+                @if (canCompareDocument) {
+
+                  <button
+                    class="comparison-button"
+                    type="button"
+                    [disabled]="loadingComparison"
+                    (click)="
+                      documentComparison
+                        ? toggleDocumentComparison()
+                        : loadDocumentComparison()
+                    "
+                  >
+                    @if (loadingComparison) {
+                      Сравниваем...
+                    } @else if (documentComparison) {
+                      {{ getComparisonToggleLabel() }}
+                    } @else {
+                      Сравнить с договором
+                    }
+                  </button>
+
+                }
+
+              </div>
+
+
+              @if (comparisonErrorMessage) {
+
+                <div class="comparison-message error">
+                  {{ comparisonErrorMessage }}
+                </div>
+
+              }
+
+
+              @if (
+                documentComparison
+                &&
+                comparisonExpanded
+              ) {
+
+                <section class="document-comparison">
+
+                  <div class="comparison-header">
+
+                    <div>
+
+                      <span class="comparison-eyebrow">
+                        СРАВНЕНИЕ ДОКУМЕНТОВ
+                      </span>
+
+                      <h3>
+                        Изменения относительно основного договора
+                      </h3>
+
+                      <p>
+                        Сопоставлены подтверждённые реквизиты
+                        дополнительного соглашения и связанного договора.
+                      </p>
+
+                    </div>
+
+
+                    <div
+                      class="comparison-counter"
+                      [class.has-changes]="
+                        documentComparison.changedFieldsCount > 0
+                      "
+                    >
+
+                      <strong>
+                        {{ documentComparison.changedFieldsCount }}
+                      </strong>
+
+                      <span>
+                        {{
+                          getComparisonChangesWord(
+                            documentComparison.changedFieldsCount
+                          )
+                        }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="comparison-documents">
+
+                    <div class="comparison-document">
+
+                      <span>
+                        Основной договор
+                      </span>
+
+                      <strong>
+                        {{
+                          documentComparison.contractDocumentNumber
+                            ? '№ ' + documentComparison.contractDocumentNumber
+                            : 'ID ' + documentComparison.contractDocumentId
+                        }}
+                      </strong>
+
+                      <small>
+                        {{
+                          formatDate(
+                            documentComparison.contractDocumentDate
+                          )
+                        }}
+                      </small>
+
+                    </div>
+
+
+                    <div class="comparison-arrow">
+                      →
+                    </div>
+
+
+                    <div class="comparison-document additional">
+
+                      <span>
+                        Доп. соглашение
+                      </span>
+
+                      <strong>
+                        {{
+                          documentComparison.additionalDocumentNumber
+                            ? '№ ' + documentComparison.additionalDocumentNumber
+                            : 'ID ' + documentComparison.additionalDocumentId
+                        }}
+                      </strong>
+
+                      <small>
+                        {{
+                          formatDate(
+                            documentComparison.additionalDocumentDate
+                          )
+                        }}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+
+                  @if (
+                    documentComparison.referencedContractMatches === true
+                  ) {
+
+                    <div class="comparison-reference success">
+                      ✓ Реквизиты основного договора в дополнительном
+                      соглашении совпадают со связанным договором.
+                    </div>
+
+                  } @else if (
+                    documentComparison.referencedContractMatches === false
+                  ) {
+
+                    <div class="comparison-reference warning">
+                      ! Реквизиты договора, указанные в дополнительном
+                      соглашении, не совпадают со связанным договором.
+                    </div>
+
+                  } @else {
+
+                    <div class="comparison-reference neutral">
+                      Реквизиты основного договора в дополнительном
+                      соглашении не указаны.
+                    </div>
+
+                  }
+
+
+                  <div class="comparison-table-wrapper">
+
+                    <table class="comparison-table">
+
+                      <thead>
+
+                        <tr>
+                          <th>Параметр</th>
+                          <th>Основной договор</th>
+                          <th>Доп. соглашение</th>
+                          <th>Результат</th>
+                        </tr>
+
+                      </thead>
+
+
+                      <tbody>
+
+                        @for (
+                          item of documentComparison.comparisons;
+                          track item.field
+                        ) {
+
+                          <tr
+                            [class.changed-row]="
+                              item.status === 'CHANGED'
+                            "
+                          >
+
+                            <td class="comparison-label">
+                              {{ item.label }}
+                            </td>
+
+                            <td>
+                              {{
+                                formatComparisonValue(
+                                  item.field,
+                                  item.contractValue
+                                )
+                              }}
+                            </td>
+
+                            <td>
+                              {{
+                                formatComparisonValue(
+                                  item.field,
+                                  item.additionalValue
+                                )
+                              }}
+                            </td>
+
+                            <td>
+
+                              <span
+                                class="comparison-status"
+                                [class.changed]="
+                                  item.status === 'CHANGED'
+                                "
+                                [class.same]="
+                                  item.status === 'SAME'
+                                "
+                                [class.not-specified]="
+                                  item.status === 'NOT_SPECIFIED'
+                                "
+                              >
+                                {{
+                                  getComparisonStatusLabel(
+                                    item.status
+                                  )
+                                }}
+                              </span>
+
+                            </td>
+
+                          </tr>
+
+                        }
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+
+                  @if (
+                    documentComparison.changedFieldsCount === 0
+                  ) {
+
+                    <div class="comparison-summary no-changes">
+                      По указанным реквизитам различий не обнаружено.
+                    </div>
+
+                  } @else {
+
+                    <div class="comparison-summary">
+
+                      <strong>
+                        Выявлено
+                        {{ documentComparison.changedFieldsCount }}
+                        {{
+                          getComparisonChangesWord(
+                            documentComparison.changedFieldsCount
+                          )
+                        }}
+                      </strong>
+
+                      <span>
+                        Изменённые значения выделены в таблице.
+                        Результат носит информационный характер
+                        и не изменяет реквизиты основного договора.
+                      </span>
+
+                    </div>
+
+                  }
+
+                </section>
+
+              }
 
             } @else if (
               document.status === 'LINK_REQUIRED'

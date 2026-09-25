@@ -854,6 +854,9 @@ export class AppShell
         fullName:
           cachedUser.fullName,
 
+        email:
+          cachedUser.email ?? null,
+
         role:
           cachedUser.role
       };

@@ -32,6 +32,7 @@ import {
   ContractCandidate,
   DocumentAuditEventResponse,
   DocumentCommentResponse,
+  DocumentComparison,
   DocumentDecisionCode,
   DocumentDecisionResponse,
   DocumentMetadata,
@@ -92,6 +93,11 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   loadingCandidates = false;
   linkingDocument = false;
+
+  documentComparison: DocumentComparison | null = null;
+  loadingComparison = false;
+  comparisonErrorMessage = '';
+  comparisonExpanded = true;
 
   preparingForSed = false;
   sendingToSed = false;
@@ -651,6 +657,24 @@ export class DocumentDetails implements OnInit, OnDestroy {
     );
   }
 
+
+  get canCompareDocument(): boolean {
+
+    if (
+      !this.document
+      ||
+      !this.document.link
+    ) {
+      return false;
+    }
+
+    return (
+      this.document.documentType === 'AMENDMENT_CHANGE'
+      ||
+      this.document.documentType === 'AMENDMENT_PROLONGATION'
+    );
+  }
+
   reviewDocument(): void {
 
     if (
@@ -913,6 +937,68 @@ export class DocumentDetails implements OnInit, OnDestroy {
               error
             )
             ?? 'Не удалось привязать документ к договору.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+  loadDocumentComparison(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canCompareDocument
+      ||
+      this.loadingComparison
+    ) {
+      return;
+    }
+
+    this.loadingComparison = true;
+    this.comparisonErrorMessage = '';
+
+    this.workspaceService
+      .getDocumentComparison(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingComparison = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: comparison => {
+
+          this.documentComparison =
+            comparison;
+
+          this.comparisonExpanded =
+            true;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.documentComparison = null;
+
+          this.comparisonErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось сравнить дополнительное соглашение с договором.';
 
           this.changeDetectorRef
             .markForCheck();
@@ -2386,6 +2472,127 @@ export class DocumentDetails implements OnInit, OnDestroy {
         contractId
       ]
     );
+  }
+
+  toggleDocumentComparison(): void {
+
+    if (!this.documentComparison) {
+      return;
+    }
+
+    this.comparisonExpanded =
+      !this.comparisonExpanded;
+
+    this.changeDetectorRef
+      .markForCheck();
+  }
+
+
+  getComparisonToggleLabel(): string {
+
+    return this.comparisonExpanded
+      ? 'Свернуть сравнение ↑'
+      : 'Показать сравнение ↓';
+  }
+
+
+  getComparisonChangesWord(
+    count: number
+  ): string {
+
+    const value =
+      Math.abs(
+        Math.trunc(count)
+      );
+
+    const lastTwoDigits =
+      value % 100;
+
+    const lastDigit =
+      value % 10;
+
+    if (
+      lastTwoDigits >= 11
+      &&
+      lastTwoDigits <= 14
+    ) {
+      return 'изменений';
+    }
+
+    if (lastDigit === 1) {
+      return 'изменение';
+    }
+
+    if (
+      lastDigit >= 2
+      &&
+      lastDigit <= 4
+    ) {
+      return 'изменения';
+    }
+
+    return 'изменений';
+  }
+
+  formatComparisonValue(
+    field: string,
+    value: string | null
+  ): string {
+
+    if (!value) {
+      return '—';
+    }
+
+    if (
+      field === 'validFrom'
+      ||
+      field === 'validTo'
+    ) {
+      return this.formatDate(
+        value
+      );
+    }
+
+    if (field === 'amount') {
+
+      const numericValue =
+        Number(value);
+
+      if (Number.isFinite(numericValue)) {
+
+        return new Intl.NumberFormat(
+          'ru-RU',
+          {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          }
+        ).format(
+          numericValue
+        );
+      }
+    }
+
+    return value;
+  }
+
+  getComparisonStatusLabel(
+    status: string
+  ): string {
+
+    switch (status) {
+
+      case 'CHANGED':
+        return 'Изменено';
+
+      case 'SAME':
+        return 'Без изменений';
+
+      case 'NOT_SPECIFIED':
+        return 'Не указано';
+
+      default:
+        return status;
+    }
   }
 
   getDocumentTypeLabel(

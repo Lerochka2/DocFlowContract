@@ -1,6 +1,7 @@
 package by.bsuir.docflow.docflow_backend.controller;
 
 import by.bsuir.docflow.docflow_backend.dto.user.CreateUserRequest;
+import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserEmailRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserEnabledRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserFullNameRequest;
 import by.bsuir.docflow.docflow_backend.dto.user.UpdateUserRoleRequest;
@@ -65,6 +66,22 @@ public class UserAdminController {
                         request
                 );
     }
+
+    @PatchMapping("/{userId}/email")
+    public UserResponse updateEmail(
+            @PathVariable Long userId,
+            @Valid
+            @RequestBody
+            UpdateUserEmailRequest request
+    ) {
+
+        return userAdminService
+                .updateEmail(
+                        userId,
+                        request
+                );
+    }
+
 
     @PatchMapping("/{userId}/role")
     public UserResponse updateRole(

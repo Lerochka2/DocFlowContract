@@ -12,6 +12,516 @@
         Настройки
       </h1>
 
+      <!-- ==================================================
+           DOCFLOW PASSWORD CHANGE UI START
+           ================================================== -->
+
+      <section class="settings-card security-card">
+
+        <div class="card-heading">
+
+          <div class="heading-icon security">
+            ⛨
+          </div>
+
+          <div>
+
+            <span class="section-eyebrow">
+              БЕЗОПАСНОСТЬ
+            </span>
+
+            <h2>
+              Изменение пароля
+            </h2>
+
+            <p>
+              Для изменения пароля необходимо подтвердить
+              операцию кодом, отправленным на вашу электронную почту.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="password-stepper">
+
+          <div
+            class="password-step"
+            [class.active]="passwordStep === 'EMAIL'"
+            [class.done]="passwordStep !== 'EMAIL'"
+          >
+
+            <span class="password-step-number">
+              @if (passwordStep !== 'EMAIL') {
+                ✓
+              } @else {
+                1
+              }
+            </span>
+
+            <div>
+              <strong>
+                Получение кода
+              </strong>
+
+              <span>
+                Подтверждение email
+              </span>
+            </div>
+
+          </div>
+
+
+          <div
+            class="password-step-line"
+            [class.done]="passwordStep === 'PASSWORD'"
+          ></div>
+
+
+          <div
+            class="password-step"
+            [class.active]="passwordStep === 'CODE'"
+            [class.done]="passwordStep === 'PASSWORD'"
+          >
+
+            <span class="password-step-number">
+              @if (passwordStep === 'PASSWORD') {
+                ✓
+              } @else {
+                2
+              }
+            </span>
+
+            <div>
+              <strong>
+                Проверка кода
+              </strong>
+
+              <span>
+                6 цифр из письма
+              </span>
+            </div>
+
+          </div>
+
+
+          <div
+            class="password-step-line"
+            [class.done]="passwordStep === 'PASSWORD'"
+          ></div>
+
+
+          <div
+            class="password-step"
+            [class.active]="passwordStep === 'PASSWORD'"
+          >
+
+            <span class="password-step-number">
+              3
+            </span>
+
+            <div>
+              <strong>
+                Новый пароль
+              </strong>
+
+              <span>
+                Сохранение изменений
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        @if (passwordSuccessMessage) {
+
+          <div class="password-message success">
+            <span>✓</span>
+
+            <p>
+              {{ passwordSuccessMessage }}
+            </p>
+          </div>
+
+        }
+
+
+        @if (passwordErrorMessage) {
+
+          <div class="password-message error">
+            <span>!</span>
+
+            <p>
+              {{ passwordErrorMessage }}
+            </p>
+          </div>
+
+        }
+
+
+        <!-- ==================================================
+             STEP 1
+             ================================================== -->
+
+        @if (passwordStep === 'EMAIL') {
+
+          <div class="password-panel">
+
+            <div class="password-info-box">
+
+              <div class="password-info-icon">
+                @
+              </div>
+
+              <div>
+
+                <span>
+                  Код подтверждения будет отправлен на
+                </span>
+
+                <strong>
+                  {{
+                    currentUser?.email
+                    || 'Email не указан'
+                  }}
+                </strong>
+
+                @if (!currentUser?.email) {
+
+                  <small>
+                    Email учетной записи должен указать
+                    администратор в разделе «Пользователи».
+                  </small>
+
+                } @else {
+
+                  <small>
+                    Код действует 5 минут.
+                    Никому не сообщайте полученный код.
+                  </small>
+
+                }
+
+              </div>
+
+            </div>
+
+
+            <div class="password-actions">
+
+              <button
+                class="password-primary-button"
+                type="button"
+                [disabled]="
+                  passwordLoading
+                  || !currentUser?.email
+                "
+                (click)="requestPasswordCode()"
+              >
+
+                @if (passwordLoading) {
+                  Отправляем код...
+                } @else {
+                  Получить код
+                }
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- ==================================================
+             STEP 2
+             ================================================== -->
+
+        @if (passwordStep === 'CODE') {
+
+          <div class="password-panel">
+
+            <div class="code-heading">
+
+              <span class="code-mail-icon">
+                ✉
+              </span>
+
+              <div>
+
+                <strong>
+                  Введите код из письма
+                </strong>
+
+                <p>
+                  Код отправлен на
+                  <b>{{ maskedEmail }}</b>
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="verification-code-wrap">
+
+              <input
+                class="verification-code-input"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                name="verificationCode"
+                [(ngModel)]="verificationCode"
+                placeholder="000000"
+                (keydown.enter)="verifyPasswordCode()"
+              />
+
+              <div class="code-timer">
+
+                <span>
+                  Код действует
+                </span>
+
+                <strong
+                  [class.expired]="
+                    codeExpiresInSeconds <= 0
+                  "
+                >
+                  {{ getCodeExpiresLabel() }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="password-actions password-actions-between">
+
+              <button
+                class="password-secondary-button"
+                type="button"
+                [disabled]="passwordLoading"
+                (click)="resetPasswordChange()"
+              >
+                Назад
+              </button>
+
+
+              <div class="password-right-actions">
+
+                <button
+                  class="password-link-button"
+                  type="button"
+                  [disabled]="
+                    passwordLoading
+                    || resendAvailableInSeconds > 0
+                  "
+                  (click)="resendPasswordCode()"
+                >
+
+                  @if (resendAvailableInSeconds > 0) {
+
+                    Отправить повторно через
+                    {{ getResendLabel() }}
+
+                  } @else {
+
+                    Отправить код повторно
+
+                  }
+
+                </button>
+
+
+                <button
+                  class="password-primary-button"
+                  type="button"
+                  [disabled]="
+                    passwordLoading
+                    || verificationCode.trim().length !== 6
+                    || codeExpiresInSeconds <= 0
+                  "
+                  (click)="verifyPasswordCode()"
+                >
+
+                  @if (passwordLoading) {
+                    Проверяем...
+                  } @else {
+                    Подтвердить код
+                  }
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- ==================================================
+             STEP 3
+             ================================================== -->
+
+        @if (passwordStep === 'PASSWORD') {
+
+          <div class="password-panel">
+
+            <div class="password-confirmed-note">
+
+              <span>
+                ✓
+              </span>
+
+              <div>
+
+                <strong>
+                  Email подтвержден
+                </strong>
+
+                <p>
+                  Теперь задайте новый пароль.
+                  После сохранения потребуется войти в систему снова.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="password-fields">
+
+              <label>
+
+                <span>
+                  Новый пароль
+                </span>
+
+                <input
+                  type="password"
+                  name="newPassword"
+                  [(ngModel)]="newPassword"
+                  autocomplete="new-password"
+                  placeholder="Минимум 8 символов"
+                />
+
+                <small>
+                  Используйте не менее 8 символов.
+                </small>
+
+              </label>
+
+
+              <label>
+
+                <span>
+                  Повторите новый пароль
+                </span>
+
+                <input
+                  type="password"
+                  name="confirmNewPassword"
+                  [(ngModel)]="confirmNewPassword"
+                  autocomplete="new-password"
+                  placeholder="Введите пароль еще раз"
+                  (keydown.enter)="confirmPasswordChange()"
+                />
+
+                @if (
+                  confirmNewPassword
+                  &&
+                  newPassword !== confirmNewPassword
+                ) {
+
+                  <small class="password-field-error">
+                    Пароли не совпадают
+                  </small>
+
+                } @else if (
+                  confirmNewPassword
+                  &&
+                  newPassword === confirmNewPassword
+                ) {
+
+                  <small class="password-field-ok">
+                    Пароли совпадают
+                  </small>
+
+                }
+
+              </label>
+
+            </div>
+
+
+            <div class="change-token-timer">
+
+              <span>
+                Подтверждение действительно еще
+              </span>
+
+              <strong
+                [class.expired]="
+                  changeTokenExpiresInSeconds <= 0
+                "
+              >
+                {{ getChangeTokenExpiresLabel() }}
+              </strong>
+
+            </div>
+
+
+            <div class="password-actions password-actions-between">
+
+              <button
+                class="password-secondary-button"
+                type="button"
+                [disabled]="passwordLoading"
+                (click)="resetPasswordChange()"
+              >
+                Начать заново
+              </button>
+
+
+              <button
+                class="password-primary-button"
+                type="button"
+                [disabled]="
+                  passwordLoading
+                  || newPassword.length < 8
+                  || newPassword !== confirmNewPassword
+                  || changeTokenExpiresInSeconds <= 0
+                "
+                (click)="confirmPasswordChange()"
+              >
+
+                @if (passwordLoading) {
+                  Сохраняем...
+                } @else {
+                  Сохранить новый пароль
+                }
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </section>
+
+      <!-- ==================================================
+           DOCFLOW PASSWORD CHANGE UI END
+           ================================================== -->
+
       @if (isAdmin()) {
 
         <p>
@@ -562,6 +1072,22 @@
 
               <dd>
                 {{ currentUser?.login || '—' }}
+              </dd>
+
+            </div>
+
+
+            <div>
+
+              <dt>
+                Email
+              </dt>
+
+              <dd>
+                {{
+                  currentUser?.email
+                  || 'Не указан'
+                }}
               </dd>
 
             </div>
