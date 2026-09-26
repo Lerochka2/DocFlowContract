@@ -1,12 +1,17 @@
 package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.DocumentApprovalStep;
+import by.bsuir.docflow.docflow_backend.entity.DocumentVersion;
+import by.bsuir.docflow.docflow_backend.entity.enums.ApprovalStepStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
+import by.bsuir.docflow.docflow_backend.repository.DocumentApprovalStepRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentLinkRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
+import by.bsuir.docflow.docflow_backend.repository.DocumentVersionRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,8 @@ public class DocumentCorrectionService {
 
     private final DocumentRepository documentRepository;
     private final DocumentLinkRepository documentLinkRepository;
+    private final DocumentApprovalStepRepository approvalStepRepository;
+    private final DocumentVersionRepository documentVersionRepository;
     private final DocumentAccessService documentAccessService;
     private final DocumentAuditService documentAuditService;
     private final DocumentRoutingService documentRoutingService;
@@ -26,6 +33,8 @@ public class DocumentCorrectionService {
     public DocumentCorrectionService(
             DocumentRepository documentRepository,
             DocumentLinkRepository documentLinkRepository,
+            DocumentApprovalStepRepository approvalStepRepository,
+            DocumentVersionRepository documentVersionRepository,
             DocumentAccessService documentAccessService,
             DocumentAuditService documentAuditService,
             DocumentRoutingService documentRoutingService
@@ -36,6 +45,12 @@ public class DocumentCorrectionService {
 
         this.documentLinkRepository =
                 documentLinkRepository;
+
+        this.approvalStepRepository =
+                approvalStepRepository;
+
+        this.documentVersionRepository =
+                documentVersionRepository;
 
         this.documentAccessService =
                 documentAccessService;
@@ -95,6 +110,11 @@ public class DocumentCorrectionService {
                     "Тип документа не определён"
             );
         }
+
+
+        requireNewVersionAfterReturn(
+                document
+        );
 
 
         DocumentStatus targetStatus;
@@ -165,5 +185,92 @@ public class DocumentCorrectionService {
 
 
         return targetStatus;
+    }
+
+    private void requireNewVersionAfterReturn(
+            Document document
+    ) {
+
+        if (
+                document.getFile() == null
+                        ||
+                document.getFile()
+                        .getId() == null
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "У документа отсутствует текущий файл"
+            );
+        }
+
+        DocumentVersion currentVersion =
+                documentVersionRepository
+                        .findByDocumentIdAndFileId(
+                                document.getId(),
+                                document.getFile()
+                                        .getId()
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.CONFLICT,
+                                                "Текущая версия документа не зарегистрирована"
+                                        )
+                        );
+
+        DocumentApprovalStep latestReturnedStep =
+                null;
+
+        for (
+                DocumentApprovalStep step
+                : approvalStepRepository
+                        .findByDocumentIdOrderByStepOrderAsc(
+                                document.getId()
+                        )
+        ) {
+
+            if (
+                    step.getStatus()
+                            == ApprovalStepStatus.RETURNED
+            ) {
+
+                latestReturnedStep =
+                        step;
+            }
+        }
+
+        if (latestReturnedStep == null) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Не найден этап, на котором документ был возвращён на доработку"
+            );
+        }
+
+        DocumentVersion returnedVersion =
+                latestReturnedStep
+                        .getDocumentVersion();
+
+        if (returnedVersion == null) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Для возвращённого этапа не определена версия документа"
+            );
+        }
+
+        if (
+                returnedVersion.getId()
+                        .equals(
+                                currentVersion.getId()
+                        )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Перед повторной отправкой необходимо загрузить новую версию документа"
+            );
+        }
     }
 }

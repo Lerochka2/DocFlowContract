@@ -3057,3 +3057,49 @@
   color: #28715a;
   background: #e8f7f0;
 }
+
+/* VERSION FILE ACTIONS */
+
+.version-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.version-actions button {
+  min-height: 31px;
+  padding: 0 11px;
+  border: 1px solid #d7d4ee;
+  border-radius: 8px;
+  color: #6158ba;
+  background: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 680;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.version-actions button:hover {
+  border-color: #aaa2df;
+  background: #f7f5ff;
+  transform: translateY(-1px);
+}
+
+.approval-version-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  margin-top: 7px;
+  padding: 0 9px;
+  border: 1px solid #d9d4f3;
+  border-radius: 999px;
+  color: #6259bd;
+  background: #f5f2ff;
+  font-size: 11px;
+  font-weight: 720;
+}

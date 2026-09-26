@@ -392,6 +392,156 @@ public class DocumentVersionService {
                 );
     }
 
+    @Transactional(readOnly = true)
+    public VersionFile getVersionFile(
+            Long documentId,
+            Long versionId
+    ) {
+
+        Document document =
+                documentRepository
+                        .findById(
+                                documentId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Документ не найден"
+                                        )
+                        );
+
+        documentAccessService
+                .requireAccess(
+                        document
+                );
+
+        DocumentVersion version =
+                documentVersionRepository
+                        .findById(
+                                versionId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Версия документа не найдена"
+                                        )
+                        );
+
+        if (
+                version.getDocument() == null
+                        ||
+                !documentId.equals(
+                        version.getDocument()
+                                .getId()
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Версия не относится к указанному документу"
+            );
+        }
+
+        StoredFile storedFile =
+                version.getFile();
+
+        if (
+                storedFile == null
+                        ||
+                storedFile.getStoragePath() == null
+                        ||
+                storedFile.getStoragePath()
+                        .isBlank()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Файл версии отсутствует"
+            );
+        }
+
+        Path filePath =
+                Path.of(
+                                storedFile
+                                        .getStoragePath()
+                        )
+                        .toAbsolutePath()
+                        .normalize();
+
+        if (
+                !filePath.startsWith(
+                        storageRoot
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Недопустимый путь к файлу версии"
+            );
+        }
+
+        if (
+                !Files.exists(
+                        filePath
+                )
+                        ||
+                !Files.isRegularFile(
+                        filePath
+                )
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Файл версии не найден в хранилище"
+            );
+        }
+
+        try {
+
+            org.springframework.core.io.Resource resource =
+                    new org.springframework.core.io.UrlResource(
+                            filePath.toUri()
+                    );
+
+            if (
+                    !resource.exists()
+                            ||
+                    !resource.isReadable()
+            ) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Файл версии недоступен для чтения"
+                );
+            }
+
+            return new VersionFile(
+                    resource,
+                    storedFile.getOriginalName(),
+                    storedFile.getMimeType()
+            );
+
+        } catch (
+                java.net.MalformedURLException exception
+        ) {
+
+            throw new IllegalStateException(
+                    "Не удалось открыть файл версии",
+                    exception
+            );
+        }
+    }
+
+
+    public record VersionFile(
+            org.springframework.core.io.Resource resource,
+            String originalName,
+            String mimeType
+    ) {
+    }
+
     private DocumentVersionResponse toResponse(
             DocumentVersion version,
             Long currentFileId

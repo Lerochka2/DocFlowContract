@@ -31,6 +31,10 @@ export interface ApprovalStep {
 
   documentStatus: string | null;
 
+  documentVersionId: number | null;
+
+  documentVersionNumber: number | null;
+
   stepOrder: number;
 
   roleCode: string;

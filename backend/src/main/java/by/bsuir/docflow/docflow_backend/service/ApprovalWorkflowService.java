@@ -611,6 +611,9 @@ public class ApprovalWorkflowService {
         Document document =
                 step.getDocument();
 
+        DocumentVersion version =
+                step.getDocumentVersion();
+
         return new ApprovalStepResponse(
                 step.getId(),
 
@@ -627,6 +630,14 @@ public class ApprovalWorkflowService {
                         ? null
                         : document.getStatus()
                                 .name(),
+
+                version == null
+                        ? null
+                        : version.getId(),
+
+                version == null
+                        ? null
+                        : version.getVersionNumber(),
 
                 step.getStepOrder(),
 

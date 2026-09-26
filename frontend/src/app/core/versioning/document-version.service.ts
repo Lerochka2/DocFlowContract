@@ -83,4 +83,18 @@ export class DocumentVersionService {
       formData
     );
   }
+
+
+  getVersionFile(
+    documentId: number,
+    versionId: number
+  ): Observable<Blob> {
+
+    return this.http.get(
+      `${this.apiUrl}/${documentId}/versions/${versionId}/file`,
+      {
+        responseType: 'blob'
+      }
+    );
+  }
 }

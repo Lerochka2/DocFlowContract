@@ -1634,12 +1634,146 @@ export class DocumentDetails implements OnInit, OnDestroy {
   }
 
 
+  openDocumentVersion(
+    version: DocumentVersion
+  ): void {
+
+    if (this.documentId === null) {
+      return;
+    }
+
+    this.versionErrorMessage = '';
+
+    this.documentVersionService
+      .getVersionFile(
+        this.documentId,
+        version.versionId
+      )
+      .subscribe({
+
+        next: blob => {
+
+          const url =
+            URL.createObjectURL(
+              blob
+            );
+
+          const openedWindow =
+            window.open(
+              url,
+              '_blank'
+            );
+
+          if (!openedWindow) {
+
+            URL.revokeObjectURL(
+              url
+            );
+
+            this.versionErrorMessage =
+              'Браузер заблокировал открытие файла. Разрешите всплывающие окна для DocFlow.';
+
+            this.changeDetectorRef
+              .markForCheck();
+
+            return;
+          }
+
+          window.setTimeout(
+            () => {
+              URL.revokeObjectURL(
+                url
+              );
+            },
+            60000
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.versionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось открыть выбранную версию.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  downloadDocumentVersion(
+    version: DocumentVersion
+  ): void {
+
+    if (this.documentId === null) {
+      return;
+    }
+
+    this.versionErrorMessage = '';
+
+    this.documentVersionService
+      .getVersionFile(
+        this.documentId,
+        version.versionId
+      )
+      .subscribe({
+
+        next: blob => {
+
+          const url =
+            URL.createObjectURL(
+              blob
+            );
+
+          const link =
+            document.createElement(
+              'a'
+            );
+
+          link.href =
+            url;
+
+          link.download =
+            version.fileName
+            || `document-v${version.versionNumber}.pdf`;
+
+          document.body.appendChild(
+            link
+          );
+
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(
+            url
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.versionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось скачать выбранную версию.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
   loadApprovalState(): void {
 
     if (
       this.documentId === null
-      ||
-      !this.isSpecialistUser
     ) {
 
       this.approvalSteps = [];
@@ -2122,6 +2256,56 @@ export class DocumentDetails implements OnInit, OnDestroy {
     }
   }
 
+  get latestReturnedApprovalStep():
+    ApprovalStep | null {
+
+    const returnedSteps =
+      this.approvalSteps
+        .filter(
+          step =>
+            step.status === 'RETURNED'
+        )
+        .sort(
+          (
+            first,
+            second
+          ) =>
+            second.stepOrder
+            - first.stepOrder
+        );
+
+    return returnedSteps[0]
+      ?? null;
+  }
+
+
+  get hasNewVersionForResubmit():
+    boolean {
+
+    const currentVersion =
+      this.documentVersions
+        .find(
+          version =>
+            version.currentVersion
+        )
+      ?? null;
+
+    const returnedStep =
+      this.latestReturnedApprovalStep;
+
+    return (
+      currentVersion !== null
+      &&
+      returnedStep !== null
+      &&
+      returnedStep.documentVersionId !== null
+      &&
+      currentVersion.versionId
+        !== returnedStep.documentVersionId
+    );
+  }
+
+
   get canResubmitForReview(): boolean {
 
     return (
@@ -2143,6 +2327,8 @@ export class DocumentDetails implements OnInit, OnDestroy {
       this.documentId === null
       ||
       !this.canResubmitForReview
+      ||
+      !this.hasNewVersionForResubmit
       ||
       this.resubmittingDocument
     ) {

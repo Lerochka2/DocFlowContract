@@ -1163,6 +1163,25 @@
 
                 }
 
+
+                <div class="version-actions">
+
+                  <button
+                    type="button"
+                    (click)="openDocumentVersion(version)"
+                  >
+                    Открыть
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="downloadDocumentVersion(version)"
+                  >
+                    Скачать
+                  </button>
+
+                </div>
+
               </div>
 
             </article>
@@ -2190,6 +2209,20 @@
                         Решение по документу
                       </h3>
 
+                      @if (
+                        currentApprovalStep?.documentVersionNumber
+                      ) {
+
+                        <span class="approval-version-badge">
+                          Версия
+                          {{
+                            currentApprovalStep
+                              ?.documentVersionNumber
+                          }}
+                        </span>
+
+                      }
+
                     </div>
 
                     @if (
@@ -2494,7 +2527,11 @@
                         </strong>
 
                         <span>
-                          Исправьте указанные замечания и повторно направьте документ специалисту.
+                          @if (hasNewVersionForResubmit) {
+                            Новая редакция загружена. Документ можно повторно направить специалисту.
+                          } @else {
+                            Сначала загрузите исправленный PDF как новую версию документа.
+                          }
                         </span>
 
                       </div>
@@ -2502,11 +2539,17 @@
                       <button
                         class="decision-resubmit-button"
                         type="button"
-                        [disabled]="resubmittingDocument"
+                        [disabled]="
+                          resubmittingDocument
+                          ||
+                          !hasNewVersionForResubmit
+                        "
                         (click)="resubmitForReview()"
                       >
                         @if (resubmittingDocument) {
                           Направляем...
+                        } @else if (!hasNewVersionForResubmit) {
+                          Сначала загрузите новую версию
                         } @else {
                           Повторно направить на проверку
                         }

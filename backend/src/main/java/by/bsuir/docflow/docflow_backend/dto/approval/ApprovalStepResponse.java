@@ -14,6 +14,10 @@ public record ApprovalStepResponse(
 
         String documentStatus,
 
+        Long documentVersionId,
+
+        Integer documentVersionNumber,
+
         Integer stepOrder,
 
         String roleCode,
@@ -39,6 +43,5 @@ public record ApprovalStepResponse(
         String completedByUserFullName,
 
         LocalDateTime createdAt
-
 ) {
 }
