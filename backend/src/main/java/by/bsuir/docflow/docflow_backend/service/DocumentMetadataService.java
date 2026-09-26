@@ -72,6 +72,11 @@ public class DocumentMetadataService {
                 request
         );
 
+        validateApprovedDocumentChanges(
+                document,
+                request
+        );
+
         String newDocumentNumber =
                 normalizeText(
                         request.documentNumber()
@@ -258,15 +263,6 @@ public class DocumentMetadataService {
             Document document
     ) {
 
-        if (
-                document.getStatus()
-                        == DocumentStatus.APPROVED
-        ) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Согласованный документ нельзя изменять. Для изменения требуется новый цикл обработки"
-            );
-        }
 
         if (
                 document.getStatus()
@@ -310,6 +306,194 @@ public class DocumentMetadataService {
                     "Документ имеет историю отправки в СЭД. Реквизиты больше нельзя изменять"
             );
         }
+    }
+
+    private void validateApprovedDocumentChanges(
+            Document document,
+            DocumentMetadataRequest request
+    ) {
+
+        if (
+                document.getStatus()
+                        != DocumentStatus.APPROVED
+        ) {
+            return;
+        }
+
+        String newDocumentNumber =
+                normalizeText(
+                        request.documentNumber()
+                );
+
+        String newCurrency =
+                normalizeCurrency(
+                        request.currency()
+                );
+
+        String newSubject =
+                normalizeText(
+                        request.subject()
+                );
+
+        String newReferencedContractNumber =
+                normalizeText(
+                        request.referencedContractNumber()
+                );
+
+
+        if (
+                !isBlank(document.getDocumentNumber())
+                        &&
+                !Objects.equals(
+                        document.getDocumentNumber(),
+                        newDocumentNumber
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Номер документа"
+            );
+        }
+
+
+        if (
+                document.getDocumentDate() != null
+                        &&
+                !Objects.equals(
+                        document.getDocumentDate(),
+                        request.documentDate()
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Дата документа"
+            );
+        }
+
+
+        if (
+                document.getAmount() != null
+                        &&
+                (
+                        request.amount() == null
+                                ||
+                        document.getAmount()
+                                .compareTo(
+                                        request.amount()
+                                ) != 0
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Сумма"
+            );
+        }
+
+
+        if (
+                !isBlank(document.getCurrency())
+                        &&
+                !Objects.equals(
+                        document.getCurrency(),
+                        newCurrency
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Валюта"
+            );
+        }
+
+
+        if (
+                !isBlank(document.getSubject())
+                        &&
+                !Objects.equals(
+                        document.getSubject(),
+                        newSubject
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Предмет документа"
+            );
+        }
+
+
+        if (
+                document.getValidFrom() != null
+                        &&
+                !Objects.equals(
+                        document.getValidFrom(),
+                        request.validFrom()
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Дата начала действия"
+            );
+        }
+
+
+        if (
+                document.getValidTo() != null
+                        &&
+                !Objects.equals(
+                        document.getValidTo(),
+                        request.validTo()
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Дата окончания действия"
+            );
+        }
+
+
+        if (
+                !isBlank(
+                        document.getReferencedContractNumber()
+                )
+                        &&
+                !Objects.equals(
+                        document.getReferencedContractNumber(),
+                        newReferencedContractNumber
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Номер основного договора"
+            );
+        }
+
+
+        if (
+                document.getReferencedContractDate() != null
+                        &&
+                !Objects.equals(
+                        document.getReferencedContractDate(),
+                        request.referencedContractDate()
+                )
+        ) {
+            throw approvedFieldConflict(
+                    "Дата основного договора"
+            );
+        }
+    }
+
+
+    private ResponseStatusException approvedFieldConflict(
+            String fieldName
+    ) {
+
+        return new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "После согласования можно только заполнить отсутствующие реквизиты. "
+                        + "Поле «"
+                        + fieldName
+                        + "» уже зафиксировано"
+        );
+    }
+
+
+    private boolean isBlank(
+            String value
+    ) {
+
+        return value == null
+                || value.isBlank();
     }
 
     private void validate(

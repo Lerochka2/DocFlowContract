@@ -2416,3 +2416,256 @@
   cursor: wait;
   transform: none;
 }
+
+
+/* APPROVAL ASSIGNMENT */
+
+.decision-waiting {
+  border: 1px solid #e4d7f2;
+  color: #815ca0;
+  background: #f7effc;
+}
+
+.decision-progress {
+  border: 1px solid #cfdcf5;
+  color: #496eb7;
+  background: #eef4ff;
+}
+
+.approval-state-card {
+  margin-bottom: 16px;
+  padding: 15px 16px;
+  border: 1px solid #e1e5ee;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.approval-state-card.waiting {
+  border-color: #e5dcf0;
+  background:
+    linear-gradient(
+      115deg,
+      #fdfbff,
+      #f7f3fc
+    );
+}
+
+.approval-state-card.progress {
+  border-color: #d9e2f3;
+  background:
+    linear-gradient(
+      115deg,
+      #fbfdff,
+      #f3f7ff
+    );
+}
+
+.approval-state-card.loading {
+  color: #69758a;
+  background: #fafbfc;
+}
+
+.approval-state-card.warning {
+  border-color: #eadfc1;
+  color: #786335;
+  background: #fffaf0;
+}
+
+.approval-state-card > strong,
+.approval-state-card > span {
+  display: block;
+}
+
+.approval-state-card > span {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.approval-state-main {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1fr)
+    minmax(150px, 1fr)
+    minmax(150px, 1fr);
+  gap: 14px;
+}
+
+.approval-state-eyebrow,
+.approval-state-meta > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8c96a7;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+}
+
+.approval-state-main strong {
+  color: #3e4b61;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.approval-state-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(116, 100, 164, 0.12);
+}
+
+.approval-state-action p {
+  margin: 0;
+  color: #717b8e;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.approval-state-action button {
+  min-height: 37px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #5878cd;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.approval-state-action button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.approval-state-note {
+  margin-top: 13px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #69758a;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.approval-state-note.success {
+  color: #39725d;
+  background: #edf8f3;
+}
+
+@media (max-width: 760px) {
+
+  .approval-state-main {
+    grid-template-columns: 1fr;
+  }
+
+  .approval-state-action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .approval-state-action button {
+    width: 100%;
+  }
+}
+
+/* SED WORKFLOW FULL WIDTH */
+
+.workflow-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.sed-workflow-card {
+  grid-column: 1 / -1;
+  min-height: auto;
+}
+
+.sed-workflow-card .workflow-content {
+  min-width: 0;
+  width: 100%;
+}
+
+.sed-workflow-card .sed-readiness {
+  max-width: 760px;
+}
+
+.sed-workflow-card .decision-panel,
+.sed-workflow-card .comments-panel {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.approval-state-card,
+.approval-state-main,
+.approval-state-main > div,
+.decision-form,
+.decision-comment-field,
+.decision-history,
+.comments-panel,
+.comment-compose {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.approval-state-main {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+.approval-state-main > div {
+  overflow-wrap: anywhere;
+}
+
+.approval-state-main strong,
+.approval-state-main span {
+  overflow-wrap: anywhere;
+}
+
+.decision-actions {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+.decision-button {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.decision-comment-field textarea,
+.comment-compose textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1000px) {
+
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sed-workflow-card {
+    grid-column: auto;
+  }
+
+  .approval-state-main {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+
+  .approval-state-main,
+  .decision-actions {
+    grid-template-columns: 1fr;
+  }
+}

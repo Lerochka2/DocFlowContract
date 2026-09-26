@@ -37,7 +37,7 @@
 
   @if (isAdminView) {
 
-    <section class="statistics">
+    <section class="statistics admin-statistics">
 
       <article class="stat-card">
 
@@ -46,15 +46,8 @@
         </div>
 
         <div>
-
-          <span>
-            Всего маршрутов
-          </span>
-
-          <strong>
-            {{ documents.length }}
-          </strong>
-
+          <span>Всего маршрутов</span>
+          <strong>{{ documents.length }}</strong>
         </div>
 
       </article>
@@ -67,15 +60,8 @@
         </div>
 
         <div>
-
-          <span>
-            Менеджер по договорам
-          </span>
-
-          <strong>
-            {{ contractManagerCount }}
-          </strong>
-
+          <span>Менеджер по договорам</span>
+          <strong>{{ contractManagerCount }}</strong>
         </div>
 
       </article>
@@ -88,15 +74,8 @@
         </div>
 
         <div>
-
-          <span>
-            Юрист
-          </span>
-
-          <strong>
-            {{ lawyerCount }}
-          </strong>
-
+          <span>Юрист</span>
+          <strong>{{ lawyerCount }}</strong>
         </div>
 
       </article>
@@ -109,196 +88,74 @@
         </div>
 
         <div>
-
-          <span>
-            Успешно определены
-          </span>
-
-          <strong>
-            {{ routedCount }}
-          </strong>
-
+          <span>Активные маршруты</span>
+          <strong>{{ routedCount }}</strong>
         </div>
 
       </article>
 
     </section>
 
-  } @else {
 
-    <section class="statistics specialist-statistics">
+    <section class="route-rules">
 
-      <article class="stat-card">
+      <div class="rule-title">
+        <span>Логика маршрутизации</span>
+        <strong>Тип документа → получатель</strong>
+      </div>
 
-        <div class="stat-icon all">
-          ☰
-        </div>
+      <div class="rule">
+        <span class="rule-type">Договор</span>
+        <span class="arrow">→</span>
+        <span class="rule-target manager">
+          Менеджер по договорам
+        </span>
+      </div>
 
-        <div>
+      <div class="rule">
+        <span class="rule-type">
+          Доп. соглашение — изменение
+        </span>
+        <span class="arrow">→</span>
+        <span class="rule-target lawyer">
+          Юрист
+        </span>
+      </div>
 
-          <span>
-            Назначено мне
-          </span>
-
-          <strong>
-            {{ documents.length }}
-          </strong>
-
-        </div>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon lawyer">
-          !
-        </div>
-
-        <div>
-
-          <span>
-            Требуют обработки
-          </span>
-
-          <strong>
-            {{ actionableTaskCount }}
-          </strong>
-
-        </div>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon routed">
-          ✓
-        </div>
-
-        <div>
-
-          <span>
-            Подготовлены
-          </span>
-
-          <strong>
-            {{ completedSpecialistTaskCount }}
-          </strong>
-
-        </div>
-
-      </article>
+      <div class="rule">
+        <span class="rule-type">
+          Продление / приложение
+        </span>
+        <span class="arrow">→</span>
+        <span class="rule-target manager">
+          Менеджер по договорам
+        </span>
+      </div>
 
     </section>
 
-  }
 
+    <section class="filters admin-filters">
 
-  @if (isAdminView) {
+      <label class="search-field">
 
-  <section class="route-rules">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M16 16l5 5"/>
+        </svg>
 
-    <div class="rule-title">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Поиск по документу, номеру, предмету или маршруту..."
+        />
 
-      <span>
-        Логика маршрутизации
-      </span>
+      </label>
 
-      <strong>
-        Тип документа → получатель
-      </strong>
-
-    </div>
-
-
-    <div class="rule">
-
-      <span class="rule-type">
-        Договор
-      </span>
-
-      <span class="arrow">
-        →
-      </span>
-
-      <span class="rule-target manager">
-        Менеджер по договорам
-      </span>
-
-    </div>
-
-
-    <div class="rule">
-
-      <span class="rule-type">
-        Доп. соглашение — изменение
-      </span>
-
-      <span class="arrow">
-        →
-      </span>
-
-      <span class="rule-target lawyer">
-        Юрист
-      </span>
-
-    </div>
-
-
-    <div class="rule">
-
-      <span class="rule-type">
-        Продление / приложение
-      </span>
-
-      <span class="arrow">
-        →
-      </span>
-
-      <span class="rule-target manager">
-        Менеджер по договорам
-      </span>
-
-    </div>
-
-  </section>
-
-  }
-
-
-  <section
-    class="filters"
-    [class.specialist-filters]="!isAdminView"
-  >
-
-    <label class="search-field">
-
-      <svg viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="7"/>
-        <path d="M16 16l5 5"/>
-      </svg>
-
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        [placeholder]="
-          isAdminView
-            ? 'Поиск по документу, номеру, предмету или маршруту...'
-            : 'Поиск по документу, номеру или предмету...'
-        "
-      />
-
-    </label>
-
-
-    @if (isAdminView) {
 
       <label class="filter-field">
 
-        <span>
-          Получатель
-        </span>
+        <span>Получатель</span>
 
         <select
           [(ngModel)]="targetFilter"
@@ -318,191 +175,140 @@
 
       </label>
 
-    }
-
-
-    <button
-      class="reset-button"
-      type="button"
-      (click)="resetFilters()"
-    >
-      Сбросить
-    </button>
-
-  </section>
-
-
-  @if (loading) {
-
-    <section class="state-card">
-
-      <div class="loader"></div>
-
-      <strong>
-        @if (isAdminView) {
-          Загружаем маршруты
-        } @else {
-          Загружаем ваши задачи
-        }
-      </strong>
-
-      <span>
-        @if (isAdminView) {
-          Получаем документы и результаты автоматической маршрутизации...
-        } @else {
-          Получаем документы, назначенные вам для обработки...
-        }
-      </span>
-
-    </section>
-
-  } @else if (errorMessage) {
-
-    <section class="state-card error">
-
-      <div class="state-icon">
-        !
-      </div>
-
-      <strong>
-        Не удалось загрузить маршруты
-      </strong>
-
-      <span>
-        {{ errorMessage }}
-      </span>
 
       <button
+        class="reset-button"
         type="button"
-        (click)="loadRoutingWorkspace()"
+        (click)="resetFilters()"
       >
-        Повторить
+        Сбросить
       </button>
 
     </section>
 
-  } @else if (filteredDocuments.length === 0) {
 
-    <section class="state-card empty">
+    @if (loading) {
 
-      <div class="state-icon success">
-        ✓
-      </div>
+      <section class="state-card">
 
-      <strong>
-        @if (isAdminView) {
-          Маршруты не найдены
-        } @else {
-          Задач не найдено
-        }
-      </strong>
+        <div class="loader"></div>
 
-      <span>
-        @if (isAdminView) {
-          Для выбранных условий нет документов
-          с сформированным маршрутом.
-        } @else {
-          Сейчас нет назначенных вам документов,
-          соответствующих условиям поиска.
-        }
-      </span>
-
-    </section>
-
-  } @else {
-
-        <div
-      class="table-header"
-      [class.specialist-table]="!isAdminView"
-    >
-
-      <span>
-        Документ
-      </span>
-
-      <span>
-        Класс
-      </span>
-
-      @if (isAdminView) {
+        <strong>
+          Загружаем маршруты
+        </strong>
 
         <span>
-          Получатель
+          Получаем документы и результаты автоматической маршрутизации...
         </span>
 
-      }
+      </section>
 
-      <span>
-        Маршрутизация
-      </span>
+    } @else if (errorMessage) {
 
-      <span>
-        Статус документа
-      </span>
+      <section class="state-card error">
 
-      <span></span>
+        <div class="state-icon">
+          !
+        </div>
 
-    </div>
+        <strong>
+          Не удалось загрузить маршруты
+        </strong>
 
+        <span>
+          {{ errorMessage }}
+        </span>
 
-    <section class="routing-list">
-
-      @for (
-        document of filteredDocuments;
-        track document.documentId
-      ) {
-
-                <article
-          class="route-card"
-          [class.specialist-table]="!isAdminView"
+        <button
+          type="button"
+          (click)="loadRoutingWorkspace()"
         >
+          Повторить
+        </button>
 
-          <div class="document-cell">
+      </section>
 
-            <div class="file-icon">
-              PDF
+    } @else if (filteredDocuments.length === 0) {
+
+      <section class="state-card empty">
+
+        <div class="state-icon success">
+          ✓
+        </div>
+
+        <strong>
+          Маршруты не найдены
+        </strong>
+
+        <span>
+          Для выбранных условий нет документов с сформированным маршрутом.
+        </span>
+
+      </section>
+
+    } @else {
+
+      <div class="admin-table-header">
+
+        <span>Документ</span>
+        <span>Класс</span>
+        <span>Получатель</span>
+        <span>Маршрутизация</span>
+        <span>Статус документа</span>
+        <span></span>
+
+      </div>
+
+
+      <section class="routing-list">
+
+        @for (
+          document of filteredDocuments;
+          track document.documentId
+        ) {
+
+          <article class="admin-route-card">
+
+            <div class="document-cell">
+
+              <div class="file-icon">
+                PDF
+              </div>
+
+              <div class="document-info">
+
+                <span class="document-id">
+                  ДОКУМЕНТ #{{ document.documentId }}
+                </span>
+
+                <strong
+                  class="file-name"
+                  [title]="document.originalName || 'Документ'"
+                >
+                  {{ document.originalName || 'Документ' }}
+                </strong>
+
+                <span class="document-number">
+                  {{
+                    document.documentNumber
+                      ? '№ ' + document.documentNumber
+                      : 'Без номера'
+                  }}
+                </span>
+
+              </div>
+
             </div>
 
-            <div class="document-info">
 
-              <span class="document-id">
-                ДОКУМЕНТ #{{ document.documentId }}
-              </span>
+            <div class="type-cell">
+              <span>Тип документа</span>
 
-              <strong
-                class="file-name"
-                [title]="document.originalName || 'Документ'"
-              >
-                {{ document.originalName || 'Документ' }}
+              <strong>
+                {{ getDocumentTypeLabel(document.documentType) }}
               </strong>
-
-              <span class="document-number">
-                {{
-                  document.documentNumber
-                    ? '№ ' + document.documentNumber
-                    : 'Без номера'
-                }}
-              </span>
-
             </div>
 
-          </div>
-
-
-          <div class="type-cell">
-
-            <span>
-              Тип документа
-            </span>
-
-            <strong>
-              {{ getDocumentTypeLabel(document.documentType) }}
-            </strong>
-
-          </div>
-
-
-          @if (isAdminView) {
 
             <div class="target-cell">
 
@@ -525,10 +331,7 @@
               </span>
 
               <div>
-
-                <span>
-                  Получатель
-                </span>
+                <span>Получатель</span>
 
                 <strong>
                   {{
@@ -537,81 +340,461 @@
                     )
                   }}
                 </strong>
+              </div>
+
+            </div>
+
+
+            <div class="routing-cell">
+
+              <span class="routing-status">
+                <i></i>
+
+                {{
+                  getRoutingStatusLabel(
+                    document.routing?.routingStatus || null
+                  )
+                }}
+              </span>
+
+              <span class="routing-date">
+                {{
+                  formatDateTime(
+                    document.routing?.routedAt || null
+                  )
+                }}
+              </span>
+
+              @if (document.routing?.routingReason) {
+
+                <span
+                  class="routing-reason"
+                  [title]="document.routing?.routingReason || ''"
+                >
+                  {{ document.routing?.routingReason }}
+                </span>
+
+              }
+
+            </div>
+
+
+            <div class="document-status-cell">
+
+              <span>
+                {{
+                  getDocumentStatusLabel(
+                    document.status
+                  )
+                }}
+              </span>
+
+            </div>
+
+
+            <div class="action-cell">
+
+              <button
+                type="button"
+                (click)="openDocument(document.documentId)"
+              >
+                Открыть
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+
+      </section>
+
+    }
+
+  } @else {
+
+
+    <section class="statistics specialist-statistics">
+
+      <article class="stat-card">
+
+        <div class="stat-icon pending">
+          !
+        </div>
+
+        <div>
+          <span>Требуют решения</span>
+          <strong>{{ pendingTaskCount }}</strong>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon progress">
+          ↻
+        </div>
+
+        <div>
+          <span>В работе</span>
+          <strong>{{ inProgressTaskCount }}</strong>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon overdue">
+          ⏱
+        </div>
+
+        <div>
+          <span>Просрочено</span>
+          <strong>{{ overdueTaskCount }}</strong>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <section class="specialist-toolbar">
+
+      <label class="search-field">
+
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M16 16l5 5"/>
+        </svg>
+
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Поиск по документу, номеру, предмету или причине назначения..."
+        />
+
+      </label>
+
+
+      <div class="task-tabs">
+
+        <button
+          type="button"
+          [class.active]="specialistFilter === 'ALL'"
+          (click)="setSpecialistFilter('ALL')"
+        >
+          Все
+          <span>{{ tasks.length }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="specialistFilter === 'AVAILABLE'"
+          (click)="setSpecialistFilter('AVAILABLE')"
+        >
+          Свободные
+          <span>{{ pendingTaskCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="specialistFilter === 'MINE'"
+          (click)="setSpecialistFilter('MINE')"
+        >
+          В работе
+          <span>{{ inProgressTaskCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="specialistFilter === 'OVERDUE'"
+          (click)="setSpecialistFilter('OVERDUE')"
+        >
+          Просроченные
+          <span>{{ overdueTaskCount }}</span>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    @if (actionErrorMessage) {
+
+      <div class="inline-error">
+
+        <span>!</span>
+
+        <p>
+          {{ actionErrorMessage }}
+        </p>
+
+        <button
+          type="button"
+          (click)="loadRoutingWorkspace()"
+        >
+          Обновить очередь
+        </button>
+
+      </div>
+
+    }
+
+
+    @if (loading) {
+
+      <section class="state-card">
+
+        <div class="loader"></div>
+
+        <strong>
+          Загружаем очередь согласования
+        </strong>
+
+        <span>
+          Получаем документы, доступные для вашей роли, и ваши текущие задачи.
+        </span>
+
+      </section>
+
+    } @else if (errorMessage) {
+
+      <section class="state-card error">
+
+        <div class="state-icon">
+          !
+        </div>
+
+        <strong>
+          Не удалось загрузить очередь
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+        <button
+          type="button"
+          (click)="loadRoutingWorkspace()"
+        >
+          Повторить
+        </button>
+
+      </section>
+
+    } @else if (filteredTasks.length === 0) {
+
+      <section class="state-card empty">
+
+        <div class="state-icon success">
+          ✓
+        </div>
+
+        <strong>
+          Задач по выбранному фильтру нет
+        </strong>
+
+        <span>
+          Если появится новый документ для вашей роли, он автоматически отобразится здесь.
+        </span>
+
+      </section>
+
+    } @else {
+
+      <div class="task-table-header">
+
+        <span>Документ</span>
+        <span>Причина назначения</span>
+        <span>Срок</span>
+        <span>Ответственный</span>
+        <span>Статус</span>
+        <span></span>
+
+      </div>
+
+
+      <section class="routing-list">
+
+        @for (
+          task of filteredTasks;
+          track task.stepId
+        ) {
+
+          <article
+            class="task-card"
+            [class.overdue]="isOverdue(task)"
+          >
+
+            <div class="document-cell">
+
+              <div class="file-icon">
+                PDF
+              </div>
+
+              <div class="document-info">
+
+                <span class="document-id">
+                  ДОКУМЕНТ #{{ task.documentId }}
+                </span>
+
+                <strong
+                  class="file-name"
+                  [title]="task.summary?.originalName || 'Документ'"
+                >
+                  {{
+                    task.summary?.originalName
+                    || (
+                      task.documentNumber
+                        ? 'Документ № ' + task.documentNumber
+                        : 'Документ'
+                    )
+                  }}
+                </strong>
+
+                <span class="task-document-meta">
+                  {{ getDocumentTypeLabel(task.documentType) }}
+
+                  @if (task.documentNumber) {
+                    · № {{ task.documentNumber }}
+                  }
+                </span>
+
+                @if (task.summary?.subject) {
+
+                  <span
+                    class="task-subject"
+                    [title]="task.summary?.subject || ''"
+                  >
+                    {{ task.summary?.subject }}
+                  </span>
+
+                }
 
               </div>
 
             </div>
 
-          }
+
+            <div class="task-reason">
+
+              <span>Почему назначен</span>
+
+              <strong>
+                {{
+                  task.routingReason
+                  || 'Автоматическая маршрутизация'
+                }}
+              </strong>
+
+            </div>
 
 
-          <div class="routing-cell">
+            <div
+              class="task-due"
+              [class.overdue]="isOverdue(task)"
+              [class.soon]="isDueSoon(task)"
+            >
 
-            <span class="routing-status">
-              <i></i>
-
-              {{
-                getRoutingStatusLabel(
-                  document.routing?.routingStatus || null
-                )
-              }}
-            </span>
-
-            <span class="routing-date">
-              {{
-                formatDateTime(
-                  document.routing?.routedAt || null
-                )
-              }}
-            </span>
-
-            @if (document.routing?.routingReason) {
-
-              <span
-                class="routing-reason"
-                [title]="document.routing?.routingReason || ''"
-              >
-                {{ document.routing?.routingReason }}
+              <span>
+                Срок решения
               </span>
 
-            }
+              <strong>
+                {{ formatDateTime(task.dueAt) }}
+              </strong>
 
-          </div>
+              @if (isOverdue(task)) {
+                <small>Срок истёк</small>
+              } @else if (isDueSoon(task)) {
+                <small>Осталось менее суток</small>
+              }
 
-
-          <div class="document-status-cell">
-
-            <span>
-              {{
-                getDocumentStatusLabel(
-                  document.status
-                )
-              }}
-            </span>
-
-          </div>
+            </div>
 
 
-          <div class="action-cell">
+            <div class="task-assignee">
 
-            <button
-              type="button"
-              (click)="
-                openDocument(
-                  document.documentId
-                )
-              "
-            >
-              Открыть
-            </button>
+              <span>
+                Ответственный
+              </span>
 
-          </div>
+              <strong>
+                {{ getAssigneeLabel(task) }}
+              </strong>
 
-        </article>
+              @if (
+                task.status === 'IN_PROGRESS'
+                &&
+                task.startedAt
+              ) {
 
-      }
+                <small>
+                  В работе с
+                  {{ formatDateTime(task.startedAt) }}
+                </small>
 
-    </section>
+              } @else {
+
+                <small>
+                  Свободная задача
+                </small>
+
+              }
+
+            </div>
+
+
+            <div class="task-status">
+
+              <span
+                [class]="
+                  'status-badge ' +
+                  getApprovalStatusClass(task.status)
+                "
+              >
+                {{ getApprovalStatusLabel(task.status) }}
+              </span>
+
+            </div>
+
+
+            <div class="task-actions">
+
+              <button
+                type="button"
+                [class.primary]="task.status === 'PENDING'"
+                [disabled]="
+                  claimingStepId !== null
+                  &&
+                  claimingStepId !== task.stepId
+                "
+                (click)="handleTaskAction(task)"
+              >
+                @if (
+                  claimingStepId === task.stepId
+                ) {
+                  Берём...
+                } @else if (
+                  task.status === 'PENDING'
+                ) {
+                  Взять в работу
+                } @else {
+                  Открыть
+                }
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+
+      </section>
+
+    }
 
   }
 

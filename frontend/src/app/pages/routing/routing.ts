@@ -36,6 +36,27 @@ import {
   AuthService
 } from '../../core/auth/auth.service';
 
+import {
+  ApprovalService,
+  ApprovalStep
+} from '../../core/approval/approval.service';
+
+
+interface ApprovalTaskView
+  extends ApprovalStep {
+
+  summary:
+    DocumentSummary | null;
+}
+
+
+type SpecialistFilter =
+  | 'ALL'
+  | 'AVAILABLE'
+  | 'MINE'
+  | 'OVERDUE';
+
+
 @Component({
   selector: 'app-routing-workspace',
   standalone: true,
@@ -45,33 +66,73 @@ import {
   templateUrl: './routing.html',
   styleUrl: './routing.scss'
 })
-export class RoutingWorkspace implements OnInit {
+export class RoutingWorkspace
+  implements OnInit {
 
-  documents: DocumentSummary[] = [];
+  documents:
+    DocumentSummary[] = [];
+
+  tasks:
+    ApprovalTaskView[] = [];
 
   loading = true;
+
   errorMessage = '';
 
+  actionErrorMessage = '';
+
   searchQuery = '';
+
   targetFilter = 'ALL';
 
+  specialistFilter:
+    SpecialistFilter = 'ALL';
+
+  claimingStepId:
+    number | null = null;
+
+
   constructor(
-    private readonly workspaceService: WorkspaceService,
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly workspaceService:
+      WorkspaceService,
+
+    private readonly approvalService:
+      ApprovalService,
+
+    private readonly authService:
+      AuthService,
+
+    private readonly router:
+      Router,
+
+    private readonly changeDetectorRef:
+      ChangeDetectorRef
   ) {
   }
 
+
   ngOnInit(): void {
+
     this.loadRoutingWorkspace();
   }
 
-  private get currentRole(): string | null {
+
+  private get currentRole():
+    string | null {
 
     return this.authService
       .getCurrentUser()
       ?.role
+      ?? null;
+  }
+
+
+  private get currentUserId():
+    number | null {
+
+    return this.authService
+      .getCurrentUser()
+      ?.userId
       ?? null;
   }
 
@@ -93,27 +154,11 @@ export class RoutingWorkspace implements OnInit {
   }
 
 
-  get specialistRoleLabel(): string {
-
-    switch (this.currentRole) {
-
-      case 'LAWYER':
-        return 'Юрист';
-
-      case 'CONTRACT_MANAGER':
-        return 'Менеджер по договорам';
-
-      default:
-        return 'Специалист';
-    }
-  }
-
-
   get pageEyebrow(): string {
 
     return this.isAdminView
       ? 'АВТОМАТИЗИРОВАННАЯ МАРШРУТИЗАЦИЯ'
-      : 'РАБОЧЕЕ ПРОСТРАНСТВО СПЕЦИАЛИСТА';
+      : 'СОГЛАСОВАНИЕ ДОКУМЕНТОВ';
   }
 
 
@@ -121,7 +166,7 @@ export class RoutingWorkspace implements OnInit {
 
     return this.isAdminView
       ? 'Маршрутизация документов'
-      : 'Мои задачи';
+      : 'На согласовании';
   }
 
 
@@ -129,34 +174,40 @@ export class RoutingWorkspace implements OnInit {
 
     return this.isAdminView
       ? 'Контроль автоматически сформированных маршрутов на основе результата интеллектуальной классификации документов.'
-      : 'Документы, автоматически назначенные вам для проверки и подготовки к передаче в корпоративную СЭД.';
-  }
-  get actionableTaskCount(): number {
-
-    return this.documents.filter(
-      document =>
-        document.status !== 'READY_FOR_SED'
-        &&
-        document.status !== 'SENT_TO_SED'
-    ).length;
+      : 'Документы, которые требуют вашего решения. Возьмите свободный документ в работу, изучите его и завершите согласование.';
   }
 
-
-
-  get completedSpecialistTaskCount(): number {
-
-    return this.documents.filter(
-      document =>
-        document.status === 'READY_FOR_SED'
-        ||
-        document.status === 'SENT_TO_SED'
-    ).length;
-  }
 
   loadRoutingWorkspace(): void {
 
     this.loading = true;
+
     this.errorMessage = '';
+
+    this.actionErrorMessage = '';
+
+    if (this.isAdminView) {
+
+      this.loadAdminWorkspace();
+
+      return;
+    }
+
+    if (this.isSpecialistView) {
+
+      this.loadSpecialistWorkspace();
+
+      return;
+    }
+
+    this.loading = false;
+
+    this.errorMessage =
+      'Для текущей роли этот раздел недоступен.';
+  }
+
+
+  private loadAdminWorkspace(): void {
 
     this.workspaceService
       .getDocuments()
@@ -197,16 +248,11 @@ export class RoutingWorkspace implements OnInit {
           error: HttpErrorResponse
         ) => {
 
-          if (error.status === 0) {
-
-            this.errorMessage =
-              'Не удалось подключиться к серверу DocFlow.';
-
-          } else {
-
-            this.errorMessage =
-              'Не удалось загрузить данные маршрутизации.';
-          }
+          this.errorMessage =
+            this.resolveLoadError(
+              error,
+              'Не удалось загрузить данные маршрутизации.'
+            );
 
           this.changeDetectorRef
             .markForCheck();
@@ -214,7 +260,60 @@ export class RoutingWorkspace implements OnInit {
       });
   }
 
-  get filteredDocuments(): DocumentSummary[] {
+
+  private loadSpecialistWorkspace(): void {
+
+    this.approvalService
+      .getMyQueue()
+      .pipe(
+
+        switchMap(
+          steps =>
+            this.loadTaskSummaries(
+              steps
+            )
+        ),
+
+        finalize(
+          () => {
+
+            this.loading = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: tasks => {
+
+          this.tasks =
+            tasks;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.errorMessage =
+            this.resolveLoadError(
+              error,
+              'Не удалось загрузить очередь согласования.'
+            );
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  get filteredDocuments():
+    DocumentSummary[] {
 
     const query =
       this.searchQuery
@@ -225,11 +324,10 @@ export class RoutingWorkspace implements OnInit {
       document => {
 
         const matchesTarget =
-          !this.isAdminView
-          ||
           this.targetFilter === 'ALL'
           ||
-          document.routing?.routingTarget
+          document.routing
+            ?.routingTarget
             === this.targetFilter;
 
         if (!matchesTarget) {
@@ -264,38 +362,152 @@ export class RoutingWorkspace implements OnInit {
     );
   }
 
+
+  get filteredTasks():
+    ApprovalTaskView[] {
+
+    const query =
+      this.searchQuery
+        .trim()
+        .toLowerCase();
+
+    return this.tasks.filter(
+      task => {
+
+        if (
+          this.specialistFilter
+          === 'AVAILABLE'
+          &&
+          task.status !== 'PENDING'
+        ) {
+          return false;
+        }
+
+        if (
+          this.specialistFilter
+          === 'MINE'
+          &&
+          task.status !== 'IN_PROGRESS'
+        ) {
+          return false;
+        }
+
+        if (
+          this.specialistFilter
+          === 'OVERDUE'
+          &&
+          !this.isOverdue(task)
+        ) {
+          return false;
+        }
+
+        if (!query) {
+          return true;
+        }
+
+        const values = [
+          task.summary?.originalName,
+          task.documentNumber,
+          task.summary?.subject,
+          task.routingReason,
+          task.assignedUserFullName,
+          this.getDocumentTypeLabel(
+            task.documentType
+          ),
+          this.getApprovalStatusLabel(
+            task.status
+          )
+        ];
+
+        return values.some(
+          value =>
+            value
+              ?.toLowerCase()
+              .includes(query)
+        );
+      }
+    );
+  }
+
+
+  get pendingTaskCount(): number {
+
+    return this.tasks.filter(
+      task =>
+        task.status === 'PENDING'
+    ).length;
+  }
+
+
+  get inProgressTaskCount(): number {
+
+    return this.tasks.filter(
+      task =>
+        task.status === 'IN_PROGRESS'
+    ).length;
+  }
+
+
+  get overdueTaskCount(): number {
+
+    return this.tasks.filter(
+      task =>
+        this.isOverdue(task)
+    ).length;
+  }
+
+
   get contractManagerCount(): number {
 
     return this.documents.filter(
       document =>
-        document.routing?.routingTarget
+        document.routing
+          ?.routingTarget
           === 'CONTRACT_MANAGER'
     ).length;
   }
+
 
   get lawyerCount(): number {
 
     return this.documents.filter(
       document =>
-        document.routing?.routingTarget
+        document.routing
+          ?.routingTarget
           === 'LAWYER'
     ).length;
   }
+
 
   get routedCount(): number {
 
     return this.documents.filter(
       document =>
-        document.routing?.routingStatus
+        document.routing
+          ?.routingStatus
           === 'ROUTED'
     ).length;
   }
 
+
+  setSpecialistFilter(
+    filter: SpecialistFilter
+  ): void {
+
+    this.specialistFilter =
+      filter;
+  }
+
+
   resetFilters(): void {
 
     this.searchQuery = '';
+
     this.targetFilter = 'ALL';
+
+    this.specialistFilter = 'ALL';
   }
+
 
   openDocument(
     documentId: number
@@ -308,6 +520,265 @@ export class RoutingWorkspace implements OnInit {
       ]
     );
   }
+
+
+  handleTaskAction(
+    task: ApprovalTaskView
+  ): void {
+
+    if (
+      task.status === 'IN_PROGRESS'
+    ) {
+
+      this.openDocument(
+        task.documentId
+      );
+
+      return;
+    }
+
+    if (
+      task.status !== 'PENDING'
+    ) {
+
+      return;
+    }
+
+    this.claimTask(
+      task
+    );
+  }
+
+
+  private claimTask(
+    task: ApprovalTaskView
+  ): void {
+
+    if (
+      this.claimingStepId !== null
+    ) {
+      return;
+    }
+
+    this.claimingStepId =
+      task.stepId;
+
+    this.actionErrorMessage = '';
+
+    this.approvalService
+      .claim(
+        task.stepId
+      )
+      .pipe(
+
+        finalize(
+          () => {
+
+            this.claimingStepId = null;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: claimed => {
+
+          const index =
+            this.tasks.findIndex(
+              item =>
+                item.stepId
+                === claimed.stepId
+            );
+
+          if (index >= 0) {
+
+            this.tasks[index] = {
+              ...this.tasks[index],
+              ...claimed
+            };
+
+            this.tasks = [
+              ...this.tasks
+            ];
+          }
+
+          this.openDocument(
+            claimed.documentId
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          if (error.status === 409) {
+
+            this.actionErrorMessage =
+              'Эту задачу уже взял другой специалист или её состояние изменилось. Обновите очередь.';
+
+          } else if (
+            error.status === 403
+          ) {
+
+            this.actionErrorMessage =
+              'Эта задача назначена другой роли.';
+
+          } else {
+
+            this.actionErrorMessage =
+              this.resolveLoadError(
+                error,
+                'Не удалось взять документ в работу.'
+              );
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  isOverdue(
+    task: ApprovalTaskView
+  ): boolean {
+
+    if (
+      !task.dueAt
+      ||
+      (
+        task.status !== 'PENDING'
+        &&
+        task.status !== 'IN_PROGRESS'
+      )
+    ) {
+      return false;
+    }
+
+    const due =
+      new Date(
+        task.dueAt
+      );
+
+    if (
+      Number.isNaN(
+        due.getTime()
+      )
+    ) {
+      return false;
+    }
+
+    return due.getTime()
+      < Date.now();
+  }
+
+
+  isDueSoon(
+    task: ApprovalTaskView
+  ): boolean {
+
+    if (
+      !task.dueAt
+      ||
+      this.isOverdue(task)
+    ) {
+      return false;
+    }
+
+    const due =
+      new Date(
+        task.dueAt
+      );
+
+    if (
+      Number.isNaN(
+        due.getTime()
+      )
+    ) {
+      return false;
+    }
+
+    const remaining =
+      due.getTime()
+      - Date.now();
+
+    return remaining
+      <= 24 * 60 * 60 * 1000;
+  }
+
+
+  getAssigneeLabel(
+    task: ApprovalTaskView
+  ): string {
+
+    if (
+      task.assignedUserFullName
+    ) {
+      return task.assignedUserFullName;
+    }
+
+    return 'Не назначен';
+  }
+
+
+  getApprovalStatusLabel(
+    status: string | null
+  ): string {
+
+    switch (status) {
+
+      case 'PENDING':
+        return 'Ожидает специалиста';
+
+      case 'IN_PROGRESS':
+        return 'В работе';
+
+      case 'APPROVED':
+        return 'Согласован';
+
+      case 'RETURNED':
+        return 'Возвращён';
+
+      case 'REJECTED':
+        return 'Отклонён';
+
+      case 'CANCELLED':
+        return 'Отменён';
+
+      default:
+        return status || 'Нет данных';
+    }
+  }
+
+
+  getApprovalStatusClass(
+    status: string | null
+  ): string {
+
+    switch (status) {
+
+      case 'PENDING':
+        return 'pending';
+
+      case 'IN_PROGRESS':
+        return 'progress';
+
+      case 'APPROVED':
+        return 'approved';
+
+      case 'RETURNED':
+        return 'returned';
+
+      case 'REJECTED':
+        return 'rejected';
+
+      default:
+        return 'neutral';
+    }
+  }
+
 
   getDocumentTypeLabel(
     type: string | null
@@ -332,6 +803,7 @@ export class RoutingWorkspace implements OnInit {
     }
   }
 
+
   getRoutingTargetLabel(
     target: string | null
   ): string {
@@ -348,6 +820,7 @@ export class RoutingWorkspace implements OnInit {
         return target || 'Не определён';
     }
   }
+
 
   getRoutingStatusLabel(
     status: string | null
@@ -371,6 +844,7 @@ export class RoutingWorkspace implements OnInit {
         return status || 'Нет данных';
     }
   }
+
 
   getDocumentStatusLabel(
     status: string | null
@@ -396,6 +870,15 @@ export class RoutingWorkspace implements OnInit {
       case 'VERIFIED':
         return 'Проверен';
 
+      case 'APPROVED':
+        return 'Согласован';
+
+      case 'RETURNED_FOR_CORRECTION':
+        return 'На доработке';
+
+      case 'REJECTED':
+        return 'Отклонён';
+
       case 'READY_FOR_SED':
         return 'Готов к отправке';
 
@@ -412,6 +895,7 @@ export class RoutingWorkspace implements OnInit {
         return status || 'Неизвестно';
     }
   }
+
 
   getTargetClass(
     target: string | null
@@ -430,6 +914,7 @@ export class RoutingWorkspace implements OnInit {
     }
   }
 
+
   formatDateTime(
     value: string | null
   ): string {
@@ -438,41 +923,37 @@ export class RoutingWorkspace implements OnInit {
       return '—';
     }
 
-    const datePart =
-      value.substring(
-        0,
-        10
-      );
-
-    const dateMatch =
-      /^(\d{4})-(\d{2})-(\d{2})$/
-        .exec(
-          datePart
-        );
-
     const date =
-      dateMatch
-        ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
-        : datePart;
+      new Date(value);
 
-    const timeMatch =
-      /T(\d{2}):(\d{2})/
-        .exec(
-          value
-        );
-
-    if (!timeMatch) {
-      return date;
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return value;
     }
 
-    return `${date}, ${timeMatch[1]}:${timeMatch[2]}`;
+    return new Intl.DateTimeFormat(
+      'ru-RU',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+    ).format(date);
   }
+
 
   private loadSummaries(
     documents: WorkspaceDocument[]
   ): Observable<DocumentSummary[]> {
 
-    if (documents.length === 0) {
+    if (
+      documents.length === 0
+    ) {
 
       return of(
         [] as DocumentSummary[]
@@ -487,13 +968,16 @@ export class RoutingWorkspace implements OnInit {
               document.documentId
             )
             .pipe(
+
               catchError(
-                () => of(null)
+                () =>
+                  of(null)
               )
             )
       )
     )
       .pipe(
+
         map(
           summaries =>
             summaries.filter(
@@ -504,5 +988,73 @@ export class RoutingWorkspace implements OnInit {
             )
         )
       );
+  }
+
+
+  private loadTaskSummaries(
+    steps: ApprovalStep[]
+  ): Observable<ApprovalTaskView[]> {
+
+    if (
+      steps.length === 0
+    ) {
+
+      return of(
+        [] as ApprovalTaskView[]
+      );
+    }
+
+    return forkJoin(
+      steps.map(
+        step =>
+          this.workspaceService
+            .getDocumentSummary(
+              step.documentId
+            )
+            .pipe(
+
+              map(
+                summary => ({
+                  ...step,
+                  summary
+                })
+              ),
+
+              catchError(
+                () =>
+                  of({
+                    ...step,
+                    summary: null
+                  })
+              )
+            )
+      )
+    );
+  }
+
+
+  private resolveLoadError(
+    error: HttpErrorResponse,
+    fallback: string
+  ): string {
+
+    if (
+      error.status === 0
+    ) {
+      return 'Не удалось подключиться к серверу DocFlow.';
+    }
+
+    const message =
+      error.error?.message;
+
+    if (
+      typeof message === 'string'
+      &&
+      message.trim()
+    ) {
+      return message;
+    }
+
+    return fallback;
   }
 }

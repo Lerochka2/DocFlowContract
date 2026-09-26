@@ -9,6 +9,7 @@ import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingTarget;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +20,21 @@ import java.util.Optional;
 public class DocumentRoutingService {
 
     private final DocumentRouteRepository documentRouteRepository;
+
     private final AppUserRepository appUserRepository;
+
     private final NotificationService notificationService;
+
+    private final ApprovalWorkflowService approvalWorkflowService;
+
 
     public DocumentRoutingService(
             DocumentRouteRepository documentRouteRepository,
             AppUserRepository appUserRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            ApprovalWorkflowService approvalWorkflowService
     ) {
+
         this.documentRouteRepository =
                 documentRouteRepository;
 
@@ -35,7 +43,11 @@ public class DocumentRoutingService {
 
         this.notificationService =
                 notificationService;
+
+        this.approvalWorkflowService =
+                approvalWorkflowService;
     }
+
 
     @Transactional
     public DocumentRoute route(
@@ -43,12 +55,14 @@ public class DocumentRoutingService {
     ) {
 
         if (document == null) {
+
             throw new IllegalArgumentException(
                     "Документ для маршрутизации отсутствует"
             );
         }
 
         if (document.getDocumentType() == null) {
+
             throw new IllegalStateException(
                     "Невозможно маршрутизировать документ без определенного типа"
             );
@@ -58,10 +72,14 @@ public class DocumentRoutingService {
                 document.getDocumentType();
 
         RoutingTarget routingTarget =
-                determineTarget(documentType);
+                determineTarget(
+                        documentType
+                );
 
         String routingReason =
-                determineReason(documentType);
+                determineReason(
+                        documentType
+                );
 
         Optional<DocumentRoute> activeRoute =
                 documentRouteRepository
@@ -76,14 +94,27 @@ public class DocumentRoutingService {
                     activeRoute.get();
 
             boolean sameDocumentType =
-                    currentRoute.getDocumentType()
+                    currentRoute
+                            .getDocumentType()
                             == documentType;
 
             boolean sameTarget =
-                    currentRoute.getRoutingTarget()
+                    currentRoute
+                            .getRoutingTarget()
                             == routingTarget;
 
-            if (sameDocumentType && sameTarget) {
+            if (
+                    sameDocumentType
+                            &&
+                    sameTarget
+            ) {
+
+                approvalWorkflowService
+                        .ensureForRoute(
+                                document,
+                                currentRoute
+                        );
+
                 return currentRoute;
             }
 
@@ -99,7 +130,9 @@ public class DocumentRoutingService {
         DocumentRoute newRoute =
                 new DocumentRoute();
 
-        newRoute.setDocument(document);
+        newRoute.setDocument(
+                document
+        );
 
         newRoute.setDocumentType(
                 documentType
@@ -122,6 +155,12 @@ public class DocumentRoutingService {
                         newRoute
                 );
 
+        approvalWorkflowService
+                .ensureForRoute(
+                        document,
+                        savedRoute
+                );
+
         createAssignmentNotifications(
                 document,
                 savedRoute
@@ -130,6 +169,7 @@ public class DocumentRoutingService {
         return savedRoute;
     }
 
+
     private void createAssignmentNotifications(
             Document document,
             DocumentRoute route
@@ -137,13 +177,15 @@ public class DocumentRoutingService {
 
         if (
                 route.getRoutingTarget()
-                == null
+                        == null
         ) {
+
             return;
         }
 
         String roleCode =
-                route.getRoutingTarget().name();
+                route.getRoutingTarget()
+                        .name();
 
         List<AppUser> recipients =
                 appUserRepository
@@ -156,7 +198,10 @@ public class DocumentRoutingService {
                         document
                 );
 
-        for (AppUser recipient : recipients) {
+        for (
+                AppUser recipient
+                : recipients
+        ) {
 
             String dedupKey =
                     "DOCUMENT_ASSIGNED:"
@@ -168,7 +213,9 @@ public class DocumentRoutingService {
                             document,
                             NotificationType.DOCUMENT_ASSIGNED,
                             "Новый документ назначен вам",
-                            "Вам назначен документ: " + documentLabel + ".",
+                            "Вам назначен документ: "
+                                    + documentLabel
+                                    + ".",
                             "/documents/"
                                     + document.getId(),
                             "Открыть документ",
@@ -176,6 +223,7 @@ public class DocumentRoutingService {
                     );
         }
     }
+
 
     private String buildDocumentLabel(
             Document document
@@ -185,6 +233,7 @@ public class DocumentRoutingService {
                 switch (
                         document.getDocumentType()
                 ) {
+
                     case CONTRACT ->
                             "Договор";
 
@@ -201,10 +250,12 @@ public class DocumentRoutingService {
         if (
                 document.getDocumentNumber()
                         != null
-                && !document
-                .getDocumentNumber()
-                .isBlank()
+                        &&
+                !document
+                        .getDocumentNumber()
+                        .isBlank()
         ) {
+
             return typeLabel
                     + " №"
                     + document
@@ -215,11 +266,15 @@ public class DocumentRoutingService {
         return typeLabel;
     }
 
+
     private RoutingTarget determineTarget(
             DocumentType documentType
     ) {
 
-        return switch (documentType) {
+        return switch (
+                documentType
+        ) {
+
             case CONTRACT ->
                     RoutingTarget.CONTRACT_MANAGER;
 
@@ -234,11 +289,15 @@ public class DocumentRoutingService {
         };
     }
 
+
     private String determineReason(
             DocumentType documentType
     ) {
 
-        return switch (documentType) {
+        return switch (
+                documentType
+        ) {
+
             case CONTRACT ->
                     "Основной договор направлен менеджеру по договорам";
 

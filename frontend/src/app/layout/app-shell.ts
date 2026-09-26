@@ -205,7 +205,7 @@ export class AppShell
   getRoutingMenuLabel(): string {
 
     if (this.isSpecialist()) {
-      return 'Мои задачи';
+      return 'На согласовании';
     }
 
     return 'Маршрутизация';

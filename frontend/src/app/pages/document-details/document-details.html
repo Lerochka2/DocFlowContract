@@ -5,7 +5,7 @@
     type="button"
     (click)="backToDocuments()"
   >
-    ← Назад к документам
+    {{ backButtonLabel }}
   </button>
 
 
@@ -1741,7 +1741,7 @@
         </article>
 
 
-        <article class="panel workflow-card">
+        <article class="panel workflow-card sed-workflow-card">
 
           <div class="workflow-icon sed">
             S
@@ -1844,9 +1844,11 @@
                       document.status === 'VERIFIED'
                     ) {
                       @if (isOperatorUser) {
-                        Ожидает обработки специалистом
+                        Ожидает решения специалиста
+                      } @else if (isSpecialistUser) {
+                        На согласовании
                       } @else {
-                        Готов к подготовке
+                        Ожидает согласования
                       }
                     } @else {
                       Пока не готов
@@ -1864,6 +1866,16 @@
 
               @if (
                 canMakeDocumentDecision
+                ||
+                (
+                  isSpecialistUser
+                  &&
+                  (
+                    document.status === 'VERIFIED'
+                    ||
+                    document.status === 'LINKED'
+                  )
+                )
                 ||
                 canResubmitForReview
                 ||
@@ -1886,7 +1898,35 @@
 
                     </div>
 
-                    @if (document.status === 'APPROVED') {
+                    @if (
+                      isSpecialistUser
+                      &&
+                      currentApprovalStep?.status === 'PENDING'
+                    ) {
+
+                      <span class="decision-status decision-waiting">
+                        Ожидает начала
+                      </span>
+
+                    } @else if (
+                      isSpecialistUser
+                      &&
+                      currentApprovalStep?.status === 'IN_PROGRESS'
+                    ) {
+
+                      <span class="decision-status decision-progress">
+                        @if (isApprovalAssignedToCurrentUser) {
+                          У вас в работе
+                        } @else {
+                          В работе
+                        }
+                      </span>
+
+                    } @else if (
+                      document.status === 'READY_FOR_SED'
+                      ||
+                      document.status === 'APPROVED'
+                    ) {
 
                       <span class="decision-status decision-approved">
                         Согласован
@@ -1910,6 +1950,168 @@
                     }
 
                   </div>
+
+
+                  @if (
+                    isSpecialistUser
+                    &&
+                    (
+                      document.status === 'VERIFIED'
+                      ||
+                      document.status === 'LINKED'
+                    )
+                  ) {
+
+                    @if (loadingApprovalState) {
+
+                      <div class="approval-state-card loading">
+
+                        <strong>
+                          Загружаем состояние согласования
+                        </strong>
+
+                        <span>
+                          Проверяем назначение и ответственного специалиста...
+                        </span>
+
+                      </div>
+
+                    } @else if (currentApprovalStep) {
+
+                      <div
+                        [class]="
+                          currentApprovalStep.status === 'PENDING'
+                            ? 'approval-state-card waiting'
+                            : 'approval-state-card progress'
+                        "
+                      >
+
+                        <div class="approval-state-main">
+
+                          <div>
+
+                            <span class="approval-state-eyebrow">
+                              ТЕКУЩИЙ ЭТАП
+                            </span>
+
+                            <strong>
+                              {{
+                                getApprovalStepStatusLabel(
+                                  currentApprovalStep.status
+                                )
+                              }}
+                            </strong>
+
+                          </div>
+
+                          <div class="approval-state-meta">
+
+                            <span>
+                              Ответственный
+                            </span>
+
+                            <strong>
+                              {{ approvalAssigneeLabel }}
+                            </strong>
+
+                          </div>
+
+                          <div class="approval-state-meta">
+
+                            <span>
+                              Срок решения
+                            </span>
+
+                            <strong>
+                              {{ formatDateTime(currentApprovalStep.dueAt) }}
+                            </strong>
+
+                          </div>
+
+                        </div>
+
+
+                        @if (canClaimApprovalStep) {
+
+                          <div class="approval-state-action">
+
+                            <p>
+                              Документ пока свободен. Чтобы принять решение,
+                              сначала закрепите его за собой.
+                            </p>
+
+                            <button
+                              type="button"
+                              [disabled]="claimingApproval"
+                              (click)="claimApprovalStep()"
+                            >
+                              @if (claimingApproval) {
+                                Берём в работу...
+                              } @else {
+                                Взять в работу
+                              }
+                            </button>
+
+                          </div>
+
+                        } @else if (
+                          isApprovalAssignedToCurrentUser
+                        ) {
+
+                          <div class="approval-state-note success">
+                            Документ закреплён за вами. После проверки выберите решение ниже.
+                          </div>
+
+                        } @else if (
+                          currentApprovalStep.status === 'IN_PROGRESS'
+                        ) {
+
+                          <div class="approval-state-note">
+                            Документ уже находится в работе у
+                            <strong>{{ approvalAssigneeLabel }}</strong>.
+                            Принять решение может только ответственный специалист.
+                          </div>
+
+                        }
+
+                      </div>
+
+                    } @else {
+
+                      <div class="approval-state-card warning">
+
+                        <strong>
+                          Активный этап согласования не найден
+                        </strong>
+
+                        <span>
+                          Обновите страницу. Если сообщение останется,
+                          необходимо проверить маршрут документа.
+                        </span>
+
+                      </div>
+
+                    }
+
+
+                    @if (approvalErrorMessage) {
+
+                      <div class="decision-message decision-message-error">
+                        {{ approvalErrorMessage }}
+                      </div>
+
+                    }
+
+
+                    @if (approvalSuccessMessage) {
+
+                      <div class="decision-message decision-message-success">
+                        {{ approvalSuccessMessage }}
+                      </div>
+
+                    }
+
+                  }
 
 
                   @if (canMakeDocumentDecision) {
@@ -2351,7 +2553,7 @@
               ) {
 
                 <div class="sed-help">
-                  Подготовку документа выполняет назначенный специалист.
+                  Документ находится на согласовании. После положительного решения делопроизводитель проверит реквизиты и подготовит документ к отправке.
                 </div>
 
               }

@@ -319,8 +319,7 @@ public class SecurityConfig {
                         )
                         .hasAnyRole(
                                 "ADMIN",
-                                "LAWYER",
-                                "CONTRACT_MANAGER"
+                                "DOCUMENT_OPERATOR"
                         )
 
                         /*
@@ -343,6 +342,43 @@ public class SecurityConfig {
                                 "/api/profile/**"
                         )
                         .authenticated()
+                        /*
+                         * Approval workflow read access
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/approval/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR",
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
+
+                        /*
+                         * Create approval flow from current route
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/approval/documents/*/initialize"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
+                         * Specialist takes approval step
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/approval/steps/*/claim"
+                        )
+                        .hasAnyRole(
+                                "LAWYER",
+                                "CONTRACT_MANAGER"
+                        )
                         /*
                          * Notifications
                          */

@@ -47,6 +47,11 @@ import {
 } from '../../core/auth/auth.service';
 
 import {
+  ApprovalService,
+  ApprovalStep
+} from '../../core/approval/approval.service';
+
+import {
   DocumentAuditTimelineComponent
 } from './document-audit-timeline/document-audit-timeline';
 
@@ -115,6 +120,14 @@ export class DocumentDetails implements OnInit, OnDestroy {
   decisionErrorMessage = '';
   decisionSuccessMessage = '';
 
+  approvalSteps: ApprovalStep[] = [];
+
+  loadingApprovalState = false;
+  claimingApproval = false;
+
+  approvalErrorMessage = '';
+  approvalSuccessMessage = '';
+
   documentComments: DocumentCommentResponse[] = [];
   newComment = '';
 
@@ -159,6 +172,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly workspaceService: WorkspaceService,
     private readonly authService: AuthService,
+    private readonly approvalService: ApprovalService,
     private readonly http: HttpClient,
     private readonly sanitizer: DomSanitizer,
     private readonly changeDetectorRef: ChangeDetectorRef
@@ -230,6 +244,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.loadDocumentPreview();
           this.loadDecisionHistory();
+          this.loadApprovalState();
           this.loadDocumentComments();
           this.loadDocumentAudit();
 
@@ -478,6 +493,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           );
 
           this.loadDecisionHistory();
+          this.loadApprovalState();
           this.loadDocumentComments();
           this.loadDocumentAudit();
 
@@ -543,6 +559,15 @@ export class DocumentDetails implements OnInit, OnDestroy {
   }
 
 
+  private get currentUserId(): number | null {
+
+    return this.authService
+      .getCurrentUser()
+      ?.userId
+      ?? null;
+  }
+
+
   get isAdminUser(): boolean {
 
     return this.currentRole
@@ -589,19 +614,26 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   get canEditMetadataByRole(): boolean {
 
-    if (
-      this.isAdminUser
-      ||
-      this.isSpecialistUser
-    ) {
+    if (this.isAdminUser) {
       return true;
+    }
+
+    if (this.isSpecialistUser) {
+
+      return this
+        .isApprovalAssignedToCurrentUser;
     }
 
     return (
       this.isOperatorUser
       &&
-      this.document?.status
-        === 'RETURNED_FOR_CORRECTION'
+      (
+        this.document?.status
+          === 'RETURNED_FOR_CORRECTION'
+        ||
+        this.document?.status
+          === 'APPROVED'
+      )
     );
   }
 
@@ -611,7 +643,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
     return (
       this.isAdminUser
       ||
-      this.isSpecialistUser
+      this.isOperatorUser
     );
   }
 
@@ -1341,6 +1373,279 @@ export class DocumentDetails implements OnInit, OnDestroy {
       });
   }
 
+  loadApprovalState(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.isSpecialistUser
+    ) {
+
+      this.approvalSteps = [];
+
+      return;
+    }
+
+    this.loadingApprovalState = true;
+
+    this.approvalErrorMessage = '';
+
+    this.approvalService
+      .getDocumentSteps(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingApprovalState =
+              false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: steps => {
+
+          this.approvalSteps =
+            steps;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.approvalSteps = [];
+
+          this.approvalErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось получить состояние согласования.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  get currentApprovalStep():
+    ApprovalStep | null {
+
+    if (
+      !this.isSpecialistUser
+      ||
+      !this.currentRole
+    ) {
+      return null;
+    }
+
+    const activeSteps =
+      this.approvalSteps
+        .filter(
+          step =>
+            step.roleCode
+              === this.currentRole
+            &&
+            (
+              step.status === 'PENDING'
+              ||
+              step.status === 'IN_PROGRESS'
+            )
+        )
+        .sort(
+          (
+            first,
+            second
+          ) =>
+            first.stepOrder
+            - second.stepOrder
+        );
+
+    return activeSteps[0]
+      ?? null;
+  }
+
+
+  get canClaimApprovalStep(): boolean {
+
+    const step =
+      this.currentApprovalStep;
+
+    return (
+      this.isSpecialistUser
+      &&
+      (
+        this.document?.status === 'VERIFIED'
+        ||
+        this.document?.status === 'LINKED'
+      )
+      &&
+      step !== null
+      &&
+      step.status === 'PENDING'
+      &&
+      step.assignedUserId === null
+    );
+  }
+
+
+  get isApprovalAssignedToCurrentUser():
+    boolean {
+
+    const step =
+      this.currentApprovalStep;
+
+    const userId =
+      this.currentUserId;
+
+    return (
+      step !== null
+      &&
+      userId !== null
+      &&
+      step.status === 'IN_PROGRESS'
+      &&
+      step.assignedUserId === userId
+    );
+  }
+
+
+  get approvalAssigneeLabel():
+    string {
+
+    const step =
+      this.currentApprovalStep;
+
+    if (!step) {
+      return 'Не назначен';
+    }
+
+    return step.assignedUserFullName
+      || 'Не назначен';
+  }
+
+
+  getApprovalStepStatusLabel(
+    status: string | null
+  ): string {
+
+    switch (status) {
+
+      case 'PENDING':
+        return 'Ожидает специалиста';
+
+      case 'IN_PROGRESS':
+        return 'В работе';
+
+      case 'APPROVED':
+        return 'Согласован';
+
+      case 'RETURNED':
+        return 'Возвращён на доработку';
+
+      case 'REJECTED':
+        return 'Отклонён';
+
+      case 'CANCELLED':
+        return 'Отменён';
+
+      default:
+        return status || 'Нет данных';
+    }
+  }
+
+
+  claimApprovalStep(): void {
+
+    const step =
+      this.currentApprovalStep;
+
+    if (
+      !step
+      ||
+      !this.canClaimApprovalStep
+      ||
+      this.claimingApproval
+    ) {
+      return;
+    }
+
+    this.claimingApproval = true;
+
+    this.approvalErrorMessage = '';
+    this.approvalSuccessMessage = '';
+
+    this.approvalService
+      .claim(
+        step.stepId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.claimingApproval =
+              false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: claimed => {
+
+          this.approvalSteps =
+            this.approvalSteps.map(
+              item =>
+                item.stepId
+                  === claimed.stepId
+                    ? claimed
+                    : item
+            );
+
+          this.approvalSuccessMessage =
+            'Документ взят в работу. Теперь вы можете принять решение по согласованию.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          if (error.status === 409) {
+
+            this.approvalErrorMessage =
+              'Документ уже взят другим специалистом или состояние задачи изменилось.';
+
+            this.loadApprovalState();
+
+          } else {
+
+            this.approvalErrorMessage =
+              this.extractBackendMessage(
+                error
+              )
+              ?? 'Не удалось взять документ в работу.';
+          }
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
   loadDecisionHistory(): void {
 
     if (
@@ -1392,11 +1697,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
   get canMakeDocumentDecision(): boolean {
 
     return (
-      (
-        this.isAdminUser
-        ||
-        this.isSpecialistUser
-      )
+      this.isSpecialistUser
+      &&
+      this.isApprovalAssignedToCurrentUser
       &&
       (
         this.document?.status === 'VERIFIED'
@@ -1498,7 +1801,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           ) {
 
             this.decisionSuccessMessage =
-              'Документ согласован специалистом.';
+              'Документ согласован. Теперь делопроизводитель может заполнить недостающие реквизиты и подготовить документ к отправке в СЭД.';
 
           } else if (
             decision === 'RETURN_FOR_CORRECTION'
@@ -1982,10 +2285,41 @@ export class DocumentDetails implements OnInit, OnDestroy {
         return 'Перед отправкой документ необходимо привязать к основному договору.';
 
       case 'LINKED':
-        return this.isOperatorUser ? 'Документ связан с договором и передан назначенному специалисту для проверки и подготовки.' : 'Документ связан с договором и может быть подготовлен к отправке.';
-
       case 'VERIFIED':
-        return this.isOperatorUser ? 'Документ проверен и передан назначенному специалисту для подготовки.' : 'Документ проверен и может быть подготовлен к отправке.';
+
+        if (this.isOperatorUser) {
+
+          return 'Документ находится на согласовании у назначенного специалиста.';
+        }
+
+        if (this.isSpecialistUser) {
+
+          if (
+            this.canClaimApprovalStep
+          ) {
+
+            return 'Документ ожидает, пока специалист возьмёт его в работу.';
+          }
+
+          if (
+            this.isApprovalAssignedToCurrentUser
+          ) {
+
+            return 'Документ находится у вас в работе. После положительного решения система автоматически проверит готовность к отправке в СЭД.';
+          }
+
+          if (
+            this.currentApprovalStep
+              ?.assignedUserFullName
+          ) {
+
+            return `Документ уже находится в работе у специалиста: ${this.currentApprovalStep.assignedUserFullName}.`;
+          }
+
+          return 'Документ находится на согласовании.';
+        }
+
+        return 'Документ находится на согласовании.';
 
       case 'READY_FOR_SED':
         return 'Все проверки пройдены. Документ готов к отправке в СЭД.';
@@ -2093,8 +2427,6 @@ export class DocumentDetails implements OnInit, OnDestroy {
     }
 
     if (
-      this.document.status === 'APPROVED'
-      ||
       this.document.status === 'REJECTED'
       ||
       this.document.status === 'READY_FOR_SED'
@@ -2301,7 +2633,24 @@ export class DocumentDetails implements OnInit, OnDestroy {
       });
   }
 
+  get backButtonLabel(): string {
+
+    return this.isSpecialistUser
+      ? '← Назад к согласованию'
+      : '← Назад к документам';
+  }
+
+
   backToDocuments(): void {
+
+    if (this.isSpecialistUser) {
+
+      void this.router.navigate(
+        ['/routing']
+      );
+
+      return;
+    }
 
     void this.router.navigate(
       ['/documents']
