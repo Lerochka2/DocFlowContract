@@ -1052,6 +1052,300 @@
     </section>
 
 
+    <article class="panel version-panel">
+
+      <div class="version-heading">
+
+        <div>
+
+          <span class="section-eyebrow">
+            РЕДАКЦИИ ДОКУМЕНТА
+          </span>
+
+          <h2>
+            Версии документа
+          </h2>
+
+          <p>
+            Предыдущие редакции сохраняются в истории и не перезаписываются.
+          </p>
+
+        </div>
+
+        @if (documentVersions.length > 0) {
+
+          <span class="version-count">
+            {{ documentVersions.length }}
+          </span>
+
+        }
+
+      </div>
+
+
+      @if (loadingVersions) {
+
+        <div class="version-state">
+          Загружаем историю версий...
+        </div>
+
+      } @else if (versionErrorMessage && documentVersions.length === 0) {
+
+        <div class="version-message error">
+          {{ versionErrorMessage }}
+        </div>
+
+      } @else if (documentVersions.length > 0) {
+
+        <div class="version-list">
+
+          @for (
+            version of documentVersions;
+            track version.versionId
+          ) {
+
+            <article
+              class="version-item"
+              [class.current]="version.currentVersion"
+            >
+
+              <div class="version-number">
+                v{{ version.versionNumber }}
+              </div>
+
+              <div class="version-info">
+
+                <div class="version-title">
+
+                  <strong>
+                    Версия {{ version.versionNumber }}
+                  </strong>
+
+                  @if (version.currentVersion) {
+
+                    <span class="version-current">
+                      Текущая
+                    </span>
+
+                  }
+
+                </div>
+
+                <span class="version-file-name">
+                  {{ version.fileName }}
+                </span>
+
+                <div class="version-meta">
+
+                  <span>
+                    {{ formatFileSize(version.sizeBytes) }}
+                  </span>
+
+                  <span>
+                    {{ formatDateTime(version.createdAt) }}
+                  </span>
+
+                  @if (version.createdByFullName) {
+
+                    <span>
+                      {{ version.createdByFullName }}
+                    </span>
+
+                  }
+
+                </div>
+
+                @if (version.changeNote) {
+
+                  <p class="version-note">
+                    {{ version.changeNote }}
+                  </p>
+
+                }
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="version-state">
+          История версий пока отсутствует.
+        </div>
+
+      }
+
+
+      @if (canUploadDocumentVersion) {
+
+        <div class="version-upload">
+
+          <div class="version-upload-heading">
+
+            <strong>
+              Загрузить исправленную редакцию
+            </strong>
+
+            <span>
+              Документ был возвращён специалистом на доработку.
+              Выберите исправленный файл перед повторной отправкой.
+            </span>
+
+          </div>
+
+
+          <div class="version-file-section">
+
+            <span class="version-file-label">
+              Новый файл
+            </span>
+
+            <label
+              class="version-file-picker"
+              [class.selected]="selectedVersionFile !== null"
+              [class.disabled]="uploadingVersion"
+            >
+
+              <input
+                class="version-file-native"
+                type="file"
+                accept=".pdf"
+                [disabled]="uploadingVersion"
+                (change)="onVersionFileSelected($event)"
+              />
+
+              <span class="version-file-icon">
+
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 16V5M12 5L8 9M12 5L16 9M5 15V18C5 19.1 5.9 20 7 20H17C18.1 20 19 19.1 19 18V15"
+                  ></path>
+                </svg>
+
+              </span>
+
+
+              <span class="version-file-content">
+
+                @if (selectedVersionFile) {
+
+                  <strong>
+                    {{ selectedVersionFile.name }}
+                  </strong>
+
+                  <span>
+                    {{
+                      formatFileSize(
+                        selectedVersionFile.size
+                      )
+                    }}
+                    · файл готов к загрузке
+                  </span>
+
+                } @else {
+
+                  <strong>
+                    Выберите исправленный документ
+                  </strong>
+
+                  <span>
+                    PDF · до 20 МБ
+                  </span>
+
+                }
+
+              </span>
+
+
+              <span class="version-file-action">
+
+                @if (selectedVersionFile) {
+                  Заменить
+                } @else {
+                  Выбрать файл
+                }
+
+              </span>
+
+            </label>
+
+          </div>
+
+
+          <label class="version-note-field">
+
+            <span>
+              Что было исправлено
+            </span>
+
+            <textarea
+              [(ngModel)]="versionChangeNote"
+              rows="3"
+              maxlength="1000"
+              [disabled]="uploadingVersion"
+              placeholder="Например: исправлен предмет соглашения и уточнены условия договора"
+            ></textarea>
+
+          </label>
+
+
+          @if (versionErrorMessage) {
+
+            <div class="version-message error">
+              {{ versionErrorMessage }}
+            </div>
+
+          }
+
+
+          @if (versionSuccessMessage) {
+
+            <div class="version-message success">
+              {{ versionSuccessMessage }}
+            </div>
+
+          }
+
+
+          <button
+            class="version-upload-button"
+            type="button"
+            [disabled]="
+              uploadingVersion
+              ||
+              !selectedVersionFile
+            "
+            (click)="uploadDocumentVersion()"
+          >
+
+            @if (uploadingVersion) {
+              Загружаем...
+            } @else {
+              Загрузить новую версию
+            }
+
+          </button>
+
+        </div>
+
+      } @else if (versionSuccessMessage) {
+
+        <div class="version-message success">
+          {{ versionSuccessMessage }}
+        </div>
+
+      }
+
+    </article>
+
+
     <section class="workflow-section">
 
       <div class="workflow-section-heading">

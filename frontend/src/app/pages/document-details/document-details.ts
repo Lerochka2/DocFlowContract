@@ -52,6 +52,11 @@ import {
 } from '../../core/approval/approval.service';
 
 import {
+  DocumentVersion,
+  DocumentVersionService
+} from '../../core/versioning/document-version.service';
+
+import {
   DocumentAuditTimelineComponent
 } from './document-audit-timeline/document-audit-timeline';
 
@@ -128,6 +133,17 @@ export class DocumentDetails implements OnInit, OnDestroy {
   approvalErrorMessage = '';
   approvalSuccessMessage = '';
 
+  documentVersions: DocumentVersion[] = [];
+
+  loadingVersions = false;
+  uploadingVersion = false;
+
+  selectedVersionFile: File | null = null;
+  versionChangeNote = '';
+
+  versionErrorMessage = '';
+  versionSuccessMessage = '';
+
   documentComments: DocumentCommentResponse[] = [];
   newComment = '';
 
@@ -173,6 +189,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
     private readonly workspaceService: WorkspaceService,
     private readonly authService: AuthService,
     private readonly approvalService: ApprovalService,
+    private readonly documentVersionService: DocumentVersionService,
     private readonly http: HttpClient,
     private readonly sanitizer: DomSanitizer,
     private readonly changeDetectorRef: ChangeDetectorRef
@@ -245,6 +262,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
           this.loadDocumentPreview();
           this.loadDecisionHistory();
           this.loadApprovalState();
+          this.loadDocumentVersions();
           this.loadDocumentComments();
           this.loadDocumentAudit();
 
@@ -494,6 +512,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
           this.loadDecisionHistory();
           this.loadApprovalState();
+          this.loadDocumentVersions();
           this.loadDocumentComments();
           this.loadDocumentAudit();
 
@@ -1372,6 +1391,248 @@ export class DocumentDetails implements OnInit, OnDestroy {
         }
       });
   }
+
+  loadDocumentVersions(): void {
+
+    if (
+      this.documentId === null
+      ||
+      this.loadingVersions
+    ) {
+      return;
+    }
+
+    this.loadingVersions = true;
+    this.versionErrorMessage = '';
+
+    this.documentVersionService
+      .getVersions(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.loadingVersions = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: versions => {
+
+          this.documentVersions =
+            versions;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.documentVersions = [];
+
+          this.versionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось загрузить историю версий.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  get canUploadDocumentVersion(): boolean {
+
+    return (
+      (
+        this.isAdminUser
+        ||
+        this.isOperatorUser
+      )
+      &&
+      this.document?.status
+        === 'RETURNED_FOR_CORRECTION'
+    );
+  }
+
+
+  onVersionFileSelected(
+    event: Event
+  ): void {
+
+    const input =
+      event.target as HTMLInputElement;
+
+    const file =
+      input.files?.item(0)
+      ?? null;
+
+    this.selectedVersionFile =
+      file;
+
+    this.versionErrorMessage = '';
+    this.versionSuccessMessage = '';
+
+    this.changeDetectorRef
+      .markForCheck();
+  }
+
+
+  uploadDocumentVersion(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canUploadDocumentVersion
+      ||
+      !this.selectedVersionFile
+      ||
+      this.uploadingVersion
+    ) {
+      return;
+    }
+
+    const file =
+      this.selectedVersionFile;
+
+    const maxSize =
+      20 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+
+      this.versionErrorMessage =
+        'Размер файла не должен превышать 20 МБ.';
+
+      return;
+    }
+
+    const allowed =
+      /\.pdf$/i
+        .test(
+          file.name
+        );
+
+    if (!allowed) {
+
+      this.versionErrorMessage =
+        'Поддерживаются только PDF-файлы.';
+
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Загрузить «${file.name}» как новую версию документа?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.uploadingVersion = true;
+    this.versionErrorMessage = '';
+    this.versionSuccessMessage = '';
+
+    const note =
+      this.versionChangeNote
+        .trim();
+
+    this.documentVersionService
+      .uploadVersion(
+        this.documentId,
+        file,
+        note || null
+      )
+      .pipe(
+        finalize(
+          () => {
+
+            this.uploadingVersion = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: version => {
+
+          this.selectedVersionFile = null;
+          this.versionChangeNote = '';
+
+          this.versionSuccessMessage =
+            `Версия ${version.versionNumber} успешно загружена.`;
+
+          this.loadDocumentVersions();
+          this.loadDocumentPreview();
+          this.refreshDocumentSummary();
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.versionErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось загрузить новую версию документа.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  formatFileSize(
+    bytes: number | null
+  ): string {
+
+    if (
+      bytes === null
+      ||
+      bytes === undefined
+    ) {
+      return '—';
+    }
+
+    if (bytes < 1024) {
+      return `${bytes} Б`;
+    }
+
+    if (bytes < 1024 * 1024) {
+
+      return `${
+        (
+          bytes / 1024
+        ).toFixed(1)
+      } КБ`;
+    }
+
+    return `${
+      (
+        bytes /
+        (
+          1024 * 1024
+        )
+      ).toFixed(1)
+    } МБ`;
+  }
+
 
   loadApprovalState(): void {
 

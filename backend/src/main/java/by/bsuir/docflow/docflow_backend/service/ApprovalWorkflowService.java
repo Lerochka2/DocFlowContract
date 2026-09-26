@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.entity.AppUser;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.DocumentApprovalStep;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
+import by.bsuir.docflow.docflow_backend.entity.DocumentVersion;
 import by.bsuir.docflow.docflow_backend.entity.enums.ApprovalStepStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
@@ -12,6 +13,7 @@ import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentApprovalStepRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
+import by.bsuir.docflow.docflow_backend.repository.DocumentVersionRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -32,6 +34,7 @@ public class ApprovalWorkflowService {
     private final DocumentApprovalStepRepository approvalStepRepository;
     private final DocumentRepository documentRepository;
     private final DocumentRouteRepository documentRouteRepository;
+    private final DocumentVersionRepository documentVersionRepository;
     private final AppUserRepository appUserRepository;
 
 
@@ -39,6 +42,7 @@ public class ApprovalWorkflowService {
             DocumentApprovalStepRepository approvalStepRepository,
             DocumentRepository documentRepository,
             DocumentRouteRepository documentRouteRepository,
+            DocumentVersionRepository documentVersionRepository,
             AppUserRepository appUserRepository
     ) {
         this.approvalStepRepository =
@@ -49,6 +53,9 @@ public class ApprovalWorkflowService {
 
         this.documentRouteRepository =
                 documentRouteRepository;
+
+        this.documentVersionRepository =
+                documentVersionRepository;
 
         this.appUserRepository =
                 appUserRepository;
@@ -237,11 +244,20 @@ public class ApprovalWorkflowService {
                         .orElse(0)
                         + 1;
 
+        DocumentVersion currentVersion =
+                resolveCurrentVersion(
+                        document
+                );
+
         DocumentApprovalStep step =
                 new DocumentApprovalStep();
 
         step.setDocument(
                 document
+        );
+
+        step.setDocumentVersion(
+                currentVersion
         );
 
         step.setStepOrder(
@@ -471,6 +487,81 @@ public class ApprovalWorkflowService {
         return toResponse(
                 saved
         );
+    }
+
+
+    private DocumentVersion resolveCurrentVersion(
+            Document document
+    ) {
+
+        if (
+                document.getFile() == null
+                        ||
+                document.getFile().getId() == null
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "У документа отсутствует текущий файл"
+            );
+        }
+
+        Long documentId =
+                document.getId();
+
+        Long fileId =
+                document.getFile().getId();
+
+        return documentVersionRepository
+                .findByDocumentIdAndFileId(
+                        documentId,
+                        fileId
+                )
+                .orElseGet(
+                        () -> {
+
+                            int nextVersionNumber =
+                                    documentVersionRepository
+                                            .findFirstByDocumentIdOrderByVersionNumberDesc(
+                                                    documentId
+                                            )
+                                            .map(
+                                                    latest ->
+                                                            latest.getVersionNumber()
+                                                                    + 1
+                                            )
+                                            .orElse(1);
+
+                            DocumentVersion version =
+                                    new DocumentVersion();
+
+                            version.setDocument(
+                                    document
+                            );
+
+                            version.setFile(
+                                    document.getFile()
+                            );
+
+                            version.setVersionNumber(
+                                    nextVersionNumber
+                            );
+
+                            version.setCreatedBy(
+                                    document.getCreatedBy()
+                            );
+
+                            version.setChangeNote(
+                                    nextVersionNumber == 1
+                                            ? "Исходная версия"
+                                            : "Версия зарегистрирована системой"
+                            );
+
+                            return documentVersionRepository.save(
+                                    version
+                            );
+                        }
+                );
     }
 
 

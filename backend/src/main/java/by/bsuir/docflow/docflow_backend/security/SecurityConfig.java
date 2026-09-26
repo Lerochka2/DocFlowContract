@@ -268,6 +268,18 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Upload a new document version.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/documents/*/versions"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCUMENT_OPERATOR"
+                        )
+
+                        /*
                          * Resubmit corrected document for specialist review.
                          */
                         .requestMatchers(

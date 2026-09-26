@@ -36,6 +36,10 @@ public class DocumentApprovalStep {
     )
     private Document document;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_version_id")
+    private DocumentVersion documentVersion;
+
     @Column(
             name = "step_order",
             nullable = false
@@ -146,6 +150,19 @@ public class DocumentApprovalStep {
             Document document
     ) {
         this.document = document;
+    }
+
+
+    public DocumentVersion getDocumentVersion() {
+        return documentVersion;
+    }
+
+
+    public void setDocumentVersion(
+            DocumentVersion documentVersion
+    ) {
+        this.documentVersion =
+                documentVersion;
     }
 
 
