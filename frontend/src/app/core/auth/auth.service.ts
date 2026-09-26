@@ -155,6 +155,65 @@ export class AuthService {
     }
   }
 
+  updateCachedUser(
+    user: CurrentUserResponse
+  ): void {
+
+    const localRaw =
+      localStorage.getItem(
+        this.userKey
+      );
+
+    if (localRaw) {
+
+      try {
+
+        const current =
+          JSON.parse(
+            localRaw
+          ) as LoginResponse;
+
+        localStorage.setItem(
+          this.userKey,
+          JSON.stringify({
+            ...current,
+            ...user
+          })
+        );
+
+      } catch {
+      }
+    }
+
+
+    const sessionRaw =
+      sessionStorage.getItem(
+        this.userKey
+      );
+
+    if (sessionRaw) {
+
+      try {
+
+        const current =
+          JSON.parse(
+            sessionRaw
+          ) as LoginResponse;
+
+        sessionStorage.setItem(
+          this.userKey,
+          JSON.stringify({
+            ...current,
+            ...user
+          })
+        );
+
+      } catch {
+      }
+    }
+  }
+
+
   isAuthenticated(): boolean {
 
     const token =

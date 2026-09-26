@@ -1192,3 +1192,9 @@
 /* ==========================================================
    DOCFLOW PASSWORD CHANGE STYLES END
    ========================================================== */
+
+/* profile-content-moved */
+.settings-page .security-card,
+.settings-page .profile-card {
+  display: none;
+}

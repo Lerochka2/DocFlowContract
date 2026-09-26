@@ -47,6 +47,10 @@ import {
 } from './pages/settings/settings';
 
 import {
+  ProfileWorkspace
+} from './pages/profile/profile';
+
+import {
   Login
 } from './pages/login/login';
 
@@ -154,6 +158,10 @@ export const routes: Routes = [
       {
         path: 'settings',
         component: SettingsWorkspace
+      },
+      {
+        path: 'profile',
+        component: ProfileWorkspace
       },
       {
         path: '',

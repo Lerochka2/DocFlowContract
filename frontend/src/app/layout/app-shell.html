@@ -226,7 +226,7 @@
 
     <div class="sidebar-footer">
 
-      <div class="sidebar-user">
+      <div class="sidebar-user profile-link" routerLink="/profile" title="Открыть профиль">
 
         <div class="avatar">
           {{ getInitials() }}
@@ -773,7 +773,7 @@
         </div>
 
 
-        <div class="current-user">
+        <div class="current-user profile-link" routerLink="/profile" title="Открыть профиль">
 
           <div class="avatar">
             {{ getInitials() }}
@@ -801,6 +801,8 @@
     <main class="page-content">
       <router-outlet />
     </main>
+
+    <app-reminder-floating />
 
   </div>
 

@@ -50,6 +50,10 @@ import {
   UserNotification
 } from '../core/notifications/notification.service';
 
+import {
+  ReminderFloatingComponent
+} from './reminder-floating';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -57,7 +61,8 @@ import {
     FormsModule,
     RouterOutlet,
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
+    ReminderFloatingComponent
   ],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss'
@@ -657,6 +662,15 @@ export class AppShell
       }
     ).format(date);
   }
+
+  @HostListener(
+    'window:docflow-user-updated'
+  )
+  onUserUpdated(): void {
+
+    this.loadCurrentUser();
+  }
+
 
   logout(): void {
 

@@ -1,0 +1,670 @@
+<section class="profile-page">
+
+  <header class="page-header">
+
+    <span class="eyebrow">
+      ЛИЧНЫЙ КАБИНЕТ
+    </span>
+
+    <h1>
+      Профиль
+    </h1>
+
+    <p>
+      Данные учетной записи, личные напоминания и безопасность.
+    </p>
+
+  </header>
+
+
+  @if (!loadingUser) {
+
+    <section class="profile-hero">
+
+      <div class="big-avatar">
+        {{ getInitials() }}
+      </div>
+
+      <div class="hero-user">
+
+        <span class="active-label">
+          <i></i>
+          Аккаунт активен
+        </span>
+
+        <h2>
+          {{ currentUser?.fullName || 'Пользователь' }}
+        </h2>
+
+        <p>
+          {{ getRoleLabel() }}
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <div class="profile-layout">
+
+      <div class="profile-main">
+
+        <section class="profile-card">
+
+          <div class="card-heading">
+
+            <div class="card-icon">
+              U
+            </div>
+
+            <div>
+
+              <span class="section-eyebrow">
+                ЛИЧНЫЕ ДАННЫЕ
+              </span>
+
+              <h2>
+                Учетная запись
+              </h2>
+
+              <p>
+                Основные сведения текущего пользователя.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          @if (profileSuccessMessage) {
+
+            <div class="message success">
+              {{ profileSuccessMessage }}
+            </div>
+
+          }
+
+
+          @if (profileErrorMessage) {
+
+            <div class="message error">
+              {{ profileErrorMessage }}
+            </div>
+
+          }
+
+
+          <div class="account-grid">
+
+            <label class="full-name-field">
+
+              <span>
+                ФИО
+              </span>
+
+              <div class="edit-row">
+
+                <input
+                  type="text"
+                  maxlength="255"
+                  name="fullName"
+                  [(ngModel)]="fullName"
+                />
+
+                <button
+                  type="button"
+                  [disabled]="
+                    savingProfile
+                    || !fullName.trim()
+                    || fullName.trim() === currentUser?.fullName
+                  "
+                  (click)="saveFullName()"
+                >
+                  @if (savingProfile) {
+                    Сохраняем...
+                  } @else {
+                    Сохранить
+                  }
+                </button>
+
+              </div>
+
+            </label>
+
+
+            <div class="info-field">
+
+              <span>
+                Логин
+              </span>
+
+              <strong>
+                {{ currentUser?.login || '—' }}
+              </strong>
+
+              <small>
+                Используется для входа
+              </small>
+
+            </div>
+
+
+            <div class="info-field">
+
+              <span>
+                Email
+              </span>
+
+              <strong>
+                {{ currentUser?.email || 'Не указан' }}
+              </strong>
+
+              <small>
+                Для подтверждения безопасности
+              </small>
+
+            </div>
+
+
+            <div class="info-field">
+
+              <span>
+                Роль
+              </span>
+
+              <strong>
+                {{ getRoleLabel() }}
+              </strong>
+
+              <small>
+                Определяет права доступа
+              </small>
+
+            </div>
+
+
+            <div class="info-field">
+
+              <span>
+                ID пользователя
+              </span>
+
+              <strong>
+                {{ currentUser?.userId }}
+              </strong>
+
+              <small>
+                Внутренний идентификатор
+              </small>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="profile-card security-preview">
+
+          <div class="card-heading">
+
+            <div class="card-icon security">
+              S
+            </div>
+
+            <div>
+
+              <span class="section-eyebrow">
+                БЕЗОПАСНОСТЬ
+              </span>
+
+              <h2>
+                Пароль
+              </h2>
+
+              <p>
+                Смена пароля через подтверждение по электронной почте.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="security-placeholder">
+
+            <div>
+
+              <strong>
+                Защищенная смена пароля
+              </strong>
+
+              <span>
+                {{
+                  currentUser?.email
+                  || 'Email не указан'
+                }}
+              </span>
+
+            </div>
+
+            <span class="security-status">
+              Настроено
+            </span>
+
+          </div>
+
+          <div class="password-security-form">
+
+            @if (passwordSuccessMessage) {
+
+              <div class="message success">
+                {{ passwordSuccessMessage }}
+              </div>
+
+            }
+
+            @if (passwordErrorMessage) {
+
+              <div class="message error">
+                {{ passwordErrorMessage }}
+              </div>
+
+            }
+
+
+            @if (passwordStep === 'EMAIL') {
+
+              <div class="password-panel">
+
+                <div class="password-email-box">
+
+                  <div class="password-email-icon">
+                    @
+                  </div>
+
+                  <div>
+
+                    <span>
+                      Код подтверждения будет отправлен на
+                    </span>
+
+                    <strong>
+                      {{
+                        currentUser?.email
+                        || 'Email не указан'
+                      }}
+                    </strong>
+
+                    <small>
+                      Код действует 5 минут.
+                    </small>
+
+                  </div>
+
+                </div>
+
+                <button
+                  class="password-primary"
+                  type="button"
+                  [disabled]="
+                    passwordLoading
+                    || !currentUser?.email
+                  "
+                  (click)="requestPasswordCode()"
+                >
+
+                  @if (passwordLoading) {
+                    Отправляем...
+                  } @else {
+                    Получить код
+                  }
+
+                </button>
+
+              </div>
+
+            }
+
+
+            @if (passwordStep === 'CODE') {
+
+              <div class="password-panel">
+
+                <label class="password-field">
+
+                  <span>
+                    Код из письма
+                  </span>
+
+                  <input
+                    class="code-input"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                    name="profileVerificationCode"
+                    [(ngModel)]="verificationCode"
+                    placeholder="000000"
+                    (keydown.enter)="verifyPasswordCode()"
+                  />
+
+                </label>
+
+                <div class="password-timer">
+
+                  <span>
+                    Код действует
+                  </span>
+
+                  <strong>
+                    {{ getCodeExpiresLabel() }}
+                  </strong>
+
+                </div>
+
+
+                <div class="password-actions">
+
+                  <button
+                    class="password-secondary"
+                    type="button"
+                    (click)="resetPasswordChange()"
+                  >
+                    Назад
+                  </button>
+
+                  <button
+                    class="password-link"
+                    type="button"
+                    [disabled]="
+                      passwordLoading
+                      || resendAvailableInSeconds > 0
+                    "
+                    (click)="resendPasswordCode()"
+                  >
+
+                    @if (resendAvailableInSeconds > 0) {
+                      Повторно через {{ getResendLabel() }}
+                    } @else {
+                      Отправить повторно
+                    }
+
+                  </button>
+
+                  <button
+                    class="password-primary"
+                    type="button"
+                    [disabled]="
+                      passwordLoading
+                      || verificationCode.trim().length !== 6
+                      || codeExpiresInSeconds <= 0
+                    "
+                    (click)="verifyPasswordCode()"
+                  >
+                    Подтвердить код
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            @if (passwordStep === 'PASSWORD') {
+
+              <div class="password-panel">
+
+                <div class="password-grid">
+
+                  <label class="password-field">
+
+                    <span>
+                      Новый пароль
+                    </span>
+
+                    <input
+                      type="password"
+                      name="profileNewPassword"
+                      autocomplete="new-password"
+                      [(ngModel)]="newPassword"
+                      placeholder="Минимум 8 символов"
+                    />
+
+                  </label>
+
+
+                  <label class="password-field">
+
+                    <span>
+                      Повторите пароль
+                    </span>
+
+                    <input
+                      type="password"
+                      name="profileConfirmPassword"
+                      autocomplete="new-password"
+                      [(ngModel)]="confirmNewPassword"
+                      placeholder="Введите пароль еще раз"
+                      (keydown.enter)="confirmPasswordChange()"
+                    />
+
+                    @if (
+                      confirmNewPassword
+                      &&
+                      newPassword !== confirmNewPassword
+                    ) {
+
+                      <small class="password-error">
+                        Пароли не совпадают
+                      </small>
+
+                    }
+
+                  </label>
+
+                </div>
+
+
+                <div class="password-validity">
+
+                  Подтверждение действительно еще
+
+                  <strong>
+                    {{ getChangeTokenExpiresLabel() }}
+                  </strong>
+
+                </div>
+
+
+                <div class="password-actions">
+
+                  <button
+                    class="password-secondary"
+                    type="button"
+                    (click)="resetPasswordChange()"
+                  >
+                    Начать заново
+                  </button>
+
+                  <button
+                    class="password-primary"
+                    type="button"
+                    [disabled]="
+                      passwordLoading
+                      || newPassword.length < 8
+                      || newPassword !== confirmNewPassword
+                      || changeTokenExpiresInSeconds <= 0
+                    "
+                    (click)="confirmPasswordChange()"
+                  >
+
+                    @if (passwordLoading) {
+                      Сохраняем...
+                    } @else {
+                      Сохранить новый пароль
+                    }
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <aside class="profile-card reminders-card">
+
+        <div class="card-heading">
+
+          <div class="card-icon reminder">
+            !
+          </div>
+
+          <div>
+
+            <span class="section-eyebrow">
+              МОИ НАПОМИНАНИЯ
+            </span>
+
+            <h2>
+              Не забыть
+            </h2>
+
+            <p>
+              Простые личные заметки.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="reminder-form">
+
+          <textarea
+            rows="3"
+            maxlength="500"
+            name="reminderText"
+            [(ngModel)]="reminderText"
+            placeholder="Например: проверить договор и отправить юристу"
+          ></textarea>
+
+          <div>
+
+            <span>
+              {{ reminderText.length }}/500
+            </span>
+
+            <button
+              type="button"
+              [disabled]="
+                reminderSaving
+                || !reminderText.trim()
+              "
+              (click)="addReminder()"
+            >
+              @if (reminderSaving) {
+                Добавляем...
+              } @else {
+                + Добавить
+              }
+            </button>
+
+          </div>
+
+        </div>
+
+
+        @if (reminderErrorMessage) {
+
+          <div class="message error">
+            {{ reminderErrorMessage }}
+          </div>
+
+        }
+
+
+        @if (remindersLoading) {
+
+          <div class="reminder-state">
+            Загружаем...
+          </div>
+
+        } @else if (reminders.length === 0) {
+
+          <div class="empty-reminders">
+
+            <span>
+              ✓
+            </span>
+
+            <strong>
+              Всё выполнено
+            </strong>
+
+            <p>
+              Личных напоминаний пока нет.
+            </p>
+
+          </div>
+
+        } @else {
+
+          <div class="reminder-list">
+
+            @for (
+              reminder of reminders;
+              track reminder.id
+            ) {
+
+              <article class="reminder-item">
+
+                <div class="reminder-dot"></div>
+
+                <div>
+
+                  <p>
+                    {{ reminder.text }}
+                  </p>
+
+                  <span>
+                    {{
+                      formatReminderDate(
+                        reminder.createdAt
+                      )
+                    }}
+                  </span>
+
+                </div>
+
+                <button
+                  type="button"
+                  title="Выполнено"
+                  (click)="deleteReminder(reminder)"
+                >
+                  ✓
+                </button>
+
+              </article>
+
+            }
+
+          </div>
+
+        }
+
+      </aside>
+
+    </div>
+
+  }
+
+</section>

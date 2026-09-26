@@ -336,6 +336,14 @@ public class SecurityConfig {
                         )
 
                         /*
+                         * Current user profile
+                         */
+                        .requestMatchers(
+                                "/api/profile",
+                                "/api/profile/**"
+                        )
+                        .authenticated()
+                        /*
                          * Notifications
                          */
                         .requestMatchers(

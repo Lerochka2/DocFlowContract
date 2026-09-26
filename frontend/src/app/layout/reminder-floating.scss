@@ -1,0 +1,142 @@
+:host {
+  display: contents;
+}
+
+.floating-reminder {
+  position: fixed;
+  right: 28px;
+  bottom: 26px;
+  z-index: 14;
+  width: 350px;
+  max-width: calc(100vw - 40px);
+  overflow: hidden;
+  border: 1px solid #e2e6ee;
+  border-radius: 14px;
+  background:
+    rgba(255, 255, 255, .98);
+  box-shadow:
+    0 18px 45px
+    rgba(42, 58, 91, .16);
+  backdrop-filter: blur(10px);
+}
+
+.floating-reminder header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #edf0f4;
+  background:
+    linear-gradient(
+      135deg,
+      #fffaf0,
+      #f8f6ff
+    );
+}
+
+.floating-reminder header span,
+.floating-reminder header strong {
+  display: block;
+}
+
+.floating-reminder header span {
+  color: #a0783e;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.floating-reminder header strong {
+  margin-top: 3px;
+  color: #404c61;
+  font-size: 14px;
+}
+
+.floating-reminder header button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: #65748c;
+  background: rgba(255, 255, 255, .8);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.floating-list {
+  padding: 6px 13px;
+}
+
+.floating-list article {
+  display: grid;
+  grid-template-columns:
+    10px
+    minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 1px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.floating-list article:last-child {
+  border-bottom: 0;
+}
+
+.floating-list i {
+  width: 6px;
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #d49a44;
+}
+
+.floating-list p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #536075;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.floating-list span {
+  display: block;
+  margin-top: 4px;
+  color: #a0a8b4;
+  font-size: 10px;
+}
+
+.floating-reminder footer {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  border-top: 1px solid #edf0f4;
+  background: #fafbfd;
+}
+
+.floating-reminder footer span {
+  color: #969fad;
+  font-size: 10px;
+}
+
+.floating-reminder footer button {
+  border: 0;
+  color: #536fbd;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+
+  .floating-reminder {
+    right: 14px;
+    bottom: 14px;
+  }
+}

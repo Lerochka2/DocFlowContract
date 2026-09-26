@@ -1,0 +1,87 @@
+@if (visible) {
+
+  <aside class="floating-reminder">
+
+    <header>
+
+      <div>
+
+        <span>
+          НЕ ЗАБУДЬТЕ
+        </span>
+
+        <strong>
+          Личные напоминания
+        </strong>
+
+      </div>
+
+      <button
+        type="button"
+        title="Открыть профиль"
+        (click)="openProfile()"
+      >
+        ›
+      </button>
+
+    </header>
+
+
+    <div class="floating-list">
+
+      @for (
+        reminder of visibleReminders;
+        track reminder.id
+      ) {
+
+        <article>
+
+          <i></i>
+
+          <div>
+
+            <p>
+              {{ reminder.text }}
+            </p>
+
+            <span>
+              {{ formatDate(reminder.createdAt) }}
+            </span>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+
+    <footer>
+
+      @if (hiddenCount > 0) {
+
+        <span>
+          Ещё {{ hiddenCount }}
+        </span>
+
+      } @else {
+
+        <span>
+          Сохранено в профиле
+        </span>
+
+      }
+
+      <button
+        type="button"
+        (click)="openProfile()"
+      >
+        Открыть профиль
+      </button>
+
+    </footer>
+
+  </aside>
+
+}
