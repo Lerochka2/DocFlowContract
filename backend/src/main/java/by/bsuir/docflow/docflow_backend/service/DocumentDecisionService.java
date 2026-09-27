@@ -10,6 +10,7 @@ import by.bsuir.docflow.docflow_backend.entity.enums.ApprovalStepStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentDecision;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
+import by.bsuir.docflow.docflow_backend.entity.enums.NotificationType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentApprovalStepRepository;
@@ -42,6 +43,8 @@ public class DocumentDecisionService {
 
     private final DocumentApprovalStepRepository approvalStepRepository;
 
+    private final NotificationService notificationService;
+
 
     public DocumentDecisionService(
             DocumentRepository documentRepository,
@@ -49,7 +52,8 @@ public class DocumentDecisionService {
             AppUserRepository appUserRepository,
             DocumentAccessService documentAccessService,
             DocumentAuditService documentAuditService,
-            DocumentApprovalStepRepository approvalStepRepository
+            DocumentApprovalStepRepository approvalStepRepository,
+            NotificationService notificationService
     ) {
 
         this.documentRepository =
@@ -71,7 +75,10 @@ public class DocumentDecisionService {
                 approvalStepRepository;
 
 
-    }
+    
+        this.notificationService =
+                notificationService;
+}
 
 
     @Transactional
@@ -183,6 +190,17 @@ public class DocumentDecisionService {
                         ),
                         comment
                 );
+        if (
+                request.decision()
+                        == DocumentDecision.RETURN_FOR_CORRECTION
+        ) {
+
+            createReturnNotifications(
+                    document,
+                    savedRecord,
+                    comment
+            );
+        }
 
         return new DocumentDecisionResponse(
                 savedRecord.getId(),
@@ -746,6 +764,83 @@ public class DocumentDecisionService {
         return authentication;
     }
 
+
+    private void createReturnNotifications(
+            Document document,
+            DocumentDecisionRecord decisionRecord,
+            String comment
+    ) {
+
+        List<AppUser> operators =
+                appUserRepository
+                        .findByRoleCodeAndEnabledTrue(
+                                "DOCUMENT_OPERATOR"
+                        );
+
+        String documentLabel =
+                buildDocumentLabel(
+                        document
+                );
+
+        String message =
+                documentLabel
+                        + " возвращён специалистом на доработку.";
+
+        if (
+                comment != null
+                        &&
+                !comment.isBlank()
+        ) {
+
+            message =
+                    message
+                            + " Комментарий: "
+                            + comment;
+        }
+
+        for (
+                AppUser operator
+                : operators
+        ) {
+
+            notificationService
+                    .createNotification(
+                            operator,
+                            document,
+                            NotificationType.DOCUMENT_RETURNED,
+                            "Документ возвращён на доработку",
+                            message,
+                            "/documents/"
+                                    + document.getId(),
+                            "Открыть документ",
+                            "DOCUMENT_RETURNED:"
+                                    + decisionRecord.getId()
+                    );
+        }
+    }
+
+
+    private String buildDocumentLabel(
+            Document document
+    ) {
+
+        if (
+                document.getDocumentNumber() != null
+                        &&
+                !document
+                        .getDocumentNumber()
+                        .isBlank()
+        ) {
+
+            return "Документ №"
+                    + document
+                    .getDocumentNumber()
+                    .trim();
+        }
+
+        return "Документ ID "
+                + document.getId();
+    }
 
     private String normalizeComment(
             String comment

@@ -75,30 +75,60 @@ public class ContractRiskAnalysisService {
                 getAccessibleContract(
                         documentId
                 );
+        if (
+                document.getFile() == null
+                        ||
+                document.getFile().getStoragePath() == null
+                        ||
+                document.getFile().getStoragePath().isBlank()
+        ) {
 
-        AiProcessingResult aiResult =
-                aiProcessingResultRepository
-                        .findByDocumentIdOrderByCreatedAtDesc(
-                                documentId
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "У документа отсутствует текущий файл для AI-анализа"
+            );
+        }
+
+
+        /*
+         * ВАЖНО:
+         * анализируем именно текущий файл документа.
+         *
+         * После загрузки v2 document.file уже указывает
+         * на новую редакцию, поэтому старый recognizedText
+         * от v1 больше не используется.
+         */
+        by.bsuir.docflow.docflow_backend.dto.ai.AiAnalyzeResponse
+                currentDocumentAnalysis =
+                aiClient.analyze(
+                        java.nio.file.Path.of(
+                                document
+                                        .getFile()
+                                        .getStoragePath()
                         )
-                        .stream()
-                        .filter(result ->
-                                result.getRecognizedText() != null
-                                        &&
-                                        !result.getRecognizedText().isBlank()
-                        )
-                        .findFirst()
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.CONFLICT,
-                                        "Для договора отсутствует распознанный текст. "
-                                                + "Сначала необходимо выполнить AI-анализ документа"
-                                )
-                        );
+                );
+
+
+        String currentRecognizedText =
+                currentDocumentAnalysis.getText();
+
+
+        if (
+                currentRecognizedText == null
+                        ||
+                currentRecognizedText.isBlank()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "AI не удалось получить текст текущей версии договора"
+            );
+        }
+
 
         AiRiskAnalysisResponse aiResponse =
                 aiClient.analyzeRisks(
-                        aiResult.getRecognizedText()
+                        currentRecognizedText
                 );
 
         ContractRiskAnalysis analysis =

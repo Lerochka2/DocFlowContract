@@ -28,6 +28,7 @@ public class DocumentCorrectionService {
     private final DocumentAccessService documentAccessService;
     private final DocumentAuditService documentAuditService;
     private final DocumentRoutingService documentRoutingService;
+    private final ContractRiskAnalysisService contractRiskAnalysisService;
 
 
     public DocumentCorrectionService(
@@ -37,7 +38,8 @@ public class DocumentCorrectionService {
             DocumentVersionRepository documentVersionRepository,
             DocumentAccessService documentAccessService,
             DocumentAuditService documentAuditService,
-            DocumentRoutingService documentRoutingService
+            DocumentRoutingService documentRoutingService,
+            ContractRiskAnalysisService contractRiskAnalysisService
     ) {
 
         this.documentRepository =
@@ -60,6 +62,9 @@ public class DocumentCorrectionService {
 
         this.documentRoutingService =
                 documentRoutingService;
+
+        this.contractRiskAnalysisService =
+                contractRiskAnalysisService;
     }
 
 
@@ -170,6 +175,23 @@ public class DocumentCorrectionService {
          * ApprovalWorkflowService создаст
          * новый этап PENDING.
          */
+        if (
+                document.getDocumentType()
+                        == DocumentType.CONTRACT
+        ) {
+
+            /*
+             * Для исправленной версии договора сначала
+             * выполняем новый AI-анализ риска.
+             *
+             * Только после этого выбирается специалист.
+             */
+            contractRiskAnalysisService.analyze(
+                    documentId
+            );
+        }
+
+
         documentRoutingService.route(
                 document
         );

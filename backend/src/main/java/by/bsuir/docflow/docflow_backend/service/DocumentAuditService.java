@@ -17,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DocumentAuditService {
@@ -70,10 +73,49 @@ public class DocumentAuditService {
                 document
         );
 
-        return auditRepository
-                .findByDocument_IdOrderByCreatedAtAsc(
-                        documentId
-                )
+        List<DocumentAuditEvent> history =
+                auditRepository
+                        .findByDocument_IdOrderByCreatedAtAsc(
+                                documentId
+                        );
+
+
+        List<DocumentAuditEvent> cleanedHistory =
+                new ArrayList<>();
+
+
+        for (
+                DocumentAuditEvent event
+                : history
+        ) {
+
+            if (!cleanedHistory.isEmpty()) {
+
+                DocumentAuditEvent previous =
+                        cleanedHistory.get(
+                                cleanedHistory.size() - 1
+                        );
+
+
+                if (
+                        isDuplicateRiskEvent(
+                                previous,
+                                event
+                        )
+                ) {
+
+                    continue;
+                }
+            }
+
+
+            cleanedHistory.add(
+                    event
+            );
+        }
+
+
+        return cleanedHistory
                 .stream()
                 .map(
                         this::toResponse
@@ -183,6 +225,32 @@ public class DocumentAuditService {
             );
         }
 
+        String normalizedDescription =
+                description.trim();
+
+        String normalizedDetails =
+                normalizeDetails(
+                        details
+                );
+
+
+        if (
+                eventType
+                        == DocumentAuditEventType.RISK_ANALYSIS_COMPLETED
+                        &&
+                isRecentDuplicateRiskEvent(
+                        document,
+                        actorType,
+                        actorName,
+                        normalizedDescription,
+                        normalizedDetails
+                )
+        ) {
+
+            return;
+        }
+
+
         DocumentAuditEvent event =
                 new DocumentAuditEvent();
 
@@ -207,18 +275,194 @@ public class DocumentAuditService {
         );
 
         event.setDescription(
-                description.trim()
+                normalizedDescription
         );
 
         event.setDetails(
-                normalizeDetails(
-                        details
-                )
+                normalizedDetails
         );
 
         auditRepository.save(
                 event
         );
+    }
+
+    private boolean isDuplicateRiskEvent(
+            DocumentAuditEvent previous,
+            DocumentAuditEvent current
+    ) {
+
+        if (
+                previous == null
+                        ||
+                current == null
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                previous.getEventType()
+                        != DocumentAuditEventType.RISK_ANALYSIS_COMPLETED
+                        ||
+                current.getEventType()
+                        != DocumentAuditEventType.RISK_ANALYSIS_COMPLETED
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                previous.getActorType()
+                        != current.getActorType()
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                !Objects.equals(
+                        previous.getActorName(),
+                        current.getActorName()
+                )
+                        ||
+                !Objects.equals(
+                        previous.getDescription(),
+                        current.getDescription()
+                )
+                        ||
+                !Objects.equals(
+                        previous.getDetails(),
+                        current.getDetails()
+                )
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                previous.getCreatedAt() == null
+                        ||
+                current.getCreatedAt() == null
+        ) {
+
+            return false;
+        }
+
+
+        long seconds =
+                Duration
+                        .between(
+                                previous.getCreatedAt(),
+                                current.getCreatedAt()
+                        )
+                        .abs()
+                        .toSeconds();
+
+
+        return seconds <= 60;
+    }
+
+
+    private boolean isRecentDuplicateRiskEvent(
+            Document document,
+            AuditActorType actorType,
+            String actorName,
+            String description,
+            String details
+    ) {
+
+        if (
+                document == null
+                        ||
+                document.getId() == null
+        ) {
+
+            return false;
+        }
+
+
+        List<DocumentAuditEvent> history =
+                auditRepository
+                        .findByDocument_IdOrderByCreatedAtAsc(
+                                document.getId()
+                        );
+
+
+        if (history.isEmpty()) {
+
+            return false;
+        }
+
+
+        DocumentAuditEvent previous =
+                history.get(
+                        history.size() - 1
+                );
+
+
+        if (
+                previous.getEventType()
+                        != DocumentAuditEventType.RISK_ANALYSIS_COMPLETED
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                previous.getActorType()
+                        != actorType
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                !Objects.equals(
+                        previous.getActorName(),
+                        actorName
+                )
+                        ||
+                !Objects.equals(
+                        previous.getDescription(),
+                        description
+                )
+                        ||
+                !Objects.equals(
+                        previous.getDetails(),
+                        details
+                )
+        ) {
+
+            return false;
+        }
+
+
+        if (
+                previous.getCreatedAt() == null
+        ) {
+
+            return false;
+        }
+
+
+        long seconds =
+                Duration
+                        .between(
+                                previous.getCreatedAt(),
+                                java.time.LocalDateTime.now()
+                        )
+                        .abs()
+                        .toSeconds();
+
+
+        return seconds <= 60;
     }
 
     private DocumentAuditEventResponse toResponse(

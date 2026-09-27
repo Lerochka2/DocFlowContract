@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectorRef,
   Component,
   OnInit
@@ -972,6 +972,15 @@ export class Documents implements OnInit {
       case 'VERIFIED':
         return 'Проверен';
 
+      case 'APPROVED':
+        return 'Согласован';
+
+      case 'RETURNED_FOR_CORRECTION':
+        return 'На доработке';
+
+      case 'REJECTED':
+        return 'Отклонён';
+
       case 'READY_FOR_SED':
         return 'Готов к отправке';
 
@@ -984,8 +993,11 @@ export class Documents implements OnInit {
       case 'SED_ERROR':
         return 'Ошибка СЭД';
 
+      case 'ARCHIVED':
+        return 'В архиве';
+
       default:
-        return 'Неизвестно';
+        return status || 'Неизвестно';
     }
   }
 
@@ -997,13 +1009,16 @@ export class Documents implements OnInit {
 
       case 'SENT_TO_SED':
       case 'VERIFIED':
+      case 'APPROVED':
       case 'READY_FOR_SED':
         return 'green';
 
       case 'LINK_REQUIRED':
+      case 'RETURNED_FOR_CORRECTION':
         return 'orange';
 
       case 'REVIEW_REQUIRED':
+      case 'REJECTED':
       case 'PROCESSING_FAILED':
       case 'SED_ERROR':
         return 'red';
@@ -1012,6 +1027,9 @@ export class Documents implements OnInit {
       case 'UPLOADED':
       case 'AI_PROCESSING':
         return 'violet';
+
+      case 'ARCHIVED':
+        return 'neutral';
 
       default:
         return 'neutral';
