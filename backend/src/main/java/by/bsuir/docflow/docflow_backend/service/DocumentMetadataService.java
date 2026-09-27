@@ -3,12 +3,18 @@ package by.bsuir.docflow.docflow_backend.service;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataRequest;
 import by.bsuir.docflow.docflow_backend.dto.DocumentMetadataResponse;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.DocumentApprovalStep;
+import by.bsuir.docflow.docflow_backend.entity.enums.ApprovalStepStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRepository;
+import by.bsuir.docflow.docflow_backend.repository.DocumentApprovalStepRepository;
 import by.bsuir.docflow.docflow_backend.repository.SedDispatchRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,12 +32,14 @@ public class DocumentMetadataService {
     private final SedDispatchRepository sedDispatchRepository;
     private final DocumentAccessService documentAccessService;
     private final DocumentAuditService documentAuditService;
+    private final DocumentApprovalStepRepository approvalStepRepository;
 
     public DocumentMetadataService(
             DocumentRepository documentRepository,
             SedDispatchRepository sedDispatchRepository,
             DocumentAccessService documentAccessService,
-            DocumentAuditService documentAuditService
+            DocumentAuditService documentAuditService,
+            DocumentApprovalStepRepository approvalStepRepository
     ) {
         this.documentRepository =
                 documentRepository;
@@ -44,6 +52,9 @@ public class DocumentMetadataService {
 
         this.documentAuditService =
                 documentAuditService;
+
+        this.approvalStepRepository =
+                approvalStepRepository;
     }
 
     @Transactional
@@ -63,6 +74,10 @@ public class DocumentMetadataService {
                 getAccessibleDocument(
                         documentId
                 );
+
+        requireEditingPermission(
+                document
+        );
 
         validateEditingAllowed(
                 document
@@ -257,6 +272,140 @@ public class DocumentMetadataService {
                 );
 
         return document;
+    }
+
+    private void requireEditingPermission(
+            Document document
+    ) {
+
+        if (hasAuthority("ROLE_ADMIN")) {
+            return;
+        }
+
+        if (hasAuthority("ROLE_DOCUMENT_OPERATOR")) {
+
+            if (
+                    document.getStatus()
+                            == DocumentStatus.RETURNED_FOR_CORRECTION
+                            ||
+                    document.getStatus()
+                            == DocumentStatus.APPROVED
+            ) {
+
+                return;
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Делопроизводитель может изменять реквизиты после возврата на доработку или после согласования"
+            );
+        }
+
+        String specialistRole =
+                resolveSpecialistRole();
+
+        if (specialistRole != null) {
+
+            String login =
+                    getAuthentication()
+                            .getName();
+
+            boolean assignedToCurrentUser =
+                    approvalStepRepository
+                            .findByDocumentIdAndStatusIn(
+                                    document.getId(),
+                                    List.of(
+                                            ApprovalStepStatus.IN_PROGRESS
+                                    )
+                            )
+                            .stream()
+                            .anyMatch(
+                                    step ->
+                                            specialistRole.equals(
+                                                    step.getRoleCode()
+                                            )
+                                                    &&
+                                            step.getAssignedUser() != null
+                                                    &&
+                                            login.equals(
+                                                    step
+                                                            .getAssignedUser()
+                                                            .getLogin()
+                                            )
+                            );
+
+            if (assignedToCurrentUser) {
+                return;
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Изменять реквизиты может только специалист, взявший документ в работу"
+            );
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Недостаточно прав для изменения реквизитов документа"
+        );
+    }
+
+
+    private String resolveSpecialistRole() {
+
+        if (hasAuthority("ROLE_LAWYER")) {
+            return "LAWYER";
+        }
+
+        if (
+                hasAuthority(
+                        "ROLE_CONTRACT_MANAGER"
+                )
+        ) {
+
+            return "CONTRACT_MANAGER";
+        }
+
+        return null;
+    }
+
+
+    private boolean hasAuthority(
+            String authorityName
+    ) {
+
+        return getAuthentication()
+                .getAuthorities()
+                .stream()
+                .map(
+                        GrantedAuthority::getAuthority
+                )
+                .anyMatch(
+                        authorityName::equals
+                );
+    }
+
+
+    private Authentication getAuthentication() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (
+                authentication == null
+                        ||
+                !authentication.isAuthenticated()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Пользователь не авторизован"
+            );
+        }
+
+        return authentication;
     }
 
     private void validateEditingAllowed(

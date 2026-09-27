@@ -301,7 +301,6 @@ public class SecurityConfig {
                                 "/api/documents/*/decision"
                         )
                         .hasAnyRole(
-                                "ADMIN",
                                 "LAWYER",
                                 "CONTRACT_MANAGER"
                         )

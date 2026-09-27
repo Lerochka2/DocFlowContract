@@ -36,6 +36,7 @@ public class ApprovalWorkflowService {
     private final DocumentRouteRepository documentRouteRepository;
     private final DocumentVersionRepository documentVersionRepository;
     private final AppUserRepository appUserRepository;
+    private final DocumentAccessService documentAccessService;
 
 
     public ApprovalWorkflowService(
@@ -43,7 +44,8 @@ public class ApprovalWorkflowService {
             DocumentRepository documentRepository,
             DocumentRouteRepository documentRouteRepository,
             DocumentVersionRepository documentVersionRepository,
-            AppUserRepository appUserRepository
+            AppUserRepository appUserRepository,
+            DocumentAccessService documentAccessService
     ) {
         this.approvalStepRepository =
                 approvalStepRepository;
@@ -59,6 +61,9 @@ public class ApprovalWorkflowService {
 
         this.appUserRepository =
                 appUserRepository;
+
+        this.documentAccessService =
+                documentAccessService;
     }
 
 
@@ -315,15 +320,10 @@ public class ApprovalWorkflowService {
             Long documentId
     ) {
 
-        if (!documentRepository.existsById(documentId)) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Документ с ID "
-                            + documentId
-                            + " не найден"
-            );
-        }
+        documentAccessService
+                .requireAccess(
+                        documentId
+                );
 
         return approvalStepRepository
                 .findByDocumentIdOrderByStepOrderAsc(
