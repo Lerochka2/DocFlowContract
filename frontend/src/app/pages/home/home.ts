@@ -59,7 +59,27 @@ export class Home implements OnInit {
     processingFailed: 0,
     sedError: 0,
     expiringSoonContracts: 0,
-    expiredContracts: 0
+    expiredContracts: 0,
+
+    approvalCycles: 0,
+    approvalPending: 0,
+    approvalInProgress: 0,
+    approvalApproved: 0,
+    approvalReturned: 0,
+    approvalRejected: 0,
+    approvalOverdue: 0,
+
+    approvalCompletedOnTime: 0,
+    approvalCompletedLate: 0,
+    approvalSlaCompliancePercent: 0,
+    averageApprovalTimeHours: 0,
+    approvalReturnRatePercent: 0,
+
+    riskAnalyzedDocuments: 0,
+    lowRiskContracts: 0,
+    mediumRiskContracts: 0,
+    highRiskContracts: 0,
+    averageRiskScore: 0
   };
 
   documents:

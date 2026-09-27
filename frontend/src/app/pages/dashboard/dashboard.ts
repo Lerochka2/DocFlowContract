@@ -22,10 +22,38 @@ import {
 } from '../../core/auth/auth.service';
 
 import {
+  WorkspaceActivity,
+  WorkspaceActivityDay,
   WorkspaceDashboard,
   WorkspaceDocument,
   WorkspaceService
 } from '../../core/workspace/workspace.service';
+
+interface ActivityHeatmapCell {
+  key: string;
+  date: string | null;
+  documentCount: number;
+  placeholder: boolean;
+}
+
+interface ActivityHeatmapWeek {
+  key: string;
+  monthLabel: string;
+  days: ActivityHeatmapCell[];
+}
+
+interface ActivityTimeCell {
+  key: string;
+  date: string;
+  startHour: number;
+  documentCount: number;
+}
+
+interface ActivityTimeDay {
+  key: string;
+  label: string;
+  cells: ActivityTimeCell[];
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -52,10 +80,38 @@ export class Dashboard implements OnInit {
     processingFailed: 0,
     sedError: 0,
     expiringSoonContracts: 0,
-    expiredContracts: 0
+    expiredContracts: 0,
+
+    approvalCycles: 0,
+    approvalPending: 0,
+    approvalInProgress: 0,
+    approvalApproved: 0,
+    approvalReturned: 0,
+    approvalRejected: 0,
+    approvalOverdue: 0,
+
+    approvalCompletedOnTime: 0,
+    approvalCompletedLate: 0,
+    approvalSlaCompliancePercent: 0,
+    averageApprovalTimeHours: 0,
+    approvalReturnRatePercent: 0,
+
+    riskAnalyzedDocuments: 0,
+    lowRiskContracts: 0,
+    mediumRiskContracts: 0,
+    highRiskContracts: 0,
+    averageRiskScore: 0
   };
 
   documents: WorkspaceDocument[] = [];
+
+  activity: WorkspaceActivity | null = null;
+
+  selectedActivityDays: 30 | 90 | 365 = 90;
+
+  activityLoading = false;
+
+  activityErrorMessage = '';
 
   constructor(
     private readonly workspaceService: WorkspaceService,
@@ -67,6 +123,7 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboard();
+    this.loadActivity();
   }
 
   loadDashboard(): void {
@@ -133,6 +190,504 @@ export class Dashboard implements OnInit {
           this.changeDetectorRef.markForCheck();
         }
       });
+  }
+
+
+  loadActivity(): void {
+
+    this.activityLoading = true;
+    this.activityErrorMessage = '';
+
+    this.workspaceService
+      .getActivity(
+        this.selectedActivityDays
+      )
+      .pipe(
+        finalize(() => {
+
+          this.activityLoading = false;
+
+          this.changeDetectorRef
+            .markForCheck();
+        })
+      )
+      .subscribe({
+
+        next: activity => {
+
+          this.activity =
+            activity;
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: () => {
+
+          this.activityErrorMessage =
+            'Не удалось загрузить активность обработки документов.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  setActivityPeriod(
+    days: 30 | 90 | 365
+  ): void {
+
+    if (
+      this.selectedActivityDays === days
+    ) {
+      return;
+    }
+
+    this.selectedActivityDays =
+      days;
+
+    this.loadActivity();
+  }
+
+
+  get activityTimeDays(): ActivityTimeDay[] {
+
+    const slots =
+      this.activity?.timeActivity ?? [];
+
+    const grouped =
+      new Map<string, ActivityTimeCell[]>();
+
+
+    for (const slot of slots) {
+
+      const cells =
+        grouped.get(slot.date) ?? [];
+
+      cells.push({
+        key:
+          `${slot.date}-${slot.startHour}`,
+        date:
+          slot.date,
+        startHour:
+          slot.startHour,
+        documentCount:
+          slot.documentCount
+      });
+
+      grouped.set(
+        slot.date,
+        cells
+      );
+    }
+
+
+    return Array
+      .from(grouped.entries())
+      .map(
+        ([date, cells]) => ({
+
+          key:
+            date,
+
+          label:
+            this.getActivityDayLabel(
+              date
+            ),
+
+          cells:
+            cells.sort(
+              (a, b) =>
+                a.startHour
+                -
+                b.startHour
+            )
+        })
+      );
+  }
+
+
+  timeActivityLevel(
+    value: number
+  ): number {
+
+    const values =
+      this.activity?.timeActivity ?? [];
+
+    const max =
+      values.reduce(
+        (
+          current,
+          item
+        ) =>
+          Math.max(
+            current,
+            item.documentCount
+          ),
+        0
+      );
+
+
+    if (
+      value <= 0
+      ||
+      max <= 0
+    ) {
+      return 0;
+    }
+
+
+    return Math.min(
+      4,
+      Math.max(
+        1,
+        Math.ceil(
+          (
+            value /
+            max
+          ) * 4
+        )
+      )
+    );
+  }
+
+
+  getTimeActivityTooltip(
+    cell: ActivityTimeCell
+  ): string {
+
+    const endHour =
+      cell.startHour + 6;
+
+    return (
+      `${this.getActivityDayLabel(cell.date)}, ` +
+      `${cell.startHour
+        .toString()
+        .padStart(2, '0')}:00–` +
+      `${endHour
+        .toString()
+        .padStart(2, '0')}:00 — ` +
+      `${cell.documentCount} ` +
+      `${this.getDocumentWord(
+        cell.documentCount
+      )}`
+    );
+  }
+
+
+  private getActivityDayLabel(
+    value: string
+  ): string {
+
+    const date =
+      this.parseActivityDate(
+        value
+      );
+
+    const months = [
+      'янв.',
+      'февр.',
+      'марта',
+      'апр.',
+      'мая',
+      'июня',
+      'июля',
+      'авг.',
+      'сент.',
+      'окт.',
+      'нояб.',
+      'дек.'
+    ];
+
+    return (
+      `${date.getDate()} ` +
+      `${months[date.getMonth()]}`
+    );
+  }
+
+
+  get activityWeeks(): ActivityHeatmapWeek[] {
+
+    const values =
+      this.activity?.activity ?? [];
+
+    if (values.length === 0) {
+      return [];
+    }
+
+    const cells:
+      ActivityHeatmapCell[] = [];
+
+    const firstDate =
+      this.parseActivityDate(
+        values[0].date
+      );
+
+    const firstDayIndex =
+      (
+        firstDate.getDay() + 6
+      ) % 7;
+
+
+    for (
+      let index = 0;
+      index < firstDayIndex;
+      index++
+    ) {
+
+      cells.push({
+        key: `before-${index}`,
+        date: null,
+        documentCount: 0,
+        placeholder: true
+      });
+    }
+
+
+    for (const day of values) {
+
+      cells.push({
+        key: day.date,
+        date: day.date,
+        documentCount:
+          day.documentCount,
+        placeholder: false
+      });
+    }
+
+
+    while (
+      cells.length % 7 !== 0
+    ) {
+
+      cells.push({
+        key: `after-${cells.length}`,
+        date: null,
+        documentCount: 0,
+        placeholder: true
+      });
+    }
+
+
+    const weeks:
+      ActivityHeatmapWeek[] = [];
+
+    let previousMonth = -1;
+
+
+    for (
+      let index = 0;
+      index < cells.length;
+      index += 7
+    ) {
+
+      const weekDays =
+        cells.slice(
+          index,
+          index + 7
+        );
+
+      const realDay =
+        weekDays.find(
+          day =>
+            day.date !== null
+        );
+
+      let monthLabel = '';
+
+      if (realDay?.date) {
+
+        const date =
+          this.parseActivityDate(
+            realDay.date
+          );
+
+        const month =
+          date.getMonth();
+
+        if (
+          month !== previousMonth
+        ) {
+
+          monthLabel =
+            this.getActivityMonthLabel(
+              month
+            );
+
+          previousMonth =
+            month;
+        }
+      }
+
+
+      weeks.push({
+        key: `week-${index / 7}`,
+        monthLabel,
+        days: weekDays
+      });
+    }
+
+
+    return weeks;
+  }
+
+
+  activityLevel(
+    value: number
+  ): number {
+
+    const max =
+      this.activity
+        ?.maxDailyDocuments ?? 0;
+
+    if (
+      value <= 0
+      ||
+      max <= 0
+    ) {
+      return 0;
+    }
+
+    return Math.min(
+      4,
+      Math.max(
+        1,
+        Math.ceil(
+          (
+            value /
+            max
+          ) * 4
+        )
+      )
+    );
+  }
+
+
+  getActivityTooltip(
+    day: WorkspaceActivityDay
+  ): string {
+
+    const date =
+      this.parseActivityDate(
+        day.date
+      );
+
+    const months = [
+      'января',
+      'февраля',
+      'марта',
+      'апреля',
+      'мая',
+      'июня',
+      'июля',
+      'августа',
+      'сентября',
+      'октября',
+      'ноября',
+      'декабря'
+    ];
+
+    const word =
+      this.getDocumentWord(
+        day.documentCount
+      );
+
+    return (
+      `${date.getDate()} ` +
+      `${months[date.getMonth()]} — ` +
+      `${day.documentCount} ${word}`
+    );
+  }
+
+
+  getActivityCellTooltip(
+    dateValue: string | null,
+    documentCount: number
+  ): string {
+
+    if (!dateValue) {
+      return '';
+    }
+
+    return this.getActivityTooltip({
+      date: dateValue,
+      documentCount
+    });
+  }
+
+
+  private parseActivityDate(
+    value: string
+  ): Date {
+
+    const parts =
+      value
+        .split('-')
+        .map(Number);
+
+    return new Date(
+      parts[0],
+      parts[1] - 1,
+      parts[2]
+    );
+  }
+
+
+  private getActivityMonthLabel(
+    month: number
+  ): string {
+
+    const months = [
+      'янв.',
+      'февр.',
+      'март',
+      'апр.',
+      'май',
+      'июнь',
+      'июль',
+      'авг.',
+      'сент.',
+      'окт.',
+      'нояб.',
+      'дек.'
+    ];
+
+    return months[month] ?? '';
+  }
+
+
+  private getDocumentWord(
+    value: number
+  ): string {
+
+    const mod100 =
+      value % 100;
+
+    const mod10 =
+      value % 10;
+
+    if (
+      mod100 >= 11
+      &&
+      mod100 <= 14
+    ) {
+      return 'документов';
+    }
+
+    if (mod10 === 1) {
+      return 'документ';
+    }
+
+    if (
+      mod10 >= 2
+      &&
+      mod10 <= 4
+    ) {
+      return 'документа';
+    }
+
+    return 'документов';
   }
 
 
@@ -262,6 +817,65 @@ export class Dashboard implements OnInit {
 
     return `conic-gradient(${parts.join(', ')})`;
   }
+
+  approvalPercent(
+    value: number
+  ): number {
+
+    if (this.dashboard.approvalCycles === 0) {
+      return 0;
+    }
+
+    return Math.min(
+      100,
+      Math.round(
+        (
+          value /
+          this.dashboard.approvalCycles
+        ) * 100
+      )
+    );
+  }
+
+
+  riskPercent(
+    value: number
+  ): number {
+
+    if (this.dashboard.riskAnalyzedDocuments === 0) {
+      return 0;
+    }
+
+    return Math.min(
+      100,
+      Math.round(
+        (
+          value /
+          this.dashboard.riskAnalyzedDocuments
+        ) * 100
+      )
+    );
+  }
+
+
+  get riskScoreGradient(): string {
+
+    const score =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          this.dashboard.averageRiskScore
+        )
+      );
+
+    return (
+      `conic-gradient(` +
+      `#695bc4 0 ${score}%, ` +
+      `#e7e2f5 ${score}% 100%)`
+    );
+  }
+
 
   statusPercent(
     value: number

@@ -401,6 +401,722 @@
     </section>
 
 
+    <section class="process-analytics">
+
+      <article class="panel approval-analytics-panel">
+
+        <div class="process-analytics-header">
+
+          <div>
+
+            <span class="analytics-eyebrow">
+              ПРОЦЕСС СОГЛАСОВАНИЯ
+            </span>
+
+            <h2>
+              Согласование и SLA
+            </h2>
+
+            <p>
+              Контроль этапов согласования, сроков обработки и возвратов на доработку.
+            </p>
+
+          </div>
+
+          <span class="analytics-counter">
+            Этапов:
+            <strong>
+              {{ dashboard.approvalCycles }}
+            </strong>
+          </span>
+
+        </div>
+
+
+        <div class="approval-kpis">
+
+          <div class="approval-kpi">
+
+            <span class="approval-kpi-dot pending"></span>
+
+            <div>
+
+              <small>
+                Ожидают специалиста
+              </small>
+
+              <strong>
+                {{ dashboard.approvalPending }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="approval-kpi">
+
+            <span class="approval-kpi-dot progress"></span>
+
+            <div>
+
+              <small>
+                В работе
+              </small>
+
+              <strong>
+                {{ dashboard.approvalInProgress }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="approval-kpi"
+            [class.alert]="dashboard.approvalOverdue > 0"
+          >
+
+            <span class="approval-kpi-dot overdue"></span>
+
+            <div>
+
+              <small>
+                Просрочено
+              </small>
+
+              <strong>
+                {{ dashboard.approvalOverdue }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="sla-card">
+
+          <div class="sla-heading">
+
+            <div>
+
+              <span>
+                Соблюдение SLA
+              </span>
+
+              <strong>
+                {{ dashboard.approvalSlaCompliancePercent }}%
+              </strong>
+
+            </div>
+
+            <small>
+              {{ dashboard.approvalCompletedOnTime }}
+              в срок ·
+              {{ dashboard.approvalCompletedLate }}
+              с нарушением
+            </small>
+
+          </div>
+
+          <div class="analytics-progress large">
+
+            <span
+              class="sla-fill"
+              [style.width.%]="dashboard.approvalSlaCompliancePercent"
+            ></span>
+
+          </div>
+
+        </div>
+
+
+        <div class="approval-summary">
+
+          <div>
+
+            <span>
+              Среднее время согласования
+            </span>
+
+            <strong>
+              {{ dashboard.averageApprovalTimeHours }} ч
+            </strong>
+
+            <small>
+              от создания этапа до решения
+            </small>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Возвраты на доработку
+            </span>
+
+            <strong>
+              {{ dashboard.approvalReturnRatePercent }}%
+            </strong>
+
+            <small>
+              доля завершённых решений
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="decision-bars">
+
+          <div class="decision-row">
+
+            <div class="decision-label">
+
+              <span>
+                Согласовано
+              </span>
+
+              <strong>
+                {{ dashboard.approvalApproved }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="decision-fill approved"
+                [style.width.%]="approvalPercent(dashboard.approvalApproved)"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <div class="decision-row">
+
+            <div class="decision-label">
+
+              <span>
+                Возвращено
+              </span>
+
+              <strong>
+                {{ dashboard.approvalReturned }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="decision-fill returned"
+                [style.width.%]="approvalPercent(dashboard.approvalReturned)"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <div class="decision-row">
+
+            <div class="decision-label">
+
+              <span>
+                Отклонено
+              </span>
+
+              <strong>
+                {{ dashboard.approvalRejected }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="decision-fill rejected"
+                [style.width.%]="approvalPercent(dashboard.approvalRejected)"
+              ></span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article class="panel risk-analytics-panel">
+
+        <div class="process-analytics-header">
+
+          <div>
+
+            <span class="analytics-eyebrow">
+              AI RISK ANALYTICS
+            </span>
+
+            <h2>
+              AI-анализ рисков
+            </h2>
+
+            <p>
+              Сводка по последнему анализу риска каждого доступного документа.
+            </p>
+
+          </div>
+
+          <span class="analytics-counter">
+            Проанализировано:
+            <strong>
+              {{ dashboard.riskAnalyzedDocuments }}
+            </strong>
+          </span>
+
+        </div>
+
+
+        <div class="risk-score-card">
+
+          <div
+            class="risk-score-ring"
+            [style.background]="riskScoreGradient"
+          >
+
+            <div>
+
+              <strong>
+                {{ dashboard.averageRiskScore }}
+              </strong>
+
+              <span>
+                /100
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="risk-score-copy">
+
+            <span>
+              СРЕДНИЙ RISK SCORE
+            </span>
+
+            <strong>
+              Общая оценка портфеля
+            </strong>
+
+            <p>
+              Рассчитывается по последнему сохранённому AI-анализу каждого документа.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="risk-distribution">
+
+          <div class="risk-row">
+
+            <div class="risk-row-heading">
+
+              <span>
+                <i class="risk-dot low"></i>
+                Низкий риск
+              </span>
+
+              <strong>
+                {{ dashboard.lowRiskContracts }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="risk-fill low"
+                [style.width.%]="riskPercent(dashboard.lowRiskContracts)"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <div class="risk-row">
+
+            <div class="risk-row-heading">
+
+              <span>
+                <i class="risk-dot medium"></i>
+                Средний риск
+              </span>
+
+              <strong>
+                {{ dashboard.mediumRiskContracts }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="risk-fill medium"
+                [style.width.%]="riskPercent(dashboard.mediumRiskContracts)"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <div class="risk-row">
+
+            <div class="risk-row-heading">
+
+              <span>
+                <i class="risk-dot high"></i>
+                Высокий риск
+              </span>
+
+              <strong>
+                {{ dashboard.highRiskContracts }}
+              </strong>
+
+            </div>
+
+            <div class="analytics-progress">
+
+              <span
+                class="risk-fill high"
+                [style.width.%]="riskPercent(dashboard.highRiskContracts)"
+              ></span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        @if (dashboard.riskAnalyzedDocuments === 0) {
+
+          <div class="analytics-empty-state">
+
+            <strong>
+              Данных анализа риска пока нет
+            </strong>
+
+            <span>
+              Метрики появятся после выполнения AI-анализа документов.
+            </span>
+
+          </div>
+
+        }
+
+      </article>
+
+    </section>
+
+
+    <section class="panel activity-panel">
+
+      <div class="activity-header">
+
+        <div>
+
+          <span class="analytics-eyebrow">
+            ПРОЦЕССНАЯ АНАЛИТИКА
+          </span>
+
+          <h2>
+            Активность обработки документов
+          </h2>
+
+          <p>
+            Интенсивность работы с документами по дням и времени выполнения операций.
+          </p>
+
+        </div>
+
+
+        <div class="activity-periods">
+
+          <button
+            type="button"
+            [class.active]="selectedActivityDays === 30"
+            (click)="setActivityPeriod(30)"
+          >
+            30 дней
+          </button>
+
+          <button
+            type="button"
+            [class.active]="selectedActivityDays === 90"
+            (click)="setActivityPeriod(90)"
+          >
+            90 дней
+          </button>
+
+          <button
+            type="button"
+            [class.active]="selectedActivityDays === 365"
+            (click)="setActivityPeriod(365)"
+          >
+            Год
+          </button>
+
+        </div>
+
+      </div>
+
+
+      @if (activityLoading) {
+
+        <div class="activity-loading">
+          Загружаем данные активности...
+        </div>
+
+      } @else if (activityErrorMessage) {
+
+        <div class="activity-loading error">
+          {{ activityErrorMessage }}
+        </div>
+
+      } @else if (activity) {
+
+        <div class="activity-layout">
+
+          <div class="activity-chart-area">
+
+            @if (selectedActivityDays === 30) {
+
+              <div class="time-heatmap">
+
+                <div class="time-axis-row">
+
+                  <span class="time-axis-spacer">
+                    День
+                  </span>
+
+                  <div class="time-axis">
+
+                    <span>0ч</span>
+                    <span>6ч</span>
+                    <span>12ч</span>
+                    <span>18ч</span>
+                    <span>24ч</span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="time-day-list">
+
+                  @for (
+                    day of activityTimeDays;
+                    track day.key
+                  ) {
+
+                    <div class="time-day-row">
+
+                      <span class="time-day-label">
+                        {{ day.label }}
+                      </span>
+
+                      <div class="time-day-cells">
+
+                        @for (
+                          cell of day.cells;
+                          track cell.key
+                        ) {
+
+                          <span
+                            class="time-activity-cell"
+                            [attr.data-level]="timeActivityLevel(cell.documentCount)"
+                            [attr.title]="getTimeActivityTooltip(cell)"
+                          ></span>
+
+                        }
+
+                      </div>
+
+                    </div>
+
+                  }
+
+                </div>
+
+              </div>
+
+            } @else {
+
+              <div class="activity-scroll">
+
+                <div class="activity-grid-shell wide">
+
+                  <div class="activity-weekdays">
+
+                    <span>Пн</span>
+                    <span></span>
+                    <span>Ср</span>
+                    <span></span>
+                    <span>Пт</span>
+                    <span></span>
+                    <span>Вс</span>
+                    <span></span>
+
+                  </div>
+
+
+                  <div
+                    class="activity-weeks activity-weeks-wide"
+                    [class.year-view]="selectedActivityDays === 365"
+                    [style.grid-template-columns]="'repeat(' + activityWeeks.length + ', minmax(0, 1fr))'"
+                  >
+
+                    @for (
+                      week of activityWeeks;
+                      track week.key
+                    ) {
+
+                      <div class="activity-week activity-week-wide">
+
+                        @for (
+                          cell of week.days;
+                          track cell.key
+                        ) {
+
+                          <span
+                            class="activity-cell"
+                            [class.placeholder]="cell.placeholder"
+                            [attr.data-level]="activityLevel(cell.documentCount)"
+                            [attr.title]="getActivityCellTooltip(cell.date, cell.documentCount)"
+                          ></span>
+
+                        }
+
+                        <span class="activity-month">
+                          {{ week.monthLabel }}
+                        </span>
+
+                      </div>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <div class="activity-legend">
+
+              <span>Меньше</span>
+
+              <i data-level="0"></i>
+              <i data-level="1"></i>
+              <i data-level="2"></i>
+              <i data-level="3"></i>
+              <i data-level="4"></i>
+
+              <span>Больше</span>
+
+            </div>
+
+          </div>
+
+
+          <aside class="activity-summary">
+
+            <div class="activity-summary-card">
+
+              <span>Сегодня</span>
+
+              <strong>
+                {{ activity.today }}
+              </strong>
+
+              <small>
+                активных документов
+              </small>
+
+            </div>
+
+
+            <div class="activity-summary-card">
+
+              <span>За 7 дней</span>
+
+              <strong>
+                {{ activity.last7Days }}
+              </strong>
+
+              <small>
+                уникальных документов
+              </small>
+
+            </div>
+
+
+            <div class="activity-summary-card">
+
+              <span>За 30 дней</span>
+
+              <strong>
+                {{ activity.last30Days }}
+              </strong>
+
+              <small>
+                уникальных документов
+              </small>
+
+            </div>
+
+
+            <div class="activity-summary-card accent">
+
+              <span>
+                Среднее в день
+              </span>
+
+              <strong>
+                {{ activity.averagePerDay30 }}
+              </strong>
+
+              <small>
+                за последние 30 дней
+              </small>
+
+            </div>
+
+          </aside>
+
+        </div>
+
+      }
+
+    </section>
+
+
     <section class="analytics-grid">
 
       <article class="panel classification-panel">

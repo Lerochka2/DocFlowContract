@@ -415,7 +415,8 @@ public class SecurityConfig {
                                 "/api/documents",
                                 "/api/documents/**",
                                 "/api/workspace/documents",
-                                "/api/workspace/dashboard"
+                                "/api/workspace/dashboard",
+                                "/api/workspace/activity"
                         )
                         .hasAnyRole(
                                 "ADMIN",

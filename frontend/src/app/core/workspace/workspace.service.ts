@@ -31,6 +31,48 @@ export interface WorkspaceDashboard {
   sedError: number;
   expiringSoonContracts: number;
   expiredContracts: number;
+
+  approvalCycles: number;
+  approvalPending: number;
+  approvalInProgress: number;
+  approvalApproved: number;
+  approvalReturned: number;
+  approvalRejected: number;
+  approvalOverdue: number;
+
+  approvalCompletedOnTime: number;
+  approvalCompletedLate: number;
+  approvalSlaCompliancePercent: number;
+  averageApprovalTimeHours: number;
+  approvalReturnRatePercent: number;
+
+  riskAnalyzedDocuments: number;
+  lowRiskContracts: number;
+  mediumRiskContracts: number;
+  highRiskContracts: number;
+  averageRiskScore: number;
+}
+
+export interface WorkspaceActivityDay {
+  date: string;
+  documentCount: number;
+}
+
+export interface WorkspaceActivityTimeSlot {
+  date: string;
+  startHour: number;
+  documentCount: number;
+}
+
+export interface WorkspaceActivity {
+  days: number;
+  today: number;
+  last7Days: number;
+  last30Days: number;
+  averagePerDay30: number;
+  maxDailyDocuments: number;
+  activity: WorkspaceActivityDay[];
+  timeActivity: WorkspaceActivityTimeSlot[];
 }
 
 export interface WorkspaceDocument {
@@ -340,6 +382,26 @@ export class WorkspaceService {
       `${this.workspaceApiUrl}/dashboard`
     );
   }
+
+  getActivity(
+    days: 30 | 90 | 365 = 90
+  ): Observable<WorkspaceActivity> {
+
+    const params =
+      new HttpParams()
+        .set(
+          'days',
+          days.toString()
+        );
+
+    return this.http.get<WorkspaceActivity>(
+      `${this.workspaceApiUrl}/activity`,
+      {
+        params
+      }
+    );
+  }
+
 
   getDocuments(
     query?: string,
