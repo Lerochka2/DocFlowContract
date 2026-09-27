@@ -191,6 +191,30 @@ public class ApprovalWorkflowService {
                     )
             ) {
 
+                String newReason =
+                        route.getRoutingReason();
+
+                String currentReason =
+                        step.getRoutingReason();
+
+                boolean sameReason =
+                        currentReason == null
+                                ? newReason == null
+                                : currentReason.equals(
+                                        newReason
+                                );
+
+                if (!sameReason) {
+
+                    step.setRoutingReason(
+                            newReason
+                    );
+
+                    approvalStepRepository.save(
+                            step
+                    );
+                }
+
                 return;
             }
         }

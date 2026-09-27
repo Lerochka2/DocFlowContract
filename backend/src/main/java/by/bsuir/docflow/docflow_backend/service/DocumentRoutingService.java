@@ -1,35 +1,60 @@
 package by.bsuir.docflow.docflow_backend.service;
 
 import by.bsuir.docflow.docflow_backend.entity.AppUser;
+import by.bsuir.docflow.docflow_backend.entity.ContractRiskAnalysis;
 import by.bsuir.docflow.docflow_backend.entity.Document;
+import by.bsuir.docflow.docflow_backend.entity.DocumentLink;
 import by.bsuir.docflow.docflow_backend.entity.DocumentRoute;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.entity.enums.NotificationType;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.RoutingTarget;
 import by.bsuir.docflow.docflow_backend.repository.AppUserRepository;
+import by.bsuir.docflow.docflow_backend.repository.ContractRiskAnalysisRepository;
+import by.bsuir.docflow.docflow_backend.repository.DocumentLinkRepository;
 import by.bsuir.docflow.docflow_backend.repository.DocumentRouteRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class DocumentRoutingService {
 
-    private final DocumentRouteRepository documentRouteRepository;
+    private static final int LAWYER_RISK_SCORE_THRESHOLD =
+            60;
 
-    private final AppUserRepository appUserRepository;
+    private static final int MAX_REASON_LENGTH =
+            500;
 
-    private final NotificationService notificationService;
 
-    private final ApprovalWorkflowService approvalWorkflowService;
+    private final DocumentRouteRepository
+            documentRouteRepository;
+
+    private final ContractRiskAnalysisRepository
+            contractRiskAnalysisRepository;
+
+    private final DocumentLinkRepository
+            documentLinkRepository;
+
+    private final AppUserRepository
+            appUserRepository;
+
+    private final NotificationService
+            notificationService;
+
+    private final ApprovalWorkflowService
+            approvalWorkflowService;
 
 
     public DocumentRoutingService(
             DocumentRouteRepository documentRouteRepository,
+            ContractRiskAnalysisRepository contractRiskAnalysisRepository,
+            DocumentLinkRepository documentLinkRepository,
             AppUserRepository appUserRepository,
             NotificationService notificationService,
             ApprovalWorkflowService approvalWorkflowService
@@ -37,6 +62,12 @@ public class DocumentRoutingService {
 
         this.documentRouteRepository =
                 documentRouteRepository;
+
+        this.contractRiskAnalysisRepository =
+                contractRiskAnalysisRepository;
+
+        this.documentLinkRepository =
+                documentLinkRepository;
 
         this.appUserRepository =
                 appUserRepository;
@@ -71,14 +102,17 @@ public class DocumentRoutingService {
         DocumentType documentType =
                 document.getDocumentType();
 
-        RoutingTarget routingTarget =
-                determineTarget(
-                        documentType
+        RoutingDecision decision =
+                determineDecision(
+                        document
                 );
 
+        RoutingTarget routingTarget =
+                decision.target();
+
         String routingReason =
-                determineReason(
-                        documentType
+                limitReason(
+                        decision.reason()
                 );
 
         Optional<DocumentRoute> activeRoute =
@@ -108,6 +142,25 @@ public class DocumentRoutingService {
                             &&
                     sameTarget
             ) {
+
+                if (
+                        !Objects.equals(
+                                currentRoute
+                                        .getRoutingReason(),
+                                routingReason
+                        )
+                ) {
+
+                    currentRoute.setRoutingReason(
+                            routingReason
+                    );
+
+                    currentRoute =
+                            documentRouteRepository
+                                    .save(
+                                            currentRoute
+                                    );
+                }
 
                 approvalWorkflowService
                         .ensureForRoute(
@@ -167,6 +220,533 @@ public class DocumentRoutingService {
         );
 
         return savedRoute;
+    }
+
+
+    private RoutingDecision determineDecision(
+            Document document
+    ) {
+
+        return switch (
+                document.getDocumentType()
+        ) {
+
+            case CONTRACT ->
+                    determineContractDecision(
+                            document
+                    );
+
+            case AMENDMENT_CHANGE ->
+                    determineAmendmentChangeDecision(
+                            document
+                    );
+
+            case AMENDMENT_PROLONGATION ->
+                    determineProlongationDecision(
+                            document
+                    );
+
+            case APPENDIX ->
+                    new RoutingDecision(
+                            RoutingTarget.CONTRACT_MANAGER,
+                            "Приложение к договору направлено "
+                                    + "менеджеру по договорам: "
+                                    + "юридически значимые изменения "
+                                    + "основных условий не предполагаются."
+                    );
+        };
+    }
+
+
+    private RoutingDecision determineContractDecision(
+            Document document
+    ) {
+
+        Optional<ContractRiskAnalysis> optionalAnalysis =
+                contractRiskAnalysisRepository
+                        .findFirstByDocumentIdOrderByAnalyzedAtDescIdDesc(
+                                document.getId()
+                        );
+
+        if (optionalAnalysis.isEmpty()) {
+
+            return new RoutingDecision(
+                    RoutingTarget.CONTRACT_MANAGER,
+                    "Основной договор направлен менеджеру "
+                            + "по договорам. AI-анализ риска "
+                            + "ещё не выполнен; после анализа "
+                            + "маршрут будет автоматически уточнён."
+            );
+        }
+
+        ContractRiskAnalysis analysis =
+                optionalAnalysis.get();
+
+        String riskLevel =
+                normalizeRiskLevel(
+                        analysis.getRiskLevel()
+                );
+
+        Integer riskScore =
+                analysis.getRiskScore();
+
+        if (
+                requiresLawyer(
+                        riskLevel,
+                        riskScore
+                )
+        ) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "AI-анализ выявил "
+                            + riskLevelLabel(riskLevel)
+                            + " уровень риска"
+                            + formatRiskScore(riskScore)
+                            + ". Договор направлен юристу "
+                            + "для дополнительной юридической проверки."
+            );
+        }
+
+        return new RoutingDecision(
+                RoutingTarget.CONTRACT_MANAGER,
+                "AI-анализ: "
+                        + riskLevelLabel(riskLevel)
+                        + " уровень риска"
+                        + formatRiskScore(riskScore)
+                        + ". Договор направлен менеджеру "
+                        + "по договорам."
+        );
+    }
+
+
+    private RoutingDecision
+    determineAmendmentChangeDecision(
+            Document document
+    ) {
+
+        Optional<Document> contract =
+                resolveLinkedContract(
+                        document
+                );
+
+        if (contract.isEmpty()) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "Дополнительное соглашение изменяет "
+                            + "условия основного договора "
+                            + "и требует юридической проверки."
+            );
+        }
+
+        if (
+                referencedContractMismatch(
+                        contract.get(),
+                        document
+                )
+        ) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "Реквизиты указанного основного договора "
+                            + "не совпадают со связанным договором. "
+                            + "Документ направлен юристу."
+            );
+        }
+
+        int changedFields =
+                countChangedFields(
+                        contract.get(),
+                        document,
+                        true
+                );
+
+        if (changedFields > 0) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "Сравнение с основным договором выявило "
+                            + changedFields
+                            + " изменённых реквизит(а/ов). "
+                            + "Дополнительное соглашение "
+                            + "направлено юристу."
+            );
+        }
+
+        return new RoutingDecision(
+                RoutingTarget.LAWYER,
+                "Документ классифицирован как дополнительное "
+                        + "соглашение с изменением условий. "
+                        + "Требуется юридическая проверка."
+        );
+    }
+
+
+    private RoutingDecision
+    determineProlongationDecision(
+            Document document
+    ) {
+
+        Optional<Document> contract =
+                resolveLinkedContract(
+                        document
+                );
+
+        if (contract.isEmpty()) {
+
+            return new RoutingDecision(
+                    RoutingTarget.CONTRACT_MANAGER,
+                    "Дополнительное соглашение о пролонгации "
+                            + "направлено менеджеру по договорам."
+            );
+        }
+
+        Document baseContract =
+                contract.get();
+
+        if (
+                referencedContractMismatch(
+                        baseContract,
+                        document
+                )
+        ) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "При пролонгации обнаружено несоответствие "
+                            + "реквизитов основного договора. "
+                            + "Документ направлен юристу."
+            );
+        }
+
+        int substantiveChanges =
+                countChangedFields(
+                        baseContract,
+                        document,
+                        false
+                );
+
+        if (substantiveChanges > 0) {
+
+            return new RoutingDecision(
+                    RoutingTarget.LAWYER,
+                    "Помимо продления срока обнаружено "
+                            + substantiveChanges
+                            + (substantiveChanges == 1 ? " изменение существенных условий. " : " изменения существенных условий. ")
+                            + "Документ направлен юристу."
+            );
+        }
+
+        boolean validToChanged =
+                changedValue(
+                        baseContract.getValidTo(),
+                        document.getValidTo()
+                );
+
+        if (validToChanged) {
+
+            return new RoutingDecision(
+                    RoutingTarget.CONTRACT_MANAGER,
+                    "Сравнение с основным договором показало, "
+                            + "что изменён только срок действия. "
+                            + "Пролонгация направлена менеджеру "
+                            + "по договорам."
+            );
+        }
+
+        return new RoutingDecision(
+                RoutingTarget.CONTRACT_MANAGER,
+                "Дополнительное соглашение определено "
+                        + "как пролонгация без иных существенных "
+                        + "изменений. Направлено менеджеру "
+                        + "по договорам."
+        );
+    }
+
+
+    private boolean requiresLawyer(
+            String riskLevel,
+            Integer riskScore
+    ) {
+
+        if (
+                "HIGH".equals(riskLevel)
+                        ||
+                "CRITICAL".equals(riskLevel)
+                        ||
+                "VERY_HIGH".equals(riskLevel)
+        ) {
+
+            return true;
+        }
+
+        return riskScore != null
+                &&
+                riskScore
+                        >= LAWYER_RISK_SCORE_THRESHOLD;
+    }
+
+
+    private String normalizeRiskLevel(
+            String value
+    ) {
+
+        if (
+                value == null
+                        ||
+                value.isBlank()
+        ) {
+
+            return "UNKNOWN";
+        }
+
+        return value
+                .trim()
+                .toUpperCase();
+    }
+
+
+    private String riskLevelLabel(
+            String riskLevel
+    ) {
+
+        return switch (riskLevel) {
+
+            case "LOW" ->
+                    "низкий";
+
+            case "MEDIUM" ->
+                    "средний";
+
+            case "HIGH" ->
+                    "высокий";
+
+            case "CRITICAL",
+                 "VERY_HIGH" ->
+                    "критический";
+
+            default ->
+                    "неопределённый";
+        };
+    }
+
+
+    private String formatRiskScore(
+            Integer score
+    ) {
+
+        if (score == null) {
+            return "";
+        }
+
+        return " (" + score + "/100)";
+    }
+
+
+    private Optional<Document> resolveLinkedContract(
+            Document document
+    ) {
+
+        if (
+                document == null
+                        ||
+                document.getId() == null
+        ) {
+
+            return Optional.empty();
+        }
+
+        return documentLinkRepository
+                .findByChildDocumentId(
+                        document.getId()
+                )
+                .map(
+                        DocumentLink::getContractDocument
+                )
+                .filter(
+                        Objects::nonNull
+                );
+    }
+
+
+    private int countChangedFields(
+            Document contract,
+            Document additionalDocument,
+            boolean includeValidTo
+    ) {
+
+        int changed =
+                0;
+
+        if (
+                changedAmount(
+                        contract.getAmount(),
+                        additionalDocument.getAmount()
+                )
+        ) {
+            changed++;
+        }
+
+        if (
+                changedString(
+                        contract.getCurrency(),
+                        additionalDocument.getCurrency()
+                )
+        ) {
+            changed++;
+        }
+
+        if (
+                changedString(
+                        contract.getSubject(),
+                        additionalDocument.getSubject()
+                )
+        ) {
+            changed++;
+        }
+
+        if (
+                changedValue(
+                        contract.getValidFrom(),
+                        additionalDocument.getValidFrom()
+                )
+        ) {
+            changed++;
+        }
+
+        if (
+                includeValidTo
+                        &&
+                changedValue(
+                        contract.getValidTo(),
+                        additionalDocument.getValidTo()
+                )
+        ) {
+            changed++;
+        }
+
+        return changed;
+    }
+
+
+    private boolean changedAmount(
+            BigDecimal contractValue,
+            BigDecimal additionalValue
+    ) {
+
+        if (additionalValue == null) {
+            return false;
+        }
+
+        return contractValue == null
+                ||
+                contractValue.compareTo(
+                        additionalValue
+                ) != 0;
+    }
+
+
+    private boolean changedString(
+            String contractValue,
+            String additionalValue
+    ) {
+
+        if (
+                additionalValue == null
+                        ||
+                additionalValue.isBlank()
+        ) {
+
+            return false;
+        }
+
+        return contractValue == null
+                ||
+                !contractValue
+                        .trim()
+                        .equalsIgnoreCase(
+                                additionalValue.trim()
+                        );
+    }
+
+
+    private boolean changedValue(
+            Object contractValue,
+            Object additionalValue
+    ) {
+
+        if (additionalValue == null) {
+            return false;
+        }
+
+        return !Objects.equals(
+                contractValue,
+                additionalValue
+        );
+    }
+
+
+    private boolean referencedContractMismatch(
+            Document contract,
+            Document additionalDocument
+    ) {
+
+        String referencedNumber =
+                additionalDocument
+                        .getReferencedContractNumber();
+
+        if (
+                referencedNumber != null
+                        &&
+                !referencedNumber.isBlank()
+                        &&
+                (
+                        contract.getDocumentNumber() == null
+                                ||
+                        !contract.getDocumentNumber()
+                                .trim()
+                                .equalsIgnoreCase(
+                                        referencedNumber.trim()
+                                )
+                )
+        ) {
+
+            return true;
+        }
+
+        return additionalDocument
+                .getReferencedContractDate()
+                != null
+                &&
+                !Objects.equals(
+                        contract.getDocumentDate(),
+                        additionalDocument
+                                .getReferencedContractDate()
+                );
+    }
+
+
+    private String limitReason(
+            String reason
+    ) {
+
+        if (reason == null) {
+            return null;
+        }
+
+        if (
+                reason.length()
+                        <= MAX_REASON_LENGTH
+        ) {
+
+            return reason;
+        }
+
+        return reason.substring(
+                0,
+                MAX_REASON_LENGTH
+        );
     }
 
 
@@ -267,48 +847,9 @@ public class DocumentRoutingService {
     }
 
 
-    private RoutingTarget determineTarget(
-            DocumentType documentType
+    private record RoutingDecision(
+            RoutingTarget target,
+            String reason
     ) {
-
-        return switch (
-                documentType
-        ) {
-
-            case CONTRACT ->
-                    RoutingTarget.CONTRACT_MANAGER;
-
-            case AMENDMENT_CHANGE ->
-                    RoutingTarget.LAWYER;
-
-            case AMENDMENT_PROLONGATION ->
-                    RoutingTarget.CONTRACT_MANAGER;
-
-            case APPENDIX ->
-                    RoutingTarget.CONTRACT_MANAGER;
-        };
-    }
-
-
-    private String determineReason(
-            DocumentType documentType
-    ) {
-
-        return switch (
-                documentType
-        ) {
-
-            case CONTRACT ->
-                    "Основной договор направлен менеджеру по договорам";
-
-            case AMENDMENT_CHANGE ->
-                    "Дополнительное соглашение с изменениями направлено юристу";
-
-            case AMENDMENT_PROLONGATION ->
-                    "Дополнительное соглашение о пролонгации направлено менеджеру по договорам";
-
-            case APPENDIX ->
-                    "Приложение к договору направлено менеджеру по договорам";
-        };
     }
 }

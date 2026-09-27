@@ -819,8 +819,8 @@
               </h2>
 
               <p>
-                Текущая логика направления документов
-                после классификации.
+                Интеллектуальный выбор маршрута по типу документа,
+                AI-риску и изменениям относительно основного договора.
               </p>
 
             </div>
@@ -833,7 +833,24 @@
             <div class="routing-rule">
 
               <span class="document-type contract">
-                Договор
+                Договор · риск ≥ 60
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type contract">
+                Договор · риск &lt; 60
               </span>
 
               <span class="arrow">
@@ -867,7 +884,24 @@
             <div class="routing-rule">
 
               <span class="document-type prolongation">
-                Доп. соглашение — продление
+                Продление + существенные изменения
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type prolongation">
+                Только продление срока
               </span>
 
               <span class="arrow">
@@ -907,8 +941,8 @@
             </span>
 
             <p>
-              Маршрут формируется автоматически после принятия
-              результата классификации или завершения ручной проверки.
+              Маршрут формируется автоматически и может уточняться
+              после AI-анализа риска или сравнения связанного документа.
             </p>
 
           </div>

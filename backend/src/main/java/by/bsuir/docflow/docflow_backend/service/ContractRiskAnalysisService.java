@@ -9,6 +9,7 @@ import by.bsuir.docflow.docflow_backend.entity.ContractRiskAnalysis;
 import by.bsuir.docflow.docflow_backend.entity.ContractRiskFinding;
 import by.bsuir.docflow.docflow_backend.entity.Document;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentAuditEventType;
+import by.bsuir.docflow.docflow_backend.entity.enums.DocumentStatus;
 import by.bsuir.docflow.docflow_backend.entity.enums.DocumentType;
 import by.bsuir.docflow.docflow_backend.exception.DocumentNotFoundException;
 import by.bsuir.docflow.docflow_backend.repository.AiProcessingResultRepository;
@@ -31,6 +32,7 @@ public class ContractRiskAnalysisService {
     private final ContractRiskAnalysisRepository contractRiskAnalysisRepository;
     private final DocumentAccessService documentAccessService;
     private final DocumentAuditService documentAuditService;
+    private final DocumentRoutingService documentRoutingService;
     private final AiClient aiClient;
 
     public ContractRiskAnalysisService(
@@ -39,6 +41,7 @@ public class ContractRiskAnalysisService {
             ContractRiskAnalysisRepository contractRiskAnalysisRepository,
             DocumentAccessService documentAccessService,
             DocumentAuditService documentAuditService,
+            DocumentRoutingService documentRoutingService,
             AiClient aiClient
     ) {
         this.documentRepository =
@@ -55,6 +58,9 @@ public class ContractRiskAnalysisService {
 
         this.documentAuditService =
                 documentAuditService;
+
+        this.documentRoutingService =
+                documentRoutingService;
 
         this.aiClient =
                 aiClient;
@@ -189,6 +195,16 @@ public class ContractRiskAnalysisService {
                 "Выполнен анализ рисков договора",
                 auditDetails
         );
+
+        if (
+                document.getStatus()
+                        == DocumentStatus.VERIFIED
+        ) {
+
+            documentRoutingService.route(
+                    document
+            );
+        }
 
         return toResponse(
                 savedAnalysis

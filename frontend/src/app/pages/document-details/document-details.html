@@ -877,6 +877,163 @@
 
         </article>
 
+        <article class="panel preview-panel">
+
+          <div class="preview-heading">
+
+            <div>
+
+              <span class="section-eyebrow">
+                ИСХОДНЫЙ ФАЙЛ
+              </span>
+
+              <h2>
+                Просмотр документа
+              </h2>
+
+            </div>
+
+
+            <div class="preview-actions">
+
+              <button
+                class="preview-refresh-button"
+                type="button"
+                [disabled]="previewLoading"
+                (click)="loadDocumentPreview()"
+                title="Обновить предпросмотр"
+              >
+                ↻
+              </button>
+
+              <button
+                class="preview-open-button"
+                type="button"
+                [disabled]="!previewObjectUrl"
+                (click)="openPreviewInNewTab()"
+              >
+                Открыть отдельно ↗
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="preview-file-info">
+
+            <span class="preview-file-icon">
+              @if (isPdfPreview) {
+                PDF
+              } @else if (isImagePreview) {
+                IMG
+              } @else {
+                FILE
+              }
+            </span>
+
+            <div>
+
+              <strong>
+                {{ document.originalName || 'Документ' }}
+              </strong>
+
+              <span>
+                Оригинальный файл из хранилища DocFlow
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="preview-stage">
+
+            @if (previewLoading) {
+
+              <div class="preview-state">
+
+                <span class="preview-loader"></span>
+
+                <strong>
+                  Загружаем документ
+                </strong>
+
+                <span>
+                  Получаем исходный файл из защищённого хранилища.
+                </span>
+
+              </div>
+
+            } @else if (previewErrorMessage) {
+
+              <div class="preview-state error">
+
+                <strong>
+                  Предпросмотр недоступен
+                </strong>
+
+                <span>
+                  {{ previewErrorMessage }}
+                </span>
+
+                <button
+                  type="button"
+                  (click)="loadDocumentPreview()"
+                >
+                  Повторить
+                </button>
+
+              </div>
+
+            } @else if (
+              isPdfPreview
+              &&
+              previewResourceUrl
+            ) {
+
+              <iframe
+                class="pdf-preview"
+                [src]="previewResourceUrl"
+                title="Предпросмотр PDF-документа"
+              ></iframe>
+
+            } @else if (
+              isImagePreview
+              &&
+              previewObjectUrl
+            ) {
+
+              <div class="image-preview-wrapper">
+
+                <img
+                  class="image-preview"
+                  [src]="previewObjectUrl"
+                  [alt]="document.originalName || 'Документ'"
+                />
+
+              </div>
+
+            } @else {
+
+              <div class="preview-state">
+
+                <strong>
+                  Формат не поддерживает встроенный просмотр
+                </strong>
+
+                <span>
+                  Откройте исходный файл в отдельной вкладке.
+                </span>
+
+              </div>
+
+            }
+
+          </div>
+
+        </article>
+
       </div>
 
 
@@ -891,163 +1048,6 @@
 
       }
 
-
-      <article class="panel preview-panel">
-
-        <div class="preview-heading">
-
-          <div>
-
-            <span class="section-eyebrow">
-              ИСХОДНЫЙ ФАЙЛ
-            </span>
-
-            <h2>
-              Просмотр документа
-            </h2>
-
-          </div>
-
-
-          <div class="preview-actions">
-
-            <button
-              class="preview-refresh-button"
-              type="button"
-              [disabled]="previewLoading"
-              (click)="loadDocumentPreview()"
-              title="Обновить предпросмотр"
-            >
-              ↻
-            </button>
-
-            <button
-              class="preview-open-button"
-              type="button"
-              [disabled]="!previewObjectUrl"
-              (click)="openPreviewInNewTab()"
-            >
-              Открыть отдельно ↗
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div class="preview-file-info">
-
-          <span class="preview-file-icon">
-            @if (isPdfPreview) {
-              PDF
-            } @else if (isImagePreview) {
-              IMG
-            } @else {
-              FILE
-            }
-          </span>
-
-          <div>
-
-            <strong>
-              {{ document.originalName || 'Документ' }}
-            </strong>
-
-            <span>
-              Оригинальный файл из хранилища DocFlow
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="preview-stage">
-
-          @if (previewLoading) {
-
-            <div class="preview-state">
-
-              <span class="preview-loader"></span>
-
-              <strong>
-                Загружаем документ
-              </strong>
-
-              <span>
-                Получаем исходный файл из защищённого хранилища.
-              </span>
-
-            </div>
-
-          } @else if (previewErrorMessage) {
-
-            <div class="preview-state error">
-
-              <strong>
-                Предпросмотр недоступен
-              </strong>
-
-              <span>
-                {{ previewErrorMessage }}
-              </span>
-
-              <button
-                type="button"
-                (click)="loadDocumentPreview()"
-              >
-                Повторить
-              </button>
-
-            </div>
-
-          } @else if (
-            isPdfPreview
-            &&
-            previewResourceUrl
-          ) {
-
-            <iframe
-              class="pdf-preview"
-              [src]="previewResourceUrl"
-              title="Предпросмотр PDF-документа"
-            ></iframe>
-
-          } @else if (
-            isImagePreview
-            &&
-            previewObjectUrl
-          ) {
-
-            <div class="image-preview-wrapper">
-
-              <img
-                class="image-preview"
-                [src]="previewObjectUrl"
-                [alt]="document.originalName || 'Документ'"
-              />
-
-            </div>
-
-          } @else {
-
-            <div class="preview-state">
-
-              <strong>
-                Формат не поддерживает встроенный просмотр
-              </strong>
-
-              <span>
-                Откройте исходный файл в отдельной вкладке.
-              </span>
-
-            </div>
-
-          }
-
-        </div>
-
-      </article>
 
     </section>
 
