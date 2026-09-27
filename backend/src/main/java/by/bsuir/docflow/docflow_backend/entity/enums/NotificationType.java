@@ -7,6 +7,9 @@ public enum NotificationType {
     DOCUMENT_APPROVED,
     DOCUMENT_REJECTED,
 
+    APPROVAL_DUE_SOON,
+    APPROVAL_OVERDUE,
+
     AI_REVIEW_REQUIRED,
     LINK_REQUIRED,
 

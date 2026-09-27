@@ -582,10 +582,12 @@ export class AppShell
       case 'DOCUMENT_RETURNED':
       case 'AI_REVIEW_REQUIRED':
       case 'CONTRACT_EXPIRING':
+      case 'APPROVAL_DUE_SOON':
         return 'review';
 
       case 'DOCUMENT_REJECTED':
       case 'CONTRACT_EXPIRED':
+      case 'APPROVAL_OVERDUE':
       case 'SED_ERROR':
       case 'PROCESSING_ERROR':
       default:
@@ -618,9 +620,11 @@ export class AppShell
         return '⛓';
 
       case 'CONTRACT_EXPIRING':
+      case 'APPROVAL_DUE_SOON':
         return '⌛';
 
       case 'CONTRACT_EXPIRED':
+      case 'APPROVAL_OVERDUE':
         return '!';
 
       case 'READY_FOR_SED':

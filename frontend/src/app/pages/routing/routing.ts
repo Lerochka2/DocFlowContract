@@ -54,6 +54,7 @@ type SpecialistFilter =
   | 'ALL'
   | 'AVAILABLE'
   | 'MINE'
+  | 'DUE_SOON'
   | 'OVERDUE';
 
 
@@ -394,6 +395,15 @@ export class RoutingWorkspace
 
         if (
           this.specialistFilter
+          === 'DUE_SOON'
+          &&
+          !this.isDueSoon(task)
+        ) {
+          return false;
+        }
+
+        if (
+          this.specialistFilter
           === 'OVERDUE'
           &&
           !this.isOverdue(task)
@@ -444,6 +454,15 @@ export class RoutingWorkspace
     return this.tasks.filter(
       task =>
         task.status === 'IN_PROGRESS'
+    ).length;
+  }
+
+
+  get dueSoonTaskCount(): number {
+
+    return this.tasks.filter(
+      task =>
+        this.isDueSoon(task)
     ).length;
   }
 
@@ -706,6 +725,80 @@ export class RoutingWorkspace
 
     return remaining
       <= 24 * 60 * 60 * 1000;
+  }
+
+
+  getDueStatusText(
+    task: ApprovalTaskView
+  ): string {
+
+    if (!task.dueAt) {
+      return '';
+    }
+
+    const due =
+      new Date(
+        task.dueAt
+      );
+
+    if (
+      Number.isNaN(
+        due.getTime()
+      )
+    ) {
+      return '';
+    }
+
+    const difference =
+      due.getTime()
+      - Date.now();
+
+    if (difference < 0) {
+
+      const overdueMilliseconds =
+        Math.abs(
+          difference
+        );
+
+      if (
+        overdueMilliseconds
+        < 60 * 60 * 1000
+      ) {
+        return 'Просрочено менее часа';
+      }
+
+      const overdueHours =
+        Math.ceil(
+          overdueMilliseconds
+          / (60 * 60 * 1000)
+        );
+
+      if (overdueHours < 24) {
+        return `Просрочено примерно на ${overdueHours} ч`;
+      }
+
+      const overdueDays =
+        Math.ceil(
+          overdueHours / 24
+        );
+
+      return `Просрочено примерно на ${overdueDays} дн.`;
+    }
+
+    if (
+      difference
+      <= 60 * 60 * 1000
+    ) {
+      return 'Осталось менее часа';
+    }
+
+    const remainingHours =
+      Math.ceil(
+        difference
+        / (60 * 60 * 1000)
+      );
+
+    return `Осталось около ${remainingHours} ч`;
   }
 
 

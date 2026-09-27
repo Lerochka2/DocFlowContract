@@ -76,7 +76,7 @@
 
 .specialist-statistics {
   grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    repeat(4, minmax(0, 1fr));
 }
 
 .stat-card {
@@ -129,6 +129,11 @@
 .stat-icon.progress {
   color: #426fbd;
   background: #edf3ff;
+}
+
+.stat-icon.soon {
+  color: #a87435;
+  background: #fff5e8;
 }
 
 .stat-icon.overdue {
@@ -869,7 +874,7 @@
 
   .specialist-statistics {
     grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+      repeat(2, minmax(0, 1fr));
   }
 
   .specialist-toolbar {

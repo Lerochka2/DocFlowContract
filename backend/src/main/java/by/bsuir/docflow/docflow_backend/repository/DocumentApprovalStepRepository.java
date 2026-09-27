@@ -5,6 +5,7 @@ import by.bsuir.docflow.docflow_backend.entity.enums.ApprovalStepStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -51,5 +52,12 @@ public interface DocumentApprovalStepRepository
     findByDocumentIdAndStatusIn(
             Long documentId,
             Collection<ApprovalStepStatus> statuses
+    );
+
+
+    List<DocumentApprovalStep>
+    findByStatusInAndDueAtLessThanEqualOrderByDueAtAsc(
+            Collection<ApprovalStepStatus> statuses,
+            LocalDateTime dueAt
     );
 }

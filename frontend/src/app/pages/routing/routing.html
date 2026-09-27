@@ -458,6 +458,20 @@
 
       <article class="stat-card">
 
+        <div class="stat-icon soon">
+          ⌛
+        </div>
+
+        <div>
+          <span>Скоро срок</span>
+          <strong>{{ dueSoonTaskCount }}</strong>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
         <div class="stat-icon overdue">
           ⏱
         </div>
@@ -517,6 +531,15 @@
         >
           В работе
           <span>{{ inProgressTaskCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="specialistFilter === 'DUE_SOON'"
+          (click)="setSpecialistFilter('DUE_SOON')"
+        >
+          Скоро срок
+          <span>{{ dueSoonTaskCount }}</span>
         </button>
 
         <button
@@ -718,10 +741,14 @@
                 {{ formatDateTime(task.dueAt) }}
               </strong>
 
-              @if (isOverdue(task)) {
-                <small>Срок истёк</small>
-              } @else if (isDueSoon(task)) {
-                <small>Осталось менее суток</small>
+              @if (
+                isOverdue(task)
+                ||
+                isDueSoon(task)
+              ) {
+                <small>
+                  {{ getDueStatusText(task) }}
+                </small>
               }
 
             </div>
