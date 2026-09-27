@@ -2904,6 +2904,10 @@
       </div>
 
 
+            <app-document-lifecycle-timeline
+        [documentId]="document.documentId"
+      />
+
       <app-document-audit-timeline
         [events]="auditHistory"
         [loading]="loadingAudit"

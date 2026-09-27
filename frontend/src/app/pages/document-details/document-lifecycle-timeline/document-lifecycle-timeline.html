@@ -1,0 +1,259 @@
+<section class="lifecycle-card">
+
+  <header class="lifecycle-header">
+
+    <div>
+
+      <span class="lifecycle-eyebrow">
+        ЖИЗНЕННЫЙ ЦИКЛ
+      </span>
+
+      <h3>
+        История документа
+      </h3>
+
+      <p>
+        Версии и этапы согласования
+        собраны в единую последовательность.
+      </p>
+
+    </div>
+
+
+    @if (!loading && steps.length > 0) {
+
+      <div class="lifecycle-summary">
+
+        <div>
+          <span>Версий</span>
+          <strong>{{ versionCount }}</strong>
+        </div>
+
+        <div>
+          <span>Циклов</span>
+          <strong>{{ approvalCycleCount }}</strong>
+        </div>
+
+        <div>
+          <span>Текущий статус</span>
+          <strong>{{ latestStatusLabel }}</strong>
+        </div>
+
+      </div>
+
+    }
+
+  </header>
+
+
+  @if (loading) {
+
+    <div class="lifecycle-state">
+
+      <span class="lifecycle-loader"></span>
+
+      <div>
+        <strong>
+          Загружаем историю
+        </strong>
+
+        <span>
+          Получаем версии и этапы согласования...
+        </span>
+      </div>
+
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="lifecycle-state error">
+
+      <span class="state-symbol">
+        !
+      </span>
+
+      <div>
+        <strong>
+          История недоступна
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+      </div>
+
+    </div>
+
+  } @else if (groups.length === 0) {
+
+    <div class="lifecycle-state empty">
+
+      <span class="state-symbol">
+        ○
+      </span>
+
+      <div>
+        <strong>
+          История согласования пока пуста
+        </strong>
+
+        <span>
+          После формирования первого этапа
+          здесь появится жизненный цикл документа.
+        </span>
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div class="version-list">
+
+      @for (
+        group of groups;
+        track group.versionNumber
+      ) {
+
+        <article
+          class="version-group"
+          [class.current]="
+            isLatestVersion(
+              group.versionNumber
+            )
+          "
+        >
+
+          <div class="version-header">
+
+            <div class="version-heading">
+
+              <span class="version-badge">
+                {{
+                  getVersionLabel(
+                    group.versionNumber
+                  )
+                }}
+              </span>
+
+              <div>
+
+                <strong>
+                  {{
+                    group.versionNumber === null
+                      ? 'Этап без привязанной версии'
+                      : 'Версия документа'
+                  }}
+                </strong>
+
+                <span>
+                  {{ group.stepCount }}
+                  {{
+                    group.stepCount === 1
+                      ? 'этап согласования'
+                      : 'этапа согласования'
+                  }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            @if (
+              isLatestVersion(
+                group.versionNumber
+              )
+            ) {
+
+              <span class="current-version">
+                Текущая версия
+              </span>
+
+            }
+
+          </div>
+
+
+          <div class="timeline">
+
+            @for (
+              event of group.events;
+              track event.id
+            ) {
+
+              <div
+                class="timeline-event"
+                [class.success]="
+                  event.tone === 'success'
+                "
+                [class.warning]="
+                  event.tone === 'warning'
+                "
+                [class.danger]="
+                  event.tone === 'danger'
+                "
+                [class.active]="
+                  event.tone === 'active'
+                "
+              >
+
+                <div class="timeline-marker">
+
+                  <span></span>
+
+                </div>
+
+
+                <div class="timeline-content">
+
+                  <div class="timeline-top">
+
+                    <strong>
+                      {{ event.title }}
+                    </strong>
+
+                    <time>
+                      {{
+                        formatDateTime(
+                          event.timestamp
+                        )
+                      }}
+                    </time>
+
+                  </div>
+
+
+                  @if (event.person) {
+
+                    <span class="timeline-person">
+                      {{ event.person }}
+                    </span>
+
+                  }
+
+
+                  @if (event.description) {
+
+                    <p>
+                      {{ event.description }}
+                    </p>
+
+                  }
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+</section>

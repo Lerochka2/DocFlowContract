@@ -155,7 +155,7 @@
     );
   box-shadow:
     0 9px 22px rgba(184, 73, 86, 0.1);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 850;
 }
 
@@ -626,7 +626,7 @@ app-contract-risk-analysis {
     );
   box-shadow:
     0 4px 10px rgba(94, 76, 194, 0.18);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 800;
   transform: translateY(-50%);
 }
@@ -1002,7 +1002,7 @@ app-contract-risk-analysis {
   border-radius: 9px;
   color: #d34f5f;
   background: #fff0f2;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 820;
 }
 
@@ -1026,7 +1026,7 @@ app-contract-risk-analysis {
 .preview-file-info div > span {
   margin-top: 4px;
   color: #8792a4;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .preview-stage {
@@ -1270,7 +1270,7 @@ app-contract-risk-analysis {
   display: block;
   margin-bottom: 4px;
   color: #8d97a7;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .candidate-preview strong {
@@ -1366,7 +1366,7 @@ app-contract-risk-analysis {
 
 .sed-success-box div > span {
   display: block;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .sed-success-box strong {
@@ -1640,7 +1640,7 @@ app-contract-risk-analysis {
   margin-bottom: 5px;
 
   color: #8475d8;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 750;
   letter-spacing: 0.05em;
 }
@@ -1669,7 +1669,7 @@ app-contract-risk-analysis {
   background: #e3f4ed;
 
   color: #287d68;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1722,7 +1722,7 @@ app-contract-risk-analysis {
 .decision-eyebrow {
   display: block;
   color: #7266c7;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.1em;
 }
@@ -1731,7 +1731,7 @@ app-contract-risk-analysis {
   flex: 0 0 auto;
   padding: 7px 11px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -1899,7 +1899,7 @@ app-contract-risk-analysis {
 .decision-resubmit span {
   margin-top: 4px;
   color: #817352;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.45;
 }
 
@@ -1978,13 +1978,13 @@ app-contract-risk-analysis {
   display: block;
   margin-top: 4px;
   color: #8a93a3;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .decision-history-loading {
   flex: 0 0 auto;
   color: #766bc4;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -2056,7 +2056,7 @@ app-contract-risk-analysis {
 
 .decision-history-top > span {
   color: #98a0ae;
-  font-size: 11px;
+  font-size: 15px;
   white-space: nowrap;
 }
 
@@ -2068,7 +2068,7 @@ app-contract-risk-analysis {
   border-radius: 999px;
   color: #625b8c;
   background: #f1effa;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -2144,7 +2144,7 @@ app-contract-risk-analysis {
 .comments-eyebrow {
   display: block;
   color: #7266c7;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.1em;
 }
@@ -2159,7 +2159,7 @@ app-contract-risk-analysis {
 .comments-header p {
   margin: 6px 0 0;
   color: #8992a3;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -2171,7 +2171,7 @@ app-contract-risk-analysis {
   border-radius: 999px;
   color: #6157b5;
   background: #f0eefb;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 800;
 }
 
@@ -2217,7 +2217,7 @@ app-contract-risk-analysis {
 
 .comment-compose-footer > span {
   color: #9aa2b0;
-  font-size: 11px;
+  font-size: 15px;
 }
 
 .comment-send-button {
@@ -2233,7 +2233,7 @@ app-contract-risk-analysis {
       #8070d8
     );
   font: inherit;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -2247,7 +2247,7 @@ app-contract-risk-analysis {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 9px;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .comment-message-error {
@@ -2273,7 +2273,7 @@ app-contract-risk-analysis {
   border-radius: 10px;
   color: #9099a9;
   background: #fafbfc;
-  font-size: 12px;
+  font-size: 16px;
   text-align: center;
 }
 
@@ -2337,7 +2337,7 @@ app-contract-risk-analysis {
 
 .comment-meta time {
   color: #9aa2b0;
-  font-size: 11px;
+  font-size: 15px;
   white-space: nowrap;
 }
 
@@ -2490,7 +2490,7 @@ app-contract-risk-analysis {
 
 .approval-state-card > span {
   margin-top: 5px;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -2508,7 +2508,7 @@ app-contract-risk-analysis {
   display: block;
   margin-bottom: 5px;
   color: #8c96a7;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 750;
   letter-spacing: 0.06em;
 }
@@ -2532,7 +2532,7 @@ app-contract-risk-analysis {
 .approval-state-action p {
   margin: 0;
   color: #717b8e;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.45;
 }
 
@@ -2545,7 +2545,7 @@ app-contract-risk-analysis {
   color: #ffffff;
   background: #5878cd;
   font: inherit;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -2561,7 +2561,7 @@ app-contract-risk-analysis {
   border-radius: 8px;
   color: #69758a;
   background: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -2765,7 +2765,7 @@ app-contract-risk-analysis {
   border-radius: 6px;
   color: #28715a;
   background: #e6f5ee;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 720;
 }
 
@@ -2785,7 +2785,7 @@ app-contract-risk-analysis {
   gap: 7px 14px;
   margin-top: 7px;
   color: #8a94a5;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .version-note {
@@ -2938,7 +2938,7 @@ app-contract-risk-analysis {
 .version-file-content > span {
   margin-top: 5px;
   color: #8490a4;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -2955,7 +2955,7 @@ app-contract-risk-analysis {
   background: #ffffff;
   box-shadow:
     0 4px 12px rgba(75, 64, 153, 0.06);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 720;
   transition:
     color 0.18s ease,
@@ -3087,7 +3087,7 @@ app-contract-risk-analysis {
   color: #6158ba;
   background: #ffffff;
   font: inherit;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 680;
   cursor: pointer;
   transition:
@@ -3112,6 +3112,6 @@ app-contract-risk-analysis {
   border-radius: 999px;
   color: #6259bd;
   background: #f5f2ff;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 720;
 }

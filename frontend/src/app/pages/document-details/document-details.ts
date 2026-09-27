@@ -68,6 +68,9 @@ import {
   ContractRiskAnalysisComponent
 } from './contract-risk-analysis/contract-risk-analysis';
 
+import {
+  DocumentLifecycleTimelineComponent
+} from './document-lifecycle-timeline/document-lifecycle-timeline';
 @Component({
   selector: 'app-document-details',
   standalone: true,
@@ -75,7 +78,8 @@ import {
     FormsModule,
     DocumentAuditTimelineComponent,
     ContractExpirationCardComponent,
-    ContractRiskAnalysisComponent
+    ContractRiskAnalysisComponent,
+    DocumentLifecycleTimelineComponent
   ],
   templateUrl: './document-details.html',
   styleUrl: './document-details.scss'
