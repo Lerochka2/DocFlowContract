@@ -409,8 +409,8 @@
 .document-workspace {
   display: grid;
   grid-template-columns:
-    minmax(0, 1.12fr)
-    minmax(420px, 0.88fr);
+    minmax(0, 0.88fr)
+    minmax(520px, 1.12fr);
   align-items: start;
   gap: 18px;
   margin-bottom: 26px;
@@ -3114,4 +3114,45 @@ app-contract-risk-analysis {
   background: #f5f2ff;
   font-size: 15px;
   font-weight: 720;
+}
+
+/* AI ANALYSIS RETRY */
+
+.ai-retry-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #5855d1,
+      #8063d4
+    );
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-retry-button:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.ai-retry-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-retry-error {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid #f0cfcc;
+  border-radius: 8px;
+  color: #a34d48;
+  background: #fff7f6;
+  font-size: 13px;
+  line-height: 1.45;
 }

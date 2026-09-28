@@ -778,6 +778,35 @@
                 Для этого документа отсутствует результат классификации.
               </span>
 
+              @if (canRunAiAnalysis) {
+
+                <button
+                  type="button"
+                  class="ai-retry-button"
+                  [disabled]="analyzingDocument"
+                  (click)="analyzeDocument()"
+                >
+                  @if (analyzingDocument) {
+                    Выполняется AI-анализ...
+                  } @else if (document.status === 'PROCESSING_FAILED') {
+                    Повторить AI-анализ
+                  } @else {
+                    Запустить AI-анализ
+                  }
+                </button>
+
+              }
+
+              @if (aiAnalysisErrorMessage) {
+
+                <div class="ai-retry-error">
+                  {{ aiAnalysisErrorMessage }}
+                </div>
+
+              }
+
+
+
             </div>
 
           }
@@ -877,7 +906,25 @@
 
         </article>
 
-        <article class="panel preview-panel">
+      
+
+      @if (
+        document.documentType === 'CONTRACT'
+      ) {
+
+        <app-contract-risk-analysis
+          [documentId]="document.documentId"
+        >
+        </app-contract-risk-analysis>
+
+      }
+
+      </div>
+
+
+    
+
+      <article class="panel preview-panel">
 
           <div class="preview-heading">
 
@@ -1033,21 +1080,6 @@
           </div>
 
         </article>
-
-      </div>
-
-
-      @if (
-        document.documentType === 'CONTRACT'
-      ) {
-
-        <app-contract-risk-analysis
-          [documentId]="document.documentId"
-        >
-        </app-contract-risk-analysis>
-
-      }
-
 
     </section>
 

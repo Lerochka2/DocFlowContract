@@ -105,6 +105,9 @@ export class DocumentDetails implements OnInit, OnDestroy {
 
   reviewingDocument = false;
 
+  analyzingDocument = false;
+  aiAnalysisErrorMessage = '';
+
   loadingCandidates = false;
   linkingDocument = false;
 
@@ -814,6 +817,80 @@ export class DocumentDetails implements OnInit, OnDestroy {
             .markForCheck();
         }
       });
+  }
+
+  analyzeDocument(): void {
+
+    if (
+      this.documentId === null
+      ||
+      !this.canRunAiAnalysis
+      ||
+      this.analyzingDocument
+    ) {
+      return;
+    }
+
+    this.analyzingDocument = true;
+    this.aiAnalysisErrorMessage = '';
+
+    this.workspaceService
+      .analyzeDocument(
+        this.documentId
+      )
+      .pipe(
+        finalize(
+          () => {
+            this.analyzingDocument = false;
+
+            this.changeDetectorRef
+              .markForCheck();
+          }
+        )
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.refreshDocumentSummary();
+          this.loadDocumentAudit();
+
+          this.changeDetectorRef
+            .markForCheck();
+        },
+
+        error: (
+          error: HttpErrorResponse
+        ) => {
+
+          this.aiAnalysisErrorMessage =
+            this.extractBackendMessage(
+              error
+            )
+            ?? 'Не удалось выполнить AI-анализ документа.';
+
+          this.changeDetectorRef
+            .markForCheck();
+        }
+      });
+  }
+
+
+  get canRunAiAnalysis(): boolean {
+
+    return (
+      (
+        this.isAdminUser
+        ||
+        this.isOperatorUser
+      )
+      &&
+      (
+        this.document?.status === 'UPLOADED'
+        ||
+        this.document?.status === 'PROCESSING_FAILED'
+      )
+    );
   }
 
   get canReviewDocument(): boolean {
