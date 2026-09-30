@@ -30,6 +30,9 @@ export class ContractRiskAnalysisComponent implements OnInit {
   @Input({ required: true })
   documentId!: number;
 
+  @Input()
+  canAnalyze = false;
+
   loading = false;
 
   loadingPrevious = false;
@@ -103,7 +106,11 @@ export class ContractRiskAnalysisComponent implements OnInit {
 
   analyze(): void {
 
-    if (this.loading) {
+    if (
+      !this.canAnalyze
+      ||
+      this.loading
+    ) {
       return;
     }
 

@@ -46,18 +46,22 @@
 
       </div>
 
-      <button
-        type="button"
-        class="risk-button"
-        [disabled]="loading"
-        (click)="analyze()"
-      >
-        @if (loading) {
-          Выполняется анализ...
-        } @else {
-          Провести анализ
-        }
-      </button>
+      @if (canAnalyze) {
+
+        <button
+          type="button"
+          class="risk-button"
+          [disabled]="loading"
+          (click)="analyze()"
+        >
+          @if (loading) {
+            Выполняется анализ...
+          } @else {
+            Провести анализ
+          }
+        </button>
+
+      }
 
     </div>
 
@@ -253,18 +257,22 @@
 
       </div>
 
-      <button
-        type="button"
-        class="risk-button secondary"
-        [disabled]="loading"
-        (click)="analyze()"
-      >
-        @if (loading) {
-          Выполняется...
-        } @else {
-          Повторить анализ
-        }
-      </button>
+      @if (canAnalyze) {
+
+        <button
+          type="button"
+          class="risk-button secondary"
+          [disabled]="loading"
+          (click)="analyze()"
+        >
+          @if (loading) {
+            Выполняется...
+          } @else {
+            Повторить анализ
+          }
+        </button>
+
+      }
 
     </div>
 

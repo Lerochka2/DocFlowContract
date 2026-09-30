@@ -191,7 +191,8 @@ public class SecurityConfig {
 
                         /*
                          * Contract risk analysis.
-                         * Object-level access is checked in service layer.
+                         * Only administrator and document operator
+                         * may start or repeat AI risk analysis.
                          */
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -199,9 +200,7 @@ public class SecurityConfig {
                         )
                         .hasAnyRole(
                                 "ADMIN",
-                                "DOCUMENT_OPERATOR",
-                                "LAWYER",
-                                "CONTRACT_MANAGER"
+                                "DOCUMENT_OPERATOR"
                         )
 
                         /*
