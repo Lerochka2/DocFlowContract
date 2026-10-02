@@ -1,51 +1,31 @@
 <section class="documents-page">
-
   <header class="page-heading">
-
     <div>
-
-      <span class="eyebrow">
-        РАБОЧЕЕ ПРОСТРАНСТВО
-      </span>
-
-      <h1>
-        Документы
-      </h1>
-
-      <p>
-        Просматривайте, ищите и фильтруйте документы,
-        загруженные в DocFlow.
-      </p>
-
+      <span class="eyebrow"> РАБОЧЕЕ ПРОСТРАНСТВО </span>
+      <h1>Документы</h1>
+      <p>Просматривайте, ищите и фильтруйте документы, загруженные в DocFlow.</p>
       @if (uploadMessage) {
         <p class="feedback success">
           {{ uploadMessage }}
         </p>
       }
-
       @if (uploadErrorMessage) {
         <p class="feedback error">
           {{ uploadErrorMessage }}
         </p>
       }
-
       @if (deleteMessage) {
         <p class="feedback success">
           {{ deleteMessage }}
         </p>
       }
-
       @if (deleteErrorMessage) {
         <p class="feedback error">
           {{ deleteErrorMessage }}
         </p>
       }
-
     </div>
-
-
     @if (canManageDocuments) {
-
       <input
         #fileInput
         type="file"
@@ -53,210 +33,88 @@
         style="display: none"
         (change)="onFileSelected($event)"
       />
-
-
       <button
         class="upload-button"
         type="button"
         [disabled]="uploading || deleting"
         (click)="fileInput.click()"
       >
-
         @if (uploading) {
-
           <span>↻</span>
           Обработка...
-
         } @else {
-
           <span>+</span>
           Загрузить документ
-
         }
-
       </button>
-
     }
-
   </header>
-
-
-  <section class="filter-panel">
-
-    <form
-      class="filters"
-      (ngSubmit)="loadDocuments()"
-    >
-
+  <section class="filter-panel" aria-label="Поиск и фильтры документов">
+    <div class="filter-heading">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+      Поиск и фильтры
+    </div>
+    <form class="filters" (ngSubmit)="loadDocuments()">
       <div class="search-field">
-
         <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="7"/>
-          <path d="M16 16l5 5"/>
+          <circle cx="11" cy="11" r="7" />
+          <path d="M16 16l5 5" />
         </svg>
-
         <input
           type="text"
           name="query"
+          aria-label="Название, номер или предмет документа"
           [(ngModel)]="query"
           placeholder="Название, номер или предмет документа"
         />
-
       </div>
-
-
-      <select
-        name="type"
-        [(ngModel)]="selectedType"
-      >
-
-        <option value="">
-          Все типы
-        </option>
-
-        <option value="CONTRACT">
-          Договор
-        </option>
-
-        <option value="APPENDIX">
-          Приложение
-        </option>
-
-        <option value="AMENDMENT_CHANGE">
-          Доп. соглашение — изменение
-        </option>
-
-        <option value="AMENDMENT_PROLONGATION">
-          Доп. соглашение — продление
-        </option>
-
+      <select name="type" aria-label="Тип документа" [(ngModel)]="selectedType">
+        <option value="">Все типы</option>
+        <option value="CONTRACT">Договор</option>
+        <option value="APPENDIX">Приложение</option>
+        <option value="AMENDMENT_CHANGE">Доп. соглашение — изменение</option>
+        <option value="AMENDMENT_PROLONGATION">Доп. соглашение — продление</option>
       </select>
-
-
-      <select
-        name="status"
-        [(ngModel)]="selectedStatus"
-      >
-
-        <option value="">
-          Все статусы
-        </option>
-
-        <option value="UPLOADED">
-          Загружен
-        </option>
-
-        <option value="AI_PROCESSING">
-          AI-анализ
-        </option>
-
-        <option value="REVIEW_REQUIRED">
-          Требует проверки
-        </option>
-
-        <option value="LINK_REQUIRED">
-          Требует привязки
-        </option>
-
-        <option value="LINKED">
-          Связан с договором
-        </option>
-
-        <option value="VERIFIED">
-          Проверен
-        </option>
-
-        <option value="READY_FOR_SED">
-          Готов к отправке
-        </option>
-
-        <option value="SENT_TO_SED">
-          Отправлен в СЭД
-        </option>
-
-        <option value="PROCESSING_FAILED">
-          Ошибка обработки
-        </option>
-
-        <option value="SED_ERROR">
-          Ошибка СЭД
-        </option>
-
+      <select name="status" aria-label="Статус документа" [(ngModel)]="selectedStatus">
+        <option value="">Все статусы</option>
+        <option value="UPLOADED">Загружен</option>
+        <option value="AI_PROCESSING">AI-анализ</option>
+        <option value="REVIEW_REQUIRED">Требует проверки</option>
+        <option value="LINK_REQUIRED">Требует привязки</option>
+        <option value="LINKED">Связан с договором</option>
+        <option value="VERIFIED">Проверен</option>
+        <option value="READY_FOR_SED">Готов к отправке</option>
+        <option value="SENT_TO_SED">Отправлен в СЭД</option>
+        <option value="PROCESSING_FAILED">Ошибка обработки</option>
+        <option value="SED_ERROR">Ошибка СЭД</option>
       </select>
-<select
+      <select
         name="expirationStatus"
+        aria-label="Срок действия договора"
         [(ngModel)]="selectedExpirationStatus"
         title="Фильтр по сроку действия договоров"
       >
-
-        <option value="">
-          Все сроки договоров
-        </option>
-
-        <option value="ACTIVE">
-          Действующие
-        </option>
-
-        <option value="EXPIRING_SOON">
-          Скоро истекают
-        </option>
-
-        <option value="EXPIRED">
-          Истёкшие
-        </option>
-
-        <option value="NOT_SPECIFIED">
-          Срок не указан
-        </option>
-
+        <option value="">Все сроки договоров</option>
+        <option value="ACTIVE">Действующие</option>
+        <option value="EXPIRING_SOON">Скоро истекают</option>
+        <option value="EXPIRED">Истёкшие</option>
+        <option value="NOT_SPECIFIED">Срок не указан</option>
       </select>
-
-
-      <button
-        class="apply-button"
-        type="submit"
-      >
-        Применить
-      </button>
-
-      <button
-        class="reset-button"
-        type="button"
-        (click)="resetFilters()"
-      >
-        Сбросить
-      </button>
-
+      <button class="apply-button" type="submit">Применить</button>
+      <button class="reset-button" type="button" (click)="resetFilters()">Сбросить</button>
     </form>
-
   </section>
-
-
   <section class="documents-panel">
-
     <div class="panel-heading">
-
       <div>
-
         <h2>
           {{ documentsListTitle }}
         </h2>
-
-        <span>
-          Найдено: {{ documents.length }}
-        </span>
-
+        <span> Найдено: {{ documents.length }} </span>
       </div>
-
-
       <div class="panel-actions">
-
         @if (canManageDocuments && selectedCount > 0) {
-
-          <span class="selected-count">
-            Выбрано: {{ selectedCount }}
-          </span>
-
+          <span class="selected-count"> Выбрано: {{ selectedCount }} </span>
           <button
             class="delete-selected-button"
             type="button"
@@ -269,101 +127,63 @@
               Удалить выбранные
             }
           </button>
-
         }
-
         <span class="ai-label">
           <i></i>
           Данные из DocFlow
         </span>
-
       </div>
-
     </div>
-
-
     @if (loading) {
-
-      <div class="state-message">
-        Загружаем документы...
-      </div>
-
+      <div class="state-message">Загружаем документы...</div>
     } @else if (errorMessage) {
-
       <div class="state-message error">
-
-        <strong>
-          Не удалось загрузить документы
-        </strong>
-
+        <strong> Не удалось загрузить документы </strong>
         <span>
           {{ errorMessage }}
         </span>
-
-        <button
-          type="button"
-          (click)="loadDocuments()"
-        >
-          Повторить
-        </button>
-
+        <button type="button" (click)="loadDocuments()">Повторить</button>
       </div>
-
     } @else {
-
-      <div class="table-wrapper">
-
+      <div
+        class="table-wrapper"
+        tabindex="0"
+        role="region"
+        aria-label="Таблица документов с горизонтальной прокруткой"
+      >
         <div class="documents-table" [class.read-only-table]="!canManageDocuments">
-
           <div class="document-row table-head">
-
             @if (canManageDocuments) {
-
               <span class="checkbox-cell">
-
                 <input
                   type="checkbox"
                   aria-label="Выбрать все доступные документы"
                   [checked]="allDeletableSelected"
                   (change)="toggleSelectAll($event)"
                 />
-
               </span>
-
             }
-
             <span>Документ</span>
             <span>Тип</span>
             <span>Статус</span>
             <span>Номер</span>
             <span>Дата</span>
             <span>Сумма</span>
-
           </div>
-
-
-          @for (
-            document of documents;
-            track document.documentId
-          ) {
-
+          @for (document of documents; track document.documentId) {
             <div
               class="document-row clickable-row"
+              [class.selected]="isDocumentSelected(document.documentId)"
               role="button"
               tabindex="0"
               (click)="openDocument(document.documentId)"
               (keydown.enter)="openDocument(document.documentId)"
             >
-
               @if (canManageDocuments) {
-
-                <span
-                  class="checkbox-cell"
-                  (click)="$event.stopPropagation()"
-                >
-
+                <span class="checkbox-cell" (click)="$event.stopPropagation()">
                   <input
                     type="checkbox"
+                    [attr.aria-label]="'Выбрать документ: ' + getDocumentName(document)"
                     [checked]="isDocumentSelected(document.documentId)"
                     [disabled]="!isDocumentDeletable(document) || deleting"
                     [title]="
@@ -373,121 +193,64 @@
                     "
                     (change)="toggleDocumentSelection(document, $event)"
                   />
-
                 </span>
-
               }
-
-
               <div class="document-main">
-
-                <span class="pdf-icon">
-                  PDF
-                </span>
-
+                <span class="pdf-icon" aria-hidden="true"
+                  ><img
+                    src="assets/ai-analysis/pdf-file-3d.png"
+                    alt=""
+                    width="1254"
+                    height="1254"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
                 <div>
-
                   <strong>
                     {{ getDocumentName(document) }}
                   </strong>
-
-                  <small>
-                    ID {{ document.documentId }}
-                  </small>
-
+                  <small> ID {{ document.documentId }} </small>
                   @if (document.subject) {
-
                     <span class="subject">
                       {{ document.subject }}
                     </span>
-
                   }
-
                 </div>
-
               </div>
-
-
               <div class="document-type-cell">
-
                 <span class="document-type">
                   {{ getDocumentTypeLabel(document.documentType) }}
                 </span>
-
-                @if (
-                  document.documentType === 'CONTRACT'
-                  &&
-                  document.expirationStatus
-                ) {
-
+                @if (document.documentType === 'CONTRACT' && document.expirationStatus) {
                   <span
-                    [class]="
-                      'expiration-mini ' +
-                      getExpirationClass(
-                        document.expirationStatus
-                      )
-                    "
+                    [class]="'expiration-mini ' + getExpirationClass(document.expirationStatus)"
                   >
                     {{ getExpirationLabel(document) }}
                   </span>
-
                 }
-
               </div>
-
-
-              <span
-                [class]="
-                  'status ' +
-                  getStatusClass(document.status)
-                "
-              >
+              <span [class]="'status ' + getStatusClass(document.status)">
                 {{ getStatusLabel(document.status) }}
               </span>
-
-
               <span>
                 {{ document.documentNumber || '—' }}
               </span>
-
-
               <span>
                 {{ getDate(document) }}
               </span>
-
-
               <span class="amount">
                 {{ getAmount(document) }}
               </span>
-
             </div>
-
           } @empty {
-
             <div class="empty-state">
-
-              <div class="empty-icon">
-                ⌕
-              </div>
-
-              <strong>
-                Документы не найдены
-              </strong>
-
-              <span>
-                Измените параметры поиска или сбросьте фильтры.
-              </span>
-
+              <div class="empty-icon">⌕</div>
+              <strong> Документы не найдены </strong>
+              <span> Измените параметры поиска или сбросьте фильтры. </span>
             </div>
-
           }
-
         </div>
-
       </div>
-
     }
-
   </section>
-
 </section>
