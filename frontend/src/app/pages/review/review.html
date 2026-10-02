@@ -1,304 +1,160 @@
-<section class="review-page">
-
+﻿<section class="review-page" [attr.aria-busy]="loading">
   <header class="page-header">
-
-    <div>
-
-      <span class="eyebrow">
-        КОНТРОЛЬ AI-КЛАССИФИКАЦИИ
-      </span>
-
-      <h1>
-        Ручная проверка
-      </h1>
-
+    <div class="hero-copy">
+      <span class="eyebrow">КОНТРОЛЬ AI-КЛАССИФИКАЦИИ</span>
+      <h1>Ручная проверка</h1>
       <p>
-        Документы, для которых уверенность AI оказалась ниже
-        установленного порога и требуется подтверждение пользователя.
+        Документы, для которых уверенность AI оказалась ниже установленного порога и требуется
+        подтверждение пользователя.
       </p>
-
     </div>
-
-
     <div class="header-actions">
-
       <div class="queue-counter">
-
-        <span>
-          Требуют проверки
-        </span>
-
-        <strong>
-          {{ documents.length }}
-        </strong>
-
+        <span class="counter-icon" aria-hidden="true">▤</span><strong>{{ documents.length }}</strong
+        ><span>Требуют<br />проверки</span>
       </div>
-
-
-      <button
-        class="refresh-button"
-        type="button"
-        [disabled]="loading"
-        (click)="loadQueue()"
-      >
+      <button class="refresh-button" type="button" [disabled]="loading" (click)="loadQueue()">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M20 7v5h-5M20 12a8 8 0 1 0-2 5M20 7l-3-3" />
+        </svg>
         @if (loading) {
           Обновляем...
         } @else {
           Обновить
         }
       </button>
-
     </div>
-
+    <div class="hero-art" aria-hidden="true">
+      <div class="glass-document"><i></i><i></i><i></i><span>✦</span></div>
+    </div>
   </header>
-
-
-  <section class="info-banner">
-
-    <div class="banner-icon">
-      AI
-    </div>
-
+  <section class="info-banner" aria-labelledby="review-explanation">
+    <div class="banner-icon" aria-hidden="true">AI<span>✦</span></div>
     <div>
-
-      <strong>
-        Почему документы попадают сюда?
-      </strong>
-
-      <span>
-        Если уверенность модели ниже 80%, DocFlow не принимает
-        классификацию автоматически. Пользователь должен проверить
-        предложенный AI тип документа и подтвердить или исправить его.
-      </span>
-
+      <h2 id="review-explanation">Почему документы попадают сюда?</h2>
+      <p>
+        Если уверенность модели ниже <strong>80%</strong>, DocFlow не принимает классификацию
+        автоматически. Пользователь должен проверить предложенный AI тип документа и подтвердить или
+        исправить его.
+      </p>
     </div>
-
   </section>
-
-
   @if (loading) {
-
-    <section class="state-card">
-
-      <div class="loader"></div>
-
-      <strong>
-        Загружаем очередь проверки
-      </strong>
-
-      <span>
-        Получаем документы и результаты AI-классификации...
-      </span>
-
+    <section class="state-card" role="status">
+      <div class="loader" aria-hidden="true"></div>
+      <strong>Загружаем очередь проверки</strong
+      ><span>Получаем документы и результаты AI-классификации...</span>
     </section>
-
   } @else if (errorMessage) {
-
-    <section class="state-card error">
-
-      <div class="state-icon">
-        !
-      </div>
-
-      <strong>
-        Не удалось загрузить документы
-      </strong>
-
-      <span>
-        {{ errorMessage }}
-      </span>
-
-      <button
-        type="button"
-        (click)="loadQueue()"
-      >
-        Повторить
-      </button>
-
+    <section class="state-card error" role="alert">
+      <div class="state-icon" aria-hidden="true">!</div>
+      <strong>Не удалось загрузить документы</strong><span>{{ errorMessage }}</span
+      ><button type="button" (click)="loadQueue()">Повторить</button>
     </section>
-
   } @else if (documents.length === 0) {
-
-    <section class="state-card empty">
-
-      <div class="state-icon">
-        ✓
-      </div>
-
-      <strong>
-        Очередь проверки пуста
-      </strong>
-
-      <span>
-        Сейчас нет документов с низкой уверенностью AI.
-        Все классификации обработаны.
-      </span>
-
+    <section class="state-card empty" role="status">
+      <div class="state-icon" aria-hidden="true">✓</div>
+      <strong>Очередь проверки пуста</strong
+      ><span>Сейчас нет документов с низкой уверенностью AI. Все классификации обработаны.</span>
     </section>
-
   } @else {
-
-    <div class="queue-heading">
-
-      <span>
-        Документ
-      </span>
-
-      <span>
-        AI-классификация
-      </span>
-
-      <span>
-        Уверенность
-      </span>
-
-      <span>
-        Действие
-      </span>
-
-    </div>
-
-
-    <section class="review-list">
-
-      @for (
-        document of documents;
-        track document.documentId
-      ) {
-
-        <article class="review-card">
-
+    <section class="review-grid" aria-label="Документы для ручной проверки">
+      @for (document of documents; track document.documentId) {
+        <article
+          class="review-card"
+          [class.confidence-low]="getConfidencePercent(document) < 40"
+          [class.confidence-medium]="
+            getConfidencePercent(document) >= 40 && getConfidencePercent(document) < 60
+          "
+          [class.confidence-high]="
+            getConfidencePercent(document) >= 60 && getConfidencePercent(document) < 80
+          "
+          [class.confidence-approved]="getConfidencePercent(document) >= 80"
+          [class.confidence-unknown]="document.ai?.confidence == null"
+        >
           <div class="document-cell">
-
-            <div class="file-icon">
-              PDF
+            <div class="file-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M8 13h8M8 17h6" />
+              </svg>
             </div>
-
             <div class="document-info">
-
               <div class="document-topline">
-
-                <span>
-                  ДОКУМЕНТ #{{ document.documentId }}
-                </span>
-
-                <span class="review-status">
-                  Требует проверки
-                </span>
-
+                <span>Документ #{{ document.documentId }}</span
+                ><span class="review-status">Требует проверки</span>
               </div>
-
-              <strong
-                class="file-name"
-                [title]="document.originalName || 'Документ'"
-              >
+              <h2 class="file-name" [title]="document.originalName || 'Документ'">
                 {{ document.originalName || 'Документ' }}
-              </strong>
-
+              </h2>
               <div class="document-meta">
-
-                <span>
-                  {{
-                    document.documentNumber
-                      ? '№ ' + document.documentNumber
-                      : 'Без номера'
-                  }}
-                </span>
-
-                <i></i>
-
-                <span>
-                  {{ formatDate(document.documentDate) }}
-                </span>
-
+                <span>{{
+                  document.documentNumber ? '№ ' + document.documentNumber : 'Без номера'
+                }}</span
+                ><i aria-hidden="true"></i><span>{{ formatDate(document.documentDate) }}</span>
               </div>
-
-
-              @if (document.subject) {
-
-                <p class="subject">
-                  {{ document.subject }}
-                </p>
-
-              }
-
             </div>
-
           </div>
-
-
-          <div class="classification-cell">
-
-            <span>
-              Предсказанный класс
-            </span>
-
-            <strong>
-              {{
-                getDocumentTypeLabel(
-                  document.ai?.predictedType || null
-                )
-              }}
-            </strong>
-
-          </div>
-
-
+          @if (document.subject) {
+            <p class="subject" [title]="document.subject">{{ document.subject }}</p>
+          }
           <div class="confidence-cell">
-
+            <div class="confidence-label">
+              <span class="signal-icon" aria-hidden="true"><i></i><i></i><i></i></span>Уверенность
+              AI
+            </div>
             <div class="confidence-value">
-
-              <strong>
-                {{ getConfidence(document) }}
-              </strong>
-
-              <span>
-                порог 80%
+              <strong>{{ getConfidence(document) }}</strong
+              ><span class="confidence-warning">
+                @if (document.ai?.confidence == null) {
+                  Нет оценки AI
+                } @else if (getConfidencePercent(document) < 80) {
+                  Ниже порога 80%
+                } @else {
+                  Порог 80% достигнут
+                }
               </span>
-
             </div>
-
-            <div class="confidence-track">
-
-              <i
-                [style.width.%]="
-                  getConfidencePercent(document)
+            <div class="confidence-progress">
+              <div
+                class="confidence-track"
+                role="progressbar"
+                aria-label="Уверенность AI"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="
+                  document.ai?.confidence == null ? null : getConfidencePercent(document)
                 "
-              ></i>
-
-              <b></b>
-
+                [attr.aria-valuetext]="
+                  document.ai?.confidence == null ? 'Нет оценки AI' : getConfidence(document)
+                "
+              >
+                <i [style.width.%]="getConfidencePercent(document)"></i><b aria-hidden="true"></b>
+              </div>
+              <span class="threshold-label">Порог 80%</span>
             </div>
-
-            <span class="confidence-warning">
-              Требуется подтверждение
-            </span>
-
           </div>
-
-
+          <div class="classification-cell">
+            <span class="class-icon" aria-hidden="true">▤</span>
+            <div>
+              <span>Предсказанный класс</span
+              ><strong>{{ getDocumentTypeLabel(document.ai?.predictedType || null) }}</strong>
+            </div>
+          </div>
           <div class="action-cell">
-
             <button
               type="button"
-              (click)="
-                openDocument(
-                  document.documentId
-                )
+              (click)="openDocument(document.documentId)"
+              [attr.aria-label]="
+                'Открыть на проверку: ' +
+                (document.originalName || 'Документ #' + document.documentId)
               "
             >
-              Открыть на проверку
-              <span>→</span>
+              Открыть на проверку <span aria-hidden="true">→</span>
             </button>
-
           </div>
-
         </article>
-
       }
-
     </section>
-
   }
-
 </section>
