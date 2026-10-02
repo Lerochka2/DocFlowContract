@@ -121,6 +121,33 @@ export class Dashboard implements OnInit {
   ) {
   }
 
+  // Rendering adapters for existing API responses; business calculations stay unchanged.
+  heatmapTooltip = '';
+
+  get dashboardGreeting(): string {
+    const name = this.authService.getCurrentUser()?.fullName?.trim();
+    return name ? `Добро пожаловать, ${name}!` : 'Добро пожаловать в DocFlow!';
+  }
+
+  get funnelStages(): { label: string; count: number; description: string }[] {
+    return [
+      { label: 'В рабочем пространстве', description: 'Все доступные документы. База для расчёта процентов', count: this.dashboard.totalDocuments },
+      { label: 'Классифицированы', description: 'Документы с определённым классом', count: this.classifiedDocumentsCount },
+      { label: 'Проверены', description: 'Документы в текущем статусе «Проверен»', count: this.dashboard.verified },
+      { label: 'Привязаны', description: 'Документы в текущем статусе «Связан с договором»', count: this.dashboard.linked },
+      { label: 'Отправлены в СЭД', description: 'Документы, успешно отправленные в корпоративную СЭД', count: this.dashboard.sentToSed }
+    ];
+  }
+
+  getHeatmapLoadLabel(count: number, timeSlot = false): string {
+    const level = timeSlot ? this.timeActivityLevel(count) : this.activityLevel(count);
+    return ['нет активности', 'низкая', 'умеренная', 'высокая', 'пиковая'][level] ?? 'нет активности';
+  }
+
+  getHeatmapTooltip(date: string | null, count: number): string {
+    if (!date) return '';
+    return `${this.getActivityCellTooltip(date, count)} · Нагрузка: ${this.getHeatmapLoadLabel(count)}`;
+  }
   ngOnInit(): void {
     this.loadDashboard();
     this.loadActivity();
@@ -243,6 +270,8 @@ export class Dashboard implements OnInit {
     ) {
       return;
     }
+
+    this.heatmapTooltip = '';
 
     this.selectedActivityDays =
       days;
@@ -764,19 +793,19 @@ export class Dashboard implements OnInit {
     const types = [
       {
         type: 'CONTRACT',
-        color: '#4f55d9'
+        color: '#6385ed'
       },
       {
         type: 'APPENDIX',
-        color: '#6558c8'
+        color: '#a082de'
       },
       {
         type: 'AMENDMENT_CHANGE',
-        color: '#8268d6'
+        color: '#d789c6'
       },
       {
         type: 'AMENDMENT_PROLONGATION',
-        color: '#ab8ce8'
+        color: '#bca4ed'
       }
     ];
 
@@ -942,6 +971,14 @@ export class Dashboard implements OnInit {
       case 'VERIFIED':
         return 'Проверен';
 
+      case 'APPROVED':
+        return 'Согласован';
+      case 'RETURNED_FOR_CORRECTION':
+        return 'На доработке';
+      case 'REJECTED':
+        return 'Отклонён';
+      case 'ARCHIVED':
+        return 'В архиве';
       case 'READY_FOR_SED':
         return 'Готов к отправке';
 
@@ -955,7 +992,7 @@ export class Dashboard implements OnInit {
         return 'Ошибка СЭД';
 
       default:
-        return 'Неизвестно';
+        return status || 'Статус не указан';
     }
   }
 
@@ -965,12 +1002,14 @@ export class Dashboard implements OnInit {
 
     switch (status) {
 
+      case 'APPROVED':
       case 'SENT_TO_SED':
       case 'VERIFIED':
       case 'READY_FOR_SED':
         return 'green';
 
       case 'LINK_REQUIRED':
+      case 'RETURNED_FOR_CORRECTION':
         return 'orange';
 
       case 'LINKED':
@@ -978,6 +1017,7 @@ export class Dashboard implements OnInit {
       case 'AI_PROCESSING':
         return 'violet';
 
+      case 'REJECTED':
       case 'REVIEW_REQUIRED':
       case 'PROCESSING_FAILED':
       case 'SED_ERROR':

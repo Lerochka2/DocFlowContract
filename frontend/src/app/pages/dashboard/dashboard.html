@@ -1,88 +1,56 @@
 <section class="dashboard">
-
   @if (loading) {
-
     <section class="panel">
-
       <div class="panel-title-row">
-
-        <h2>
-          Загружаем рабочее пространство...
-        </h2>
-
+        <h2>Загружаем рабочее пространство...</h2>
       </div>
-
     </section>
-
   } @else if (errorMessage) {
-
     <section class="panel">
-
       <div class="panel-title-row">
-
         <div>
-          <h2>
-            Не удалось загрузить Dashboard
-          </h2>
+          <h2>Не удалось загрузить Dashboard</h2>
 
           <p>
             {{ errorMessage }}
           </p>
         </div>
 
-        <button
-          class="details-button"
-          type="button"
-          (click)="loadDashboard()"
-        >
-          Повторить
-        </button>
-
+        <button class="details-button" type="button" (click)="loadDashboard()">Повторить</button>
       </div>
-
     </section>
-
   } @else {
-
     <section class="hero">
-
       <div class="hero-grid"></div>
 
       <div class="hero-copy">
+        <span class="hero-eyebrow">{{ dashboardGreeting }}</span>
 
-        <span class="hero-eyebrow">
-          ДОКУМЕНТЫ ДВИЖУТСЯ ВПЕРЁД
-        </span>
-
-        <h1>
-          Интеллектуальная обработка документов
-        </h1>
+        <h1>Интеллектуальная<br /><span>обработка документов</span></h1>
 
         <p>
-          AI анализирует, классифицирует и помогает автоматически
-          маршрутизировать договоры и дополнительные соглашения.
+          AI анализирует, классифицирует и помогает автоматически маршрутизировать договоры и
+          дополнительные соглашения.
         </p>
-
       </div>
 
-      <div class="hero-ai">
+      <div class="hero-ai" aria-hidden="true">
+        <div class="floating-document doc-one"><i></i><i></i><i></i></div>
+        <div class="floating-document doc-two"><i></i><i></i><i></i></div>
 
         <div class="robot-orbit one"></div>
         <div class="robot-orbit two"></div>
 
         <div class="robot">
-
           <div class="antenna">
             <span></span>
           </div>
 
           <div class="robot-head">
-
             <div class="robot-face">
               <i></i>
               <i></i>
             </div>
-
           </div>
 
           <div class="robot-neck"></div>
@@ -90,337 +58,271 @@
           <div class="robot-body">
             <span></span>
           </div>
-
         </div>
 
         <div class="robot-message">
-
           <span>✦</span>
 
           <p>
-            Я анализирую документы
-            и ускоряю документооборот
+            <strong>Документы<br />движутся вперёд</strong><small>Быстрее. Точнее. Умнее.</small>
           </p>
-
         </div>
-
       </div>
-
     </section>
 
-
     <section class="stats">
-
       @if (isSpecialistView) {
-
-        <article class="stat-card">
-
-          <div class="stat-icon blue">
-            ▤
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, назначенные вашей роли."
+          title="Документы, назначенные вашей роли."
+        >
+          <div class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg></div>
 
           <div>
-
-            <span>
-              Назначено мне
-            </span>
+            <span> Назначено мне </span>
 
             <div class="stat-number">
               {{ dashboard.totalDocuments }}
             </div>
 
-            <small>
-              документов в работе
-            </small>
-
+            <small> документов в работе </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon red">
-            !
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, которые ещё не готовы к отправке и не отправлены в СЭД."
+          title="Документы, которые ещё не готовы к отправке и не отправлены в СЭД."
+        >
+          <div class="stat-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg></div>
 
           <div>
-
-            <span>
-              Требуют обработки
-            </span>
+            <span> Требуют обработки </span>
 
             <div class="stat-number">
               {{ specialistActionableCount }}
             </div>
 
-            <small>
-              ожидают вашей работы
-            </small>
-
+            <small> ожидают вашей работы </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon violet">
-            ✓
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, подготовленные к отправке в СЭД."
+          title="Документы, подготовленные к отправке в СЭД."
+        >
+          <div class="stat-icon violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l2-2"/></svg></div>
 
           <div>
-
-            <span>
-              Готовы к СЭД
-            </span>
+            <span> Готовы к СЭД </span>
 
             <div class="stat-number">
               {{ dashboard.readyForSed }}
             </div>
 
-            <small>
-              подготовлены специалистом
-            </small>
-
+            <small> подготовлены специалистом </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon cyan">
-            ➤
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, успешно отправленные в СЭД."
+          title="Документы, успешно отправленные в СЭД."
+        >
+          <div class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 9-18 9 4-9zM7 12h14"/></svg></div>
 
           <div>
-
-            <span>
-              Отправлены в СЭД
-            </span>
+            <span> Отправлены в СЭД </span>
 
             <div class="stat-number">
               {{ dashboard.sentToSed }}
             </div>
 
-            <small>
-              успешно зарегистрированы
-            </small>
-
+            <small> успешно зарегистрированы </small>
           </div>
-
         </article>
-
       } @else {
-
-        <article class="stat-card">
-
-          <div class="stat-icon blue">
-            ▤
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Все доступные документы рабочего пространства."
+          title="Все доступные документы рабочего пространства."
+        >
+          <div class="stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg></div>
 
           <div>
-
-            <span>
-              Всего документов
-            </span>
+            <span> Всего документов </span>
 
             <div class="stat-number">
               {{ dashboard.totalDocuments }}
             </div>
 
-            <small>
-              в рабочем пространстве
-            </small>
-
+            <small> в рабочем пространстве </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon red">
-            !
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, ожидающие ручного подтверждения классификации."
+          title="Документы, ожидающие ручного подтверждения классификации."
+        >
+          <div class="stat-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg></div>
 
           <div>
-
-            <span>
-              Требуют проверки
-            </span>
+            <span> Требуют проверки </span>
 
             <div class="stat-number">
               {{ dashboard.reviewRequired }}
             </div>
 
-            <small>
-              нужно решение пользователя
-            </small>
-
+            <small> нужно решение пользователя </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon violet">
-            ⛓
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, ожидающие связи с базовым договором."
+          title="Документы, ожидающие связи с базовым договором."
+        >
+          <div class="stat-icon violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l2-2"/></svg></div>
 
           <div>
-
-            <span>
-              Требуют привязки
-            </span>
+            <span> Требуют привязки </span>
 
             <div class="stat-number">
               {{ dashboard.linkRequired }}
             </div>
 
-            <small>
-              к базовому договору
-            </small>
-
+            <small> к базовому договору </small>
           </div>
-
         </article>
 
-
-        <article class="stat-card">
-
-          <div class="stat-icon cyan">
-            ➤
-          </div>
+        <article
+          class="stat-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Документы, успешно отправленные в СЭД."
+          title="Документы, успешно отправленные в СЭД."
+        >
+          <div class="stat-icon cyan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 9-18 9 4-9zM7 12h14"/></svg></div>
 
           <div>
-
-            <span>
-              Отправлено в СЭД
-            </span>
+            <span> Отправлено в СЭД </span>
 
             <div class="stat-number">
               {{ dashboard.sentToSed }}
             </div>
 
-            <small>
-              успешно зарегистрировано
-            </small>
-
+            <small> успешно зарегистрировано </small>
           </div>
-
         </article>
-
       }
-
     </section>
 
-
     <section class="contract-control panel">
-
       <div class="contract-control-heading">
-
         <div>
-          <h2>
-            Контроль сроков договоров
-          </h2>
+          <h2>Контроль сроков договоров</h2>
 
-          <p>
-            Автоматический контроль даты окончания действия договоров
-          </p>
+          <p>Автоматический контроль даты окончания действия договоров</p>
         </div>
 
-        <span class="contract-control-label">
-          Актуально на сегодня
-        </span>
-
+        <span class="contract-control-label"> Актуально на сегодня </span>
       </div>
 
-
       <div class="contract-control-grid">
-
         <div
-          class="contract-control-item expiring"
+          class="contract-control-item expiring has-tooltip"
+          tabindex="0"
+          data-tooltip="Договоры, срок действия которых завершится в ближайшие 30 дней."
+          title="Договоры, срок действия которых завершится в ближайшие 30 дней."
           [class.has-items]="dashboard.expiringSoonContracts > 0"
         >
-
-          <div class="contract-control-icon">
-            ◷
-          </div>
+          <div class="contract-control-icon">◷</div>
 
           <div class="contract-control-info">
-
-            <span>
-              Скоро истекают
-            </span>
+            <span> Скоро истекают </span>
 
             <strong>
               {{ dashboard.expiringSoonContracts }}
             </strong>
 
-            <small>
-              срок завершится в ближайшие 30 дней
-            </small>
-
+            <small> срок завершится в ближайшие 30 дней </small>
           </div>
-
         </div>
 
-
         <div
-          class="contract-control-item expired"
+          class="contract-control-item expired has-tooltip"
+          tabindex="0"
+          data-tooltip="Договоры, у которых уже прошла дата окончания действия."
+          title="Договоры, у которых уже прошла дата окончания действия."
           [class.has-items]="dashboard.expiredContracts > 0"
         >
-
-          <div class="contract-control-icon">
-            !
-          </div>
+          <div class="contract-control-icon">!</div>
 
           <div class="contract-control-info">
-
-            <span>
-              Срок истёк
-            </span>
+            <span> Срок истёк </span>
 
             <strong>
               {{ dashboard.expiredContracts }}
             </strong>
 
-            <small>
-              договоров с истёкшей датой действия
-            </small>
-
+            <small> договоров с истёкшей датой действия </small>
           </div>
-
         </div>
-
       </div>
-
     </section>
 
+    <article class="panel funnel-panel">
+      <div class="panel-title-row">
+        <h2>Воронка обработки документов</h2>
+        <span class="accuracy-pill">Текущий срез</span>
+      </div>
+      <p class="funnel-note">Количество и доля документов на этапах процесса</p>
+      <div class="funnel-list">
+        @for (stage of funnelStages; track stage.label; let index = $index) {
+          <div
+            class="funnel-row has-tooltip"
+            [attr.data-stage]="index"
+            tabindex="0"
+            [attr.data-tooltip]="
+              stage.description +
+              ' · ' +
+              stage.count +
+              ' документов · ' +
+              statusPercent(stage.count) +
+              '% от общего количества'
+            "
+            [attr.title]="stage.description"
+          >
+            <div class="funnel-shape" [style.width.%]="100 - index * 12" aria-hidden="true"></div>
+            <div class="funnel-copy">
+              <strong>{{ stage.count }}</strong
+              ><span>{{ stage.label }}</span>
+            </div>
+            <span class="funnel-percent">{{ statusPercent(stage.count) }}%</span>
+          </div>
+        }
+      </div>
+      <p class="funnel-note">Текущий срез этапов, а не накопленная конверсия.</p>
+    </article>
 
     <section class="process-analytics">
-
       <article class="panel approval-analytics-panel">
-
         <div class="process-analytics-header">
-
           <div>
+            <span class="analytics-eyebrow"> ПРОЦЕСС СОГЛАСОВАНИЯ </span>
 
-            <span class="analytics-eyebrow">
-              ПРОЦЕСС СОГЛАСОВАНИЯ
-            </span>
+            <h2>Согласование и SLA</h2>
 
-            <h2>
-              Согласование и SLA
-            </h2>
-
-            <p>
-              Контроль этапов согласования, сроков обработки и возвратов на доработку.
-            </p>
-
+            <p>Контроль этапов согласования, сроков обработки и возвратов на доработку.</p>
           </div>
 
           <span class="analytics-counter">
@@ -429,88 +331,57 @@
               {{ dashboard.approvalCycles }}
             </strong>
           </span>
-
         </div>
 
-
         <div class="approval-kpis">
-
           <div class="approval-kpi">
-
             <span class="approval-kpi-dot pending"></span>
 
             <div>
-
-              <small>
-                Ожидают специалиста
-              </small>
+              <small> Ожидают специалиста </small>
 
               <strong>
                 {{ dashboard.approvalPending }}
               </strong>
-
             </div>
-
           </div>
 
-
           <div class="approval-kpi">
-
             <span class="approval-kpi-dot progress"></span>
 
             <div>
-
-              <small>
-                В работе
-              </small>
+              <small> В работе </small>
 
               <strong>
                 {{ dashboard.approvalInProgress }}
               </strong>
-
             </div>
-
           </div>
 
-
-          <div
-            class="approval-kpi"
-            [class.alert]="dashboard.approvalOverdue > 0"
-          >
-
+          <div class="approval-kpi" [class.alert]="dashboard.approvalOverdue > 0">
             <span class="approval-kpi-dot overdue"></span>
 
             <div>
-
-              <small>
-                Просрочено
-              </small>
+              <small> Просрочено </small>
 
               <strong>
                 {{ dashboard.approvalOverdue }}
               </strong>
-
             </div>
-
           </div>
-
         </div>
 
-
-        <div class="sla-card">
-
+        <div
+          class="sla-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Доля завершённых этапов согласования, выполненных в установленный срок."
+          title="Доля завершённых этапов согласования, выполненных в установленный срок."
+        >
           <div class="sla-heading">
-
             <div>
+              <span> Соблюдение SLA </span>
 
-              <span>
-                Соблюдение SLA
-              </span>
-
-              <strong>
-                {{ dashboard.approvalSlaCompliancePercent }}%
-              </strong>
-
+              <strong> {{ dashboard.approvalSlaCompliancePercent }}% </strong>
             </div>
 
             <small>
@@ -519,161 +390,98 @@
               {{ dashboard.approvalCompletedLate }}
               с нарушением
             </small>
-
           </div>
 
           <div class="analytics-progress large">
-
-            <span
-              class="sla-fill"
-              [style.width.%]="dashboard.approvalSlaCompliancePercent"
-            ></span>
-
+            <span class="sla-fill" [style.width.%]="dashboard.approvalSlaCompliancePercent"></span>
           </div>
-
         </div>
 
-
-        <div class="approval-summary">
-
+        <div
+          class="approval-summary has-tooltip"
+          tabindex="0"
+          data-tooltip="Среднее время — от создания этапа до решения. Возвраты — доля завершённых решений с доработкой."
+          title="Среднее время — от создания этапа до решения. Возвраты — доля завершённых решений с доработкой."
+        >
           <div>
+            <span> Среднее время согласования </span>
 
-            <span>
-              Среднее время согласования
-            </span>
+            <strong> {{ dashboard.averageApprovalTimeHours }} ч </strong>
 
-            <strong>
-              {{ dashboard.averageApprovalTimeHours }} ч
-            </strong>
-
-            <small>
-              от создания этапа до решения
-            </small>
-
+            <small> от создания этапа до решения </small>
           </div>
 
-
           <div>
+            <span> Возвраты на доработку </span>
 
-            <span>
-              Возвраты на доработку
-            </span>
+            <strong> {{ dashboard.approvalReturnRatePercent }}% </strong>
 
-            <strong>
-              {{ dashboard.approvalReturnRatePercent }}%
-            </strong>
-
-            <small>
-              доля завершённых решений
-            </small>
-
+            <small> доля завершённых решений </small>
           </div>
-
         </div>
-
 
         <div class="decision-bars">
-
-          <div class="decision-row">
-
+          <div class="decision-row approved">
             <div class="decision-label">
-
-              <span>
-                Согласовано
-              </span>
+              <span> Согласовано </span>
 
               <strong>
                 {{ dashboard.approvalApproved }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="decision-fill approved"
                 [style.width.%]="approvalPercent(dashboard.approvalApproved)"
               ></span>
-
             </div>
-
           </div>
 
-
-          <div class="decision-row">
-
+          <div class="decision-row returned">
             <div class="decision-label">
-
-              <span>
-                Возвращено
-              </span>
+              <span> Возвращено </span>
 
               <strong>
                 {{ dashboard.approvalReturned }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="decision-fill returned"
                 [style.width.%]="approvalPercent(dashboard.approvalReturned)"
               ></span>
-
             </div>
-
           </div>
 
-
-          <div class="decision-row">
-
+          <div class="decision-row rejected">
             <div class="decision-label">
-
-              <span>
-                Отклонено
-              </span>
+              <span> Отклонено </span>
 
               <strong>
                 {{ dashboard.approvalRejected }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="decision-fill rejected"
                 [style.width.%]="approvalPercent(dashboard.approvalRejected)"
               ></span>
-
             </div>
-
           </div>
-
         </div>
-
       </article>
 
-
       <article class="panel risk-analytics-panel">
-
         <div class="process-analytics-header">
-
           <div>
+            <span class="analytics-eyebrow"> AI RISK ANALYTICS </span>
 
-            <span class="analytics-eyebrow">
-              AI RISK ANALYTICS
-            </span>
+            <h2>AI-анализ рисков</h2>
 
-            <h2>
-              AI-анализ рисков
-            </h2>
-
-            <p>
-              Сводка по последнему анализу риска каждого доступного документа.
-            </p>
-
+            <p>Сводка по последнему анализу риска каждого доступного документа.</p>
           </div>
 
           <span class="analytics-counter">
@@ -682,57 +490,41 @@
               {{ dashboard.riskAnalyzedDocuments }}
             </strong>
           </span>
-
         </div>
 
-
-        <div class="risk-score-card">
-
-          <div
-            class="risk-score-ring"
-            [style.background]="riskScoreGradient"
-          >
-
+        <div
+          class="risk-score-card has-tooltip"
+          tabindex="0"
+          data-tooltip="Средняя оценка риска от 0 до 100 по последнему сохранённому AI-анализу документов."
+          title="Средняя оценка риска от 0 до 100 по последнему сохранённому AI-анализу документов."
+        >
+          <div class="risk-score-ring" [style.background]="riskScoreGradient">
             <div>
-
               <strong>
                 {{ dashboard.averageRiskScore }}
               </strong>
 
-              <span>
-                /100
-              </span>
-
+              <span> /100 </span>
             </div>
-
           </div>
-
 
           <div class="risk-score-copy">
+            <span> СРЕДНИЙ RISK SCORE </span>
 
-            <span>
-              СРЕДНИЙ RISK SCORE
-            </span>
+            <strong> Общая оценка портфеля </strong>
 
-            <strong>
-              Общая оценка портфеля
-            </strong>
-
-            <p>
-              Рассчитывается по последнему сохранённому AI-анализу каждого документа.
-            </p>
-
+            <p>Рассчитывается по последнему сохранённому AI-анализу каждого документа.</p>
           </div>
-
         </div>
 
-
         <div class="risk-distribution">
-
-          <div class="risk-row">
-
+          <div
+            class="risk-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+            title="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+          >
             <div class="risk-row-heading">
-
               <span>
                 <i class="risk-dot low"></i>
                 Низкий риск
@@ -741,25 +533,23 @@
               <strong>
                 {{ dashboard.lowRiskContracts }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="risk-fill low"
                 [style.width.%]="riskPercent(dashboard.lowRiskContracts)"
               ></span>
-
             </div>
-
           </div>
 
-
-          <div class="risk-row">
-
+          <div
+            class="risk-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+            title="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+          >
             <div class="risk-row-heading">
-
               <span>
                 <i class="risk-dot medium"></i>
                 Средний риск
@@ -768,25 +558,23 @@
               <strong>
                 {{ dashboard.mediumRiskContracts }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="risk-fill medium"
                 [style.width.%]="riskPercent(dashboard.mediumRiskContracts)"
               ></span>
-
             </div>
-
           </div>
 
-
-          <div class="risk-row">
-
+          <div
+            class="risk-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+            title="Количество документов данного уровня риска. Полоса показывает их долю среди проанализированных документов."
+          >
             <div class="risk-row-heading">
-
               <span>
                 <i class="risk-dot high"></i>
                 Высокий риск
@@ -795,67 +583,74 @@
               <strong>
                 {{ dashboard.highRiskContracts }}
               </strong>
-
             </div>
 
             <div class="analytics-progress">
-
               <span
                 class="risk-fill high"
                 [style.width.%]="riskPercent(dashboard.highRiskContracts)"
               ></span>
-
             </div>
-
           </div>
-
         </div>
-
 
         @if (dashboard.riskAnalyzedDocuments === 0) {
-
           <div class="analytics-empty-state">
+            <strong> Данных анализа риска пока нет </strong>
 
-            <strong>
-              Данных анализа риска пока нет
-            </strong>
-
-            <span>
-              Метрики появятся после выполнения AI-анализа документов.
-            </span>
-
+            <span> Метрики появятся после выполнения AI-анализа документов. </span>
           </div>
-
         }
 
-      </article>
+        <div class="portfolio-insights">
+          @if (isSpecialistView) {
+            <div class="insight-item">
+              <span class="insight-icon green-insight"><img src="/assets/icons/dashboard-documents.svg" alt="" aria-hidden="true" /></span><p><span>Назначено документов</span><strong>{{ dashboard.totalDocuments }}</strong></p>
+            </div>
 
+            <div class="insight-item">
+              <span class="insight-icon clock-insight"><img src="/assets/icons/dashboard-review.svg" alt="" aria-hidden="true" /></span><p><span>Требуют обработки</span><strong>{{ specialistActionableCount }}</strong></p>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-icon link-insight"><img src="/assets/icons/dashboard-link.svg" alt="" aria-hidden="true" /></span><p><span>Готовы к отправке в СЭД</span><strong>{{ dashboard.readyForSed }}</strong></p>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-icon star-insight"><img src="/assets/icons/dashboard-send.svg" alt="" aria-hidden="true" /></span><p><span>Отправлено в СЭД</span><strong>{{ dashboard.sentToSed }}</strong></p>
+            </div>
+          } @else {
+            <div class="insight-item">
+              <span class="insight-icon green-insight"><img src="/assets/icons/dashboard-documents.svg" alt="" aria-hidden="true" /></span><p><span>Документы в пространстве</span><strong>{{ dashboard.totalDocuments }}</strong></p>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-icon clock-insight"><img src="/assets/icons/dashboard-review.svg" alt="" aria-hidden="true" /></span><p><span>Требуют ручной проверки</span><strong>{{ dashboard.reviewRequired }}</strong></p>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-icon link-insight"><img src="/assets/icons/dashboard-link.svg" alt="" aria-hidden="true" /></span><p><span>Ожидают привязки</span><strong>{{ dashboard.linkRequired }}</strong></p>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-icon star-insight"><img src="/assets/icons/dashboard-send.svg" alt="" aria-hidden="true" /></span><p><span>Отправлено в СЭД</span><strong>{{ dashboard.sentToSed }}</strong></p>
+            </div>
+          }
+        </div>
+      </article>
     </section>
 
-
     <section class="panel activity-panel">
-
       <div class="activity-header">
-
         <div>
+          <span class="analytics-eyebrow"> ПРОЦЕССНАЯ АНАЛИТИКА </span>
 
-          <span class="analytics-eyebrow">
-            ПРОЦЕССНАЯ АНАЛИТИКА
-          </span>
+          <h2>Активность обработки документов</h2>
 
-          <h2>
-            Активность обработки документов
-          </h2>
-
-          <p>
-            Интенсивность работы с документами по дням и времени выполнения операций.
-          </p>
-
+          <p>Нагрузка по дням и времени обработки документов</p>
         </div>
 
-
         <div class="activity-periods">
-
           <button
             type="button"
             [class.active]="selectedActivityDays === 30"
@@ -879,99 +674,89 @@
           >
             Год
           </button>
-
         </div>
-
       </div>
 
-
       @if (activityLoading) {
-
-        <div class="activity-loading">
-          Загружаем данные активности...
-        </div>
-
+        <div class="activity-loading">Загружаем данные активности...</div>
       } @else if (activityErrorMessage) {
-
         <div class="activity-loading error">
           {{ activityErrorMessage }}
         </div>
-
       } @else if (activity) {
-
         <div class="activity-layout">
-
           <div class="activity-chart-area">
+            <div class="heatmap-tooltip" role="status">
+              @if (heatmapTooltip) {
+                {{ heatmapTooltip }}
+              } @else {
+                Наведите на ячейку, чтобы увидеть количество документов и нагрузку
+              }
+            </div>
 
             @if (selectedActivityDays === 30) {
-
               <div class="time-heatmap">
-
                 <div class="time-axis-row">
-
-                  <span class="time-axis-spacer">
-                    День
-                  </span>
+                  <span class="time-axis-spacer"> День </span>
 
                   <div class="time-axis">
-
                     <span>0ч</span>
                     <span>6ч</span>
                     <span>12ч</span>
                     <span>18ч</span>
                     <span>24ч</span>
-
                   </div>
-
                 </div>
 
-
                 <div class="time-day-list">
-
-                  @for (
-                    day of activityTimeDays;
-                    track day.key
-                  ) {
-
+                  @for (day of activityTimeDays; track day.key) {
                     <div class="time-day-row">
-
                       <span class="time-day-label">
                         {{ day.label }}
                       </span>
 
                       <div class="time-day-cells">
-
-                        @for (
-                          cell of day.cells;
-                          track cell.key
-                        ) {
-
+                        @for (cell of day.cells; track cell.key) {
                           <span
                             class="time-activity-cell"
                             [attr.data-level]="timeActivityLevel(cell.documentCount)"
-                            [attr.title]="getTimeActivityTooltip(cell)"
+                            [attr.title]="
+                              getTimeActivityTooltip(cell) +
+                              ' · Нагрузка: ' +
+                              getHeatmapLoadLabel(cell.documentCount, true)
+                            "
+                            [attr.aria-label]="
+                              getTimeActivityTooltip(cell) +
+                              ' · Нагрузка: ' +
+                              getHeatmapLoadLabel(cell.documentCount, true)
+                            "
+                            tabindex="0"
+                            role="img"
+                            (mouseenter)="
+                              heatmapTooltip =
+                                getTimeActivityTooltip(cell) +
+                                ' · Нагрузка: ' +
+                                getHeatmapLoadLabel(cell.documentCount, true)
+                            "
+                            (mouseleave)="heatmapTooltip = ''"
+                            (focus)="
+                              heatmapTooltip =
+                                getTimeActivityTooltip(cell) +
+                                ' · Нагрузка: ' +
+                                getHeatmapLoadLabel(cell.documentCount, true)
+                            "
+                            (blur)="heatmapTooltip = ''"
                           ></span>
-
                         }
-
                       </div>
-
                     </div>
-
                   }
-
                 </div>
-
               </div>
-
             } @else {
-
               <div class="activity-scroll">
-
                 <div class="activity-grid-shell wide">
-
                   <div class="activity-weekdays">
-
                     <span>Пн</span>
                     <span></span>
                     <span>Ср</span>
@@ -980,56 +765,53 @@
                     <span></span>
                     <span>Вс</span>
                     <span></span>
-
                   </div>
-
 
                   <div
                     class="activity-weeks activity-weeks-wide"
                     [class.year-view]="selectedActivityDays === 365"
-                    [style.grid-template-columns]="'repeat(' + activityWeeks.length + ', minmax(0, 1fr))'"
+                    [style.grid-template-columns]="
+                      'repeat(' + activityWeeks.length + ', minmax(0, 1fr))'
+                    "
                   >
-
-                    @for (
-                      week of activityWeeks;
-                      track week.key
-                    ) {
-
+                    @for (week of activityWeeks; track week.key) {
                       <div class="activity-week activity-week-wide">
-
-                        @for (
-                          cell of week.days;
-                          track cell.key
-                        ) {
-
+                        @for (cell of week.days; track cell.key) {
                           <span
                             class="activity-cell"
                             [class.placeholder]="cell.placeholder"
                             [attr.data-level]="activityLevel(cell.documentCount)"
-                            [attr.title]="getActivityCellTooltip(cell.date, cell.documentCount)"
+                            [attr.title]="getHeatmapTooltip(cell.date, cell.documentCount)"
+                            [attr.aria-label]="getHeatmapTooltip(cell.date, cell.documentCount)"
+                            [attr.tabindex]="cell.placeholder ? -1 : 0"
+                            role="img"
+                            (mouseenter)="
+                              heatmapTooltip = getHeatmapTooltip(cell.date, cell.documentCount)
+                            "
+                            (mouseleave)="heatmapTooltip = ''"
+                            (focus)="
+                              heatmapTooltip = getHeatmapTooltip(cell.date, cell.documentCount)
+                            "
+                            (blur)="heatmapTooltip = ''"
                           ></span>
-
                         }
 
                         <span class="activity-month">
                           {{ week.monthLabel }}
                         </span>
-
                       </div>
-
                     }
-
                   </div>
-
                 </div>
-
               </div>
-
             }
 
-
-            <div class="activity-legend">
-
+            <div
+              class="activity-legend has-tooltip"
+              tabindex="0"
+              data-tooltip="Чем насыщеннее ячейка, тем выше нагрузка относительно максимума выбранного периода."
+              title="Чем насыщеннее ячейка, тем выше нагрузка относительно максимума выбранного периода."
+            >
               <span>Меньше</span>
 
               <i data-level="0"></i>
@@ -1039,93 +821,58 @@
               <i data-level="4"></i>
 
               <span>Больше</span>
-
             </div>
-
           </div>
 
-
           <aside class="activity-summary">
-
             <div class="activity-summary-card">
-
               <span>Сегодня</span>
 
               <strong>
                 {{ activity.today }}
               </strong>
 
-              <small>
-                активных документов
-              </small>
-
+              <small> активных документов </small>
             </div>
 
-
             <div class="activity-summary-card">
-
               <span>За 7 дней</span>
 
               <strong>
                 {{ activity.last7Days }}
               </strong>
 
-              <small>
-                уникальных документов
-              </small>
-
+              <small> уникальных документов </small>
             </div>
 
-
             <div class="activity-summary-card">
-
               <span>За 30 дней</span>
 
               <strong>
                 {{ activity.last30Days }}
               </strong>
 
-              <small>
-                уникальных документов
-              </small>
-
+              <small> уникальных документов </small>
             </div>
 
-
             <div class="activity-summary-card accent">
-
-              <span>
-                Среднее в день
-              </span>
+              <span> Среднее в день </span>
 
               <strong>
                 {{ activity.averagePerDay30 }}
               </strong>
 
-              <small>
-                за последние 30 дней
-              </small>
-
+              <small> за последние 30 дней </small>
             </div>
-
           </aside>
-
         </div>
-
       }
-
     </section>
 
-
     <section class="analytics-grid">
-
       <article class="panel classification-panel">
-
         <div class="panel-title-row">
-
-          <h2>
-            Классификация документов (AI)
-          </h2>
+          <h2>Классификация документов (AI)</h2>
 
           <span class="accuracy-pill">
             Распознано:
@@ -1133,119 +880,100 @@
               {{ classifiedDocumentsCount }}
             </strong>
           </span>
-
         </div>
 
         <div class="classification-content">
-
           <div
-            class="donut"
+            class="donut has-tooltip"
+            tabindex="0"
+            data-tooltip="Распределение документов по классам. В центре — число классифицированных документов."
+            title="Распределение документов по классам. В центре — число классифицированных документов."
             [style.background]="classificationGradient"
           >
-
             <div class="donut-center">
-
               <strong>
                 {{ classifiedDocumentsCount }}
               </strong>
 
               <span>
-                документа<br>
-                определены
+                документов
               </span>
-
             </div>
-
           </div>
 
-
           <div class="class-list">
-
-            <div class="class-row">
-
+            <div
+              class="class-row has-tooltip"
+              tabindex="0"
+              data-tooltip="Количество документов этого класса и его доля среди всех классифицированных документов."
+              title="Количество документов этого класса и его доля среди всех классифицированных документов."
+            >
               <span class="class-dot contract"></span>
 
-              <strong>
-                Договор
-              </strong>
+              <strong> Договор </strong>
 
               <span class="class-count">
                 {{ countDocumentType('CONTRACT') }}
               </span>
 
-              <span class="class-percent">
-                {{ documentTypePercent('CONTRACT') }}%
-              </span>
+              <span class="class-percent"> {{ documentTypePercent('CONTRACT') }}% </span>
 
               <div class="class-bar">
-                <i
-                  class="contract-bar"
-                  [style.width.%]="documentTypePercent('CONTRACT')"
-                ></i>
+                <i class="contract-bar" [style.width.%]="documentTypePercent('CONTRACT')"></i>
               </div>
-
             </div>
 
-
-            <div class="class-row">
-
+            <div
+              class="class-row has-tooltip"
+              tabindex="0"
+              data-tooltip="Количество документов этого класса и его доля среди всех классифицированных документов."
+              title="Количество документов этого класса и его доля среди всех классифицированных документов."
+            >
               <span class="class-dot appendix"></span>
 
-              <strong>
-                Приложение
-              </strong>
+              <strong> Приложение </strong>
 
               <span class="class-count">
                 {{ countDocumentType('APPENDIX') }}
               </span>
 
-              <span class="class-percent">
-                {{ documentTypePercent('APPENDIX') }}%
-              </span>
+              <span class="class-percent"> {{ documentTypePercent('APPENDIX') }}% </span>
 
               <div class="class-bar">
-                <i
-                  class="appendix-bar"
-                  [style.width.%]="documentTypePercent('APPENDIX')"
-                ></i>
+                <i class="appendix-bar" [style.width.%]="documentTypePercent('APPENDIX')"></i>
               </div>
-
             </div>
 
-
-            <div class="class-row">
-
+            <div
+              class="class-row has-tooltip"
+              tabindex="0"
+              data-tooltip="Количество документов этого класса и его доля среди всех классифицированных документов."
+              title="Количество документов этого класса и его доля среди всех классифицированных документов."
+            >
               <span class="class-dot change"></span>
 
-              <strong>
-                Доп. соглашение — изменение
-              </strong>
+              <strong> Доп. соглашение — изменение </strong>
 
               <span class="class-count">
                 {{ countDocumentType('AMENDMENT_CHANGE') }}
               </span>
 
-              <span class="class-percent">
-                {{ documentTypePercent('AMENDMENT_CHANGE') }}%
-              </span>
+              <span class="class-percent"> {{ documentTypePercent('AMENDMENT_CHANGE') }}% </span>
 
               <div class="class-bar">
-                <i
-                  class="change-bar"
-                  [style.width.%]="documentTypePercent('AMENDMENT_CHANGE')"
-                ></i>
+                <i class="change-bar" [style.width.%]="documentTypePercent('AMENDMENT_CHANGE')"></i>
               </div>
-
             </div>
 
-
-            <div class="class-row">
-
+            <div
+              class="class-row has-tooltip"
+              tabindex="0"
+              data-tooltip="Количество документов этого класса и его доля среди всех классифицированных документов."
+              title="Количество документов этого класса и его доля среди всех классифицированных документов."
+            >
               <span class="class-dot prolong"></span>
 
-              <strong>
-                Доп. соглашение — продление
-              </strong>
+              <strong> Доп. соглашение — продление </strong>
 
               <span class="class-count">
                 {{ countDocumentType('AMENDMENT_PROLONGATION') }}
@@ -1261,20 +989,13 @@
                   [style.width.%]="documentTypePercent('AMENDMENT_PROLONGATION')"
                 ></i>
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </article>
 
-
       <article class="panel confidence-panel">
-
         <div class="panel-title-row">
-
           <h2>
             @if (isSpecialistView) {
               Состояние моих задач
@@ -1289,352 +1010,279 @@
               {{ dashboard.totalDocuments }}
             </strong>
           </span>
-
         </div>
 
-
         @if (isSpecialistView) {
-
-          <div class="confidence-row">
-
-            <span>
-              Требуют обработки
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Требуют обработки </span>
 
             <div class="confidence-bar">
-              <i
-                class="low"
-                [style.width.%]="statusPercent(specialistActionableCount)"
-              ></i>
+              <i class="low" [style.width.%]="statusPercent(specialistActionableCount)"></i>
             </div>
 
             <strong>
               {{ specialistActionableCount }}
             </strong>
-
           </div>
 
-
-          <div class="confidence-row">
-
-            <span>
-              Готовы к СЭД
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Готовы к СЭД </span>
 
             <div class="confidence-bar">
-              <i
-                class="medium"
-                [style.width.%]="statusPercent(dashboard.readyForSed)"
-              ></i>
+              <i class="medium" [style.width.%]="statusPercent(dashboard.readyForSed)"></i>
             </div>
 
             <strong>
               {{ dashboard.readyForSed }}
             </strong>
-
           </div>
 
-
-          <div class="confidence-row">
-
-            <span>
-              Отправлены в СЭД
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Отправлены в СЭД </span>
 
             <div class="confidence-bar">
-              <i
-                class="high"
-                [style.width.%]="statusPercent(dashboard.sentToSed)"
-              ></i>
+              <i class="high" [style.width.%]="statusPercent(dashboard.sentToSed)"></i>
             </div>
 
             <strong>
               {{ dashboard.sentToSed }}
             </strong>
-
           </div>
-
         } @else {
-
-          <div class="confidence-row">
-
-            <span>
-              Требуют проверки
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Требуют проверки </span>
 
             <div class="confidence-bar">
-              <i
-                class="low"
-                [style.width.%]="statusPercent(dashboard.reviewRequired)"
-              ></i>
+              <i class="low" [style.width.%]="statusPercent(dashboard.reviewRequired)"></i>
             </div>
 
             <strong>
               {{ dashboard.reviewRequired }}
             </strong>
-
           </div>
 
-
-          <div class="confidence-row">
-
-            <span>
-              Требуют привязки
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Требуют привязки </span>
 
             <div class="confidence-bar">
-              <i
-                class="medium"
-                [style.width.%]="statusPercent(dashboard.linkRequired)"
-              ></i>
+              <i class="medium" [style.width.%]="statusPercent(dashboard.linkRequired)"></i>
             </div>
 
             <strong>
               {{ dashboard.linkRequired }}
             </strong>
-
           </div>
 
-
-          <div class="confidence-row">
-
-            <span>
-              Отправлены в СЭД
-            </span>
+          <div
+            class="confidence-row has-tooltip"
+            tabindex="0"
+            data-tooltip="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+            title="Количество документов в указанном состоянии. Длина полосы — доля от общего количества доступных документов."
+          >
+            <span> Отправлены в СЭД </span>
 
             <div class="confidence-bar">
-              <i
-                class="high"
-                [style.width.%]="statusPercent(dashboard.sentToSed)"
-              ></i>
+              <i class="high" [style.width.%]="statusPercent(dashboard.sentToSed)"></i>
             </div>
 
             <strong>
               {{ dashboard.sentToSed }}
             </strong>
-
           </div>
-
         }
 
-
         <div class="quality-card">
-
-          <span class="quality-icon">
-            ✦
-          </span>
+          <span class="quality-icon"> ✦ </span>
 
           <div>
-
-            <strong>
-              Данные обновляются из DocFlow
-            </strong>
+            <strong> Рабочая сводка </strong>
 
             <p>
               @if (isSpecialistView) {
-                Здесь отображаются только документы,
-                назначенные вашей роли.
+                Здесь отображаются только документы, назначенные вашей роли.
               } @else {
-                Статистика и документы на этой странице
-                загружены напрямую из backend.
+                Показатели отражают текущее состояние документов в рабочем пространстве.
               }
             </p>
-
           </div>
 
-          <span class="quality-arrow">
-            ›
-          </span>
-
+          <span class="quality-arrow"> › </span>
         </div>
-
       </article>
-
     </section>
 
-
     <section class="process-panel">
-
-      <h2>
-        Этапы обработки документа
-      </h2>
+      <h2>Этапы обработки документа</h2>
 
       <div class="process-flow">
-
-        <div class="process-step">
-
+        <div
+          class="process-step has-tooltip"
+          tabindex="0"
+          data-tooltip="Документ поступает в систему. Начальный этап обработки файла."
+          title="Документ поступает в систему. Начальный этап обработки файла."
+        >
           <div class="process-icon upload">
-
             <svg viewBox="0 0 24 24">
-              <path d="M12 16V4"/>
-              <path d="M8 8l4-4 4 4"/>
-              <path d="M5 15v5h14v-5"/>
+              <path d="M12 16V4" />
+              <path d="M8 8l4-4 4 4" />
+              <path d="M5 15v5h14v-5" />
             </svg>
-
           </div>
 
           <div>
             <strong>Загрузка</strong>
 
             <span>
-              Файл поступает<br>
+              Файл поступает<br />
               в систему
             </span>
           </div>
-
         </div>
 
+        <span class="process-arrow"> → </span>
 
-        <span class="process-arrow">
-          →
-        </span>
-
-
-        <div class="process-step">
-
-          <div class="process-icon ai">
-            AI
-          </div>
+        <div
+          class="process-step has-tooltip"
+          tabindex="0"
+          data-tooltip="AI определяет класс документа и извлекает его реквизиты."
+          title="AI определяет класс документа и извлекает его реквизиты."
+        >
+          <div class="process-icon ai">AI</div>
 
           <div>
-            <strong>
-              AI-анализ
-            </strong>
+            <strong> AI-анализ </strong>
 
             <span>
-              Классификация,<br>
+              Классификация,<br />
               извлечение данных
             </span>
           </div>
-
         </div>
 
+        <span class="process-arrow"> → </span>
 
-        <span class="process-arrow">
-          →
-        </span>
-
-
-        <div class="process-step">
-
+        <div
+          class="process-step has-tooltip"
+          tabindex="0"
+          data-tooltip="Результат классификации проходит автоматическую или ручную проверку."
+          title="Результат классификации проходит автоматическую или ручную проверку."
+        >
           <div class="process-icon verify">
-
             <svg viewBox="0 0 24 24">
-              <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>
-              <path d="M9 12l2 2 4-4"/>
+              <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" />
+              <path d="M9 12l2 2 4-4" />
             </svg>
-
           </div>
 
           <div>
-            <strong>
-              Проверка
-            </strong>
+            <strong> Проверка </strong>
 
             <span>
-              Автоматическая<br>
+              Автоматическая<br />
               или ручная
             </span>
           </div>
-
         </div>
 
+        <span class="process-arrow"> → </span>
 
-        <span class="process-arrow">
-          →
-        </span>
-
-
-        <div class="process-step">
-
+        <div
+          class="process-step has-tooltip"
+          tabindex="0"
+          data-tooltip="Дополнительный документ связывается с основным договором."
+          title="Дополнительный документ связывается с основным договором."
+        >
           <div class="process-icon linking">
-
             <svg viewBox="0 0 24 24">
-              <path d="M10 13a4 4 0 005.7 0l2.3-2.3"/>
-              <path d="M14 11a4 4 0 00-5.7 0L6 13.3"/>
+              <path d="M10 13a4 4 0 005.7 0l2.3-2.3" />
+              <path d="M14 11a4 4 0 00-5.7 0L6 13.3" />
             </svg>
-
           </div>
 
           <div>
-            <strong>
-              Привязка
-            </strong>
+            <strong> Привязка </strong>
 
             <span>
-              К базовому<br>
+              К базовому<br />
               договору
             </span>
           </div>
-
         </div>
 
+        <span class="process-arrow"> → </span>
 
-        <span class="process-arrow">
-          →
-        </span>
-
-
-        <div class="process-step">
-
+        <div
+          class="process-step has-tooltip"
+          tabindex="0"
+          data-tooltip="Подготовленный документ отправляется в корпоративную СЭД."
+          title="Подготовленный документ отправляется в корпоративную СЭД."
+        >
           <div class="process-icon sed">
-
             <svg viewBox="0 0 24 24">
-              <ellipse cx="12" cy="6" rx="6" ry="3"/>
-              <path d="M6 6v6c0 1.7 2.7 3 6 3s6-1.3 6-3V6"/>
-              <path d="M6 12v6c0 1.7 2.7 3 6 3s6-1.3 6-3v-6"/>
+              <ellipse cx="12" cy="6" rx="6" ry="3" />
+              <path d="M6 6v6c0 1.7 2.7 3 6 3s6-1.3 6-3V6" />
+              <path d="M6 12v6c0 1.7 2.7 3 6 3s6-1.3 6-3v-6" />
             </svg>
-
           </div>
 
           <div>
-            <strong>
-              СЭД
-            </strong>
+            <strong> СЭД </strong>
 
             <span>
-              Отправка<br>
+              Отправка<br />
               документа
             </span>
           </div>
-
         </div>
-
 
         <div class="process-handwriting">
-          От документа<br>
-          к результату —<br>
+          От документа<br />
+          к результату —<br />
           за минуты
         </div>
-
       </div>
-
     </section>
 
-
     <section class="bottom-grid">
-
       <article class="panel documents-panel">
-
         <div class="panel-title-row">
-
-          <h2>
-            Последние документы
-          </h2>
+          <h2>Последние документы</h2>
 
           <button
-            class="details-button"
+            class="details-button all-documents-button"
             type="button"
             (click)="openDocuments()"
           >
-            Все документы →
+            Все документы <span aria-hidden="true">→</span>
           </button>
-
         </div>
 
-
         <div class="documents-table">
-
           <div class="document-row document-head">
             <span>Название</span>
             <span>Класс</span>
@@ -1643,239 +1291,51 @@
             <span>Дата</span>
           </div>
 
-
-          @for (
-            document of recentDocuments;
-            track document.documentId
-          ) {
-
+          @for (document of recentDocuments; track document.documentId) {
             <div class="document-row">
-
               <div class="document-name">
-
-                <span class="pdf-icon">
-                  PDF
-                </span>
+                <span class="pdf-icon" aria-hidden="true"
+                  ><img
+                    src="assets/ai-analysis/pdf-file-3d.png"
+                    alt=""
+                    width="1254"
+                    height="1254"
+                    loading="lazy"
+                    decoding="async"
+                /></span>
 
                 <div>
-
                   <strong>
                     {{ getDocumentName(document) }}
                   </strong>
 
-                  <small>
-                    ID {{ document.documentId }}
-                  </small>
-
+                  <small> ID {{ document.documentId }} </small>
                 </div>
-
               </div>
-
 
               <span>
                 {{ getDocumentTypeLabel(document.documentType) }}
               </span>
 
-
-              <span
-                class="status"
-                [class]="
-                  'status ' +
-                  getStatusClass(document.status)
-                "
-              >
+              <span class="status" [class]="'status ' + getStatusClass(document.status)">
                 {{ getStatusLabel(document.status) }}
               </span>
-
 
               <strong class="confidence-value">
                 {{ getDocumentIdentifier(document) }}
               </strong>
 
-
               <span>
                 {{ getDocumentDate(document) }}
               </span>
-
             </div>
-
           } @empty {
-
             <div class="document-row">
-
-              <div class="document-name">
-                Документы пока отсутствуют
-              </div>
-
+              <div class="document-name">Документы пока отсутствуют</div>
             </div>
-
           }
-
         </div>
-
       </article>
-
-
-      <article class="panel insights-panel">
-
-        <div class="panel-title-row">
-
-          <div class="insights-title">
-            <span>✦</span>
-
-            <h2>
-              @if (isSpecialistView) {
-                Рабочая сводка
-              } @else {
-                AI Insights
-              }
-            </h2>
-          </div>
-
-        </div>
-
-
-        @if (isSpecialistView) {
-
-          <div class="insight-item">
-
-            <span class="insight-icon green-insight">
-              ✓
-            </span>
-
-            <p>
-              Вам назначено
-              <strong>
-                {{ dashboard.totalDocuments }}
-              </strong>
-              документ(а).
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon clock-insight">
-              ◷
-            </span>
-
-            <p>
-              <strong>
-                {{ specialistActionableCount }}
-              </strong>
-              документ(а) требуют обработки.
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon link-insight">
-              ✓
-            </span>
-
-            <p>
-              <strong>
-                {{ dashboard.readyForSed }}
-              </strong>
-              документ(а) подготовлены к СЭД.
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon star-insight">
-              ☆
-            </span>
-
-            <p>
-              В СЭД уже отправлено
-              <strong>
-                {{ dashboard.sentToSed }}
-              </strong>
-              документ(а).
-            </p>
-
-          </div>
-
-        } @else {
-
-          <div class="insight-item">
-
-            <span class="insight-icon green-insight">
-              ✓
-            </span>
-
-            <p>
-              В рабочем пространстве находится
-              <strong>
-                {{ dashboard.totalDocuments }}
-              </strong>
-              документов.
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon clock-insight">
-              ◷
-            </span>
-
-            <p>
-              <strong>
-                {{ dashboard.reviewRequired }}
-              </strong>
-              документ(а) требуют ручной проверки.
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon link-insight">
-              ⛓
-            </span>
-
-            <p>
-              <strong>
-                {{ dashboard.linkRequired }}
-              </strong>
-              документ(а) ожидают привязки
-              к основному договору.
-            </p>
-
-          </div>
-
-
-          <div class="insight-item">
-
-            <span class="insight-icon star-insight">
-              ☆
-            </span>
-
-            <p>
-              В СЭД успешно отправлено
-              <strong>
-                {{ dashboard.sentToSed }}
-              </strong>
-              документ(а).
-            </p>
-
-          </div>
-
-        }
-
-      </article>
-
     </section>
-
   }
-
 </section>
