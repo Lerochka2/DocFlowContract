@@ -53,7 +53,7 @@
 
     <section class="welcome-card">
 
-      <div class="welcome-grid"></div>
+      <div class="welcome-grid" aria-hidden="true"></div>
 
       <div class="welcome-copy">
 
@@ -78,34 +78,48 @@
           Здесь собраны документы, задачи и события,
           которые требуют вашего внимания сегодня.
         </p>
+        <div class="welcome-summary">
+          <span><i aria-hidden="true"></i> Рабочее пространство</span>
+          <span><strong>{{ dashboard.totalDocuments }}</strong> документов</span>
+          <span><strong>{{ dashboard.aiProcessing }}</strong> в AI-обработке</span>
+        </div>
 
       </div>
 
 
       <div class="welcome-ai">
-
-        <div class="ai-orbit orbit-one"></div>
-        <div class="ai-orbit orbit-two"></div>
-
-        <div class="ai-core">
-          AI
+        <div class="document-composition" aria-hidden="true">
+          <div class="composition-halo"></div>
+          <svg class="glass-folder" viewBox="0 0 360 290" fill="none">
+            <defs>
+              <linearGradient id="folder-back" x1="80" y1="45" x2="290" y2="270" gradientUnits="userSpaceOnUse"><stop stop-color="#c3dfff" stop-opacity=".85"/><stop offset=".5" stop-color="#b3a6ec" stop-opacity=".6"/><stop offset="1" stop-color="#88bfff" stop-opacity=".9"/></linearGradient>
+              <linearGradient id="folder-front" x1="75" y1="120" x2="285" y2="255" gradientUnits="userSpaceOnUse"><stop stop-color="#e0f5ff" stop-opacity=".85"/><stop offset=".4" stop-color="#81b9f1" stop-opacity=".7"/><stop offset=".78" stop-color="#9690e5" stop-opacity=".85"/><stop offset="1" stop-color="#ecc1e8" stop-opacity=".8"/></linearGradient>
+              <linearGradient id="folder-edge" x1="50" y1="75" x2="310" y2="265" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset=".35" stop-color="#bdeeff"/><stop offset=".7" stop-color="#8a76d2"/><stop offset="1" stop-color="#fce1f4"/></linearGradient>
+              <linearGradient id="paper-glass" x1="130" y1="50" x2="240" y2="230" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity=".95"/><stop offset="1" stop-color="#e7f2ff" stop-opacity=".65"/></linearGradient>
+            </defs>
+            <path d="M72 78Q72 61 90 61H134Q144 61 153 77L163 92H281Q302 92 302 114V244Q302 262 282 262H89Q69 262 69 241Z" fill="url(#folder-back)" stroke="url(#folder-edge)" stroke-width="3"/>
+            <g transform="rotate(9 230 145)"><rect x="167" y="62" width="107" height="152" rx="12" fill="url(#paper-glass)" stroke="white" stroke-width="2"/><path d="M185 86h44M185 104h66M185 118h56M185 132h62" stroke="#a4aed1" stroke-width="5" stroke-linecap="round"/></g>
+            <g transform="rotate(-10 149 136)"><rect x="102" y="42" width="115" height="174" rx="13" fill="url(#paper-glass)" stroke="white" stroke-width="2"/><rect x="119" y="63" width="29" height="29" rx="8" fill="#d7d0f6"/><path d="M127 77h13M134 70v14" stroke="#8271c0" stroke-width="2" stroke-linecap="round"/><path d="M119 112h73M119 128h61M119 144h69M119 160h43" stroke="#abb8d7" stroke-width="5" stroke-linecap="round"/></g>
+            <path d="M61 129Q58 112 78 114L275 136Q294 138 292 157L280 252Q279 270 258 267L84 244Q68 242 67 225Z" fill="url(#folder-front)" stroke="url(#folder-edge)" stroke-width="3"/>
+            <path d="M81 126L270 148" stroke="white" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/>
+            <path d="M79 140L85 222Q86 232 99 234" stroke="white" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/>
+            <rect x="106" y="165" width="105" height="45" rx="12" fill="white" fill-opacity=".35" stroke="white" stroke-opacity=".6"/>
+            <path d="M122 180h15M122 190h25M161 179h32M161 190h23" stroke="#5e70ac" stroke-opacity=".8" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <span class="composition-ai">✦ AI</span>
+          <span class="composition-spark">✧</span>
         </div>
-
-        <div class="ai-caption">
-          <span>✦</span>
-
+        <div class="classification-card">
+          <span class="classification-icon" aria-hidden="true">✦</span>
           <div>
-            <strong>
-              DocFlow AI
-            </strong>
-
-            <small>
-              Анализирует документы и помогает
-              управлять процессом обработки
-            </small>
+            <small>КЛАССИФИКАЦИЯ ДОКУМЕНТОВ</small>
+            <strong>Договоры и доп. соглашения</strong>
+            <span>Тип документа · реквизиты · данные</span>
           </div>
         </div>
-
+        <div class="document-flow" aria-label="Этапы интеллектуальной обработки">
+          <span>Документ</span><b aria-hidden="true">→</b><span>AI-классификация</span><b aria-hidden="true">→</b><span>Результат</span>
+        </div>
       </div>
 
     </section>
@@ -486,8 +500,8 @@
               (click)="openDocument(document.documentId)"
             >
 
-              <span class="document-icon">
-                PDF
+              <span class="document-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h4" /></svg>
               </span>
 
 
@@ -591,14 +605,20 @@
 
         <p class="ai-description">
           AI помогает автоматически определить тип документа,
-          извлечь реквизиты и подготовить его к дальнейшему
-          маршруту.
+          извлечь реквизиты договора или дополнительного
+          соглашения и представить структурированные данные.
         </p>
 
 
+        <div class="ai-metrics" aria-label="Текущее состояние обработки">
+          <div><strong>{{ dashboard.aiProcessing }}</strong><span>В AI-анализе</span></div>
+          <div><strong>{{ dashboard.reviewRequired }}</strong><span>На проверке</span></div>
+          <div><strong>{{ dashboard.readyForSed }}</strong><span>Готовы к СЭД</span></div>
+        </div>
+
         <div class="ai-feature-list">
 
-          <div class="ai-feature">
+          <div class="ai-feature classification-feature">
 
             <span>01</span>
 
@@ -638,28 +658,11 @@
 
             <div>
               <strong>
-                Анализ рисков
+                Дополнительный анализ
               </strong>
 
               <small>
                 Выявление потенциально опасных условий
-              </small>
-            </div>
-
-          </div>
-
-
-          <div class="ai-feature">
-
-            <span>04</span>
-
-            <div>
-              <strong>
-                Маршрутизация
-              </strong>
-
-              <small>
-                Направление документа нужному специалисту
               </small>
             </div>
 
