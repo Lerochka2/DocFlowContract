@@ -4,11 +4,7 @@
 
     <div class="brand">
 
-      <div class="brand-icon">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <div class="brand-icon" aria-hidden="true"><img src="assets/brand/docflow-glass-folder.jpg" alt="" width="58" height="58" /></div>
 
       <div class="brand-text">
         <strong>DocFlow</strong>
@@ -247,9 +243,11 @@
       </div>
 
 
-      <a
-        class="nav-item"
+      <button
+        type="button"
+        class="nav-item logout-button"
         (click)="logout()"
+        title="Выйти из DocFlow"
       >
 
         <svg viewBox="0 0 24 24">
@@ -260,7 +258,7 @@
 
         <span>Выйти</span>
 
-      </a>
+      </button>
 
     </div>
 
@@ -295,7 +293,7 @@
             type="text"
             autocomplete="off"
             [(ngModel)]="searchQuery"
-            placeholder="Поиск по документам, номерам и предмету..."
+            placeholder="Найти документ, номер или предмет..." aria-label="Поиск документов" [attr.aria-expanded]="searchOpen" aria-controls="docflow-search-results"
             (input)="onSearchInput()"
             (focus)="onSearchFocus()"
             (keydown.enter)="onSearchEnter()"
@@ -333,7 +331,7 @@
 
         @if (searchOpen) {
 
-          <div class="search-dropdown">
+          <div class="search-dropdown" id="docflow-search-results" aria-label="Результаты поиска документов">
 
             <div class="search-dropdown-header">
 
@@ -542,7 +540,7 @@
           <button
             class="notification-button"
             type="button"
-            title="Уведомления"
+            title="Уведомления" aria-label="Уведомления" [attr.aria-expanded]="notificationsOpen" aria-controls="docflow-notifications"
             [class.active]="notificationsOpen"
             (click)="toggleNotifications()"
           >
@@ -566,7 +564,7 @@
 
           @if (notificationsOpen) {
 
-            <div class="notifications-dropdown">
+            <div class="notifications-dropdown" id="docflow-notifications" aria-label="Последние уведомления">
 
               <div class="notifications-header">
 
@@ -786,7 +784,7 @@
             </strong>
 
             <span>
-              {{ currentUser?.login || 'DocFlow' }}
+              {{ getRoleLabel() }}
             </span>
 
           </div>

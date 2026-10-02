@@ -1078,3 +1078,25 @@ a {
 }
 
 /* DOCFLOW COMPARISON ACTIONS V5 END */
+
+/* Shared workspace width: only page roots expand; inner forms/tiles keep their limits. */
+main.page-content {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding-inline: clamp(20px, 1.5vw, 28px);
+}
+main.page-content > router-outlet + * {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+main.page-content > router-outlet + * > :is(.home, .dashboard, .documents-page, .ai-page, .review-page, .sed-page, .routing-page, .settings-page, .users-page, .profile-page, .details-page) {
+  width: 100%;
+  min-width: 0;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+@media (max-width: 650px) { main.page-content { padding-inline: 16px; } }
