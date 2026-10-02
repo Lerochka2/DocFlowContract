@@ -57,6 +57,13 @@ export class AiAnalysisWorkspace implements OnInit {
 
   readonly confidenceThreshold = 80;
 
+  readonly documentClasses = [
+    { type: 'CONTRACT', tone: 'contract', title: 'Договор', detail: '' },
+    { type: 'AMENDMENT_CHANGE', tone: 'change', title: 'Доп. соглашение', detail: 'Изменение' },
+    { type: 'AMENDMENT_PROLONGATION', tone: 'prolongation', title: 'Доп. соглашение', detail: 'Продление' },
+    { type: 'APPENDIX', tone: 'appendix', title: 'Приложение', detail: '' }
+  ] as const;
+
   constructor(
     private readonly workspaceService: WorkspaceService,
     private readonly router: Router,
@@ -466,6 +473,9 @@ export class AiAnalysisWorkspace implements OnInit {
       case 'LINKED':
         return 'Связан с договором';
 
+      case 'APPROVED':
+        return 'Согласован';
+
       case 'VERIFIED':
         return 'Проверен';
 
@@ -497,6 +507,7 @@ export class AiAnalysisWorkspace implements OnInit {
       case 'SED_ERROR':
         return 'warning';
 
+      case 'APPROVED':
       case 'VERIFIED':
       case 'READY_FOR_SED':
       case 'SENT_TO_SED':

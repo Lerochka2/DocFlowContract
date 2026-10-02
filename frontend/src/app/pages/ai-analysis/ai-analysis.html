@@ -1,671 +1,280 @@
-<section class="ai-page">
-
+<section class="ai-page" [attr.aria-busy]="loading">
   <header class="page-header">
-
-    <div>
-
-      <span class="eyebrow">
-        ИНТЕЛЛЕКТУАЛЬНАЯ КЛАССИФИКАЦИЯ
-      </span>
-
-      <h1>
-        AI-анализ документов
-      </h1>
-
+    <div class="header-copy">
+      <span class="eyebrow">ИНТЕЛЛЕКТУАЛЬНАЯ КЛАССИФИКАЦИЯ</span>
+      <h1>AI-анализ документов</h1>
       <p>
-        Результаты автоматической классификации договоров,
-        дополнительных соглашений и приложений.
-        Порог автоматического принятия результата — 80%.
+        Результаты автоматической классификации договоров, дополнительных соглашений и приложений.
       </p>
-
+      <div class="header-controls">
+        <span class="threshold-note"
+          ><span aria-hidden="true">✓</span> Порог автоматического принятия —
+          {{ confidenceThreshold }}%</span
+        >
+        <button class="refresh-button" type="button" [disabled]="loading" (click)="loadAnalysis()">
+          <svg viewBox="0 0 24 24" aria-hidden="true" [class.refreshing]="loading">
+            <path d="M20 7v5h-5M4 17v-5h5" />
+            <path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17" />
+          </svg>
+          @if (loading) {
+            Обновляем...
+          } @else {
+            Обновить
+          }
+        </button>
+      </div>
     </div>
-
-
-    <button
-      class="refresh-button"
-      type="button"
-      [disabled]="loading"
-      (click)="loadAnalysis()"
-    >
-      @if (loading) {
-        Обновляем...
-      } @else {
-        Обновить
-      }
-    </button>
-
+    <div class="analysis-art" aria-hidden="true">
+      <img
+        src="assets/ai-analysis/ai-documents-glass.png"
+        alt=""
+        width="1448"
+        height="1086"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </div>
   </header>
 
-
-  <section class="statistics">
-
-    <article class="stat-card analyzed">
-
-      <div class="stat-icon">
-        AI
-      </div>
-
-      <div>
-
-        <span>
-          Обработано AI
-        </span>
-
-        <strong>
-          {{ analyzedCount }}
-        </strong>
-
-      </div>
-
-    </article>
-
-
-    <article class="stat-card confidence">
-
-      <div class="stat-icon">
-        %
-      </div>
-
-      <div>
-
-        <span>
-          Средняя уверенность
-        </span>
-
-        <strong>
-          {{ averageConfidence.toFixed(1) }}%
-        </strong>
-
-      </div>
-
-    </article>
-
-
-    <article class="stat-card low">
-
-      <div class="stat-icon">
-        !
-      </div>
-
-      <div>
-
-        <span>
-          Ниже порога 80%
-        </span>
-
-        <strong>
-          {{ lowConfidenceCount }}
-        </strong>
-
-      </div>
-
-    </article>
-
-
-    <article class="stat-card review">
-
-      <div class="stat-icon">
-        ✓
-      </div>
-
-      <div>
-
-        <span>
-          Сейчас на проверке
-        </span>
-
-        <strong>
-          {{ reviewRequiredCount }}
-        </strong>
-
-      </div>
-
-    </article>
-
-  </section>
-
-
-  <section class="distribution-panel">
-
+  <section class="overview-panel" aria-labelledby="overview-heading">
     <div class="section-heading">
+      <div><h2 id="overview-heading">Обзор AI-анализа</h2></div>
+    </div>
+    <section class="statistics" aria-label="Сводка AI-анализа">
+      <article class="stat-card analyzed">
+        <div class="stat-icon" aria-hidden="true">
+          <img src="assets/ai-analysis/metric-processed.svg" alt="" width="30" height="30" />
+        </div>
+        <div>
+          <span>Обработано AI</span><strong>{{ analyzedCount }}</strong>
+        </div>
+      </article>
+      <article class="stat-card confidence">
+        <div class="stat-icon" aria-hidden="true">
+          <img src="assets/ai-analysis/metric-confidence.svg" alt="" width="30" height="30" />
+        </div>
+        <div>
+          <span>Средняя уверенность</span><strong>{{ averageConfidence.toFixed(1) }}%</strong>
+        </div>
+      </article>
+      <article class="stat-card low">
+        <div class="stat-icon" aria-hidden="true">
+          <img src="assets/ai-analysis/metric-threshold.svg" alt="" width="30" height="30" />
+        </div>
+        <div>
+          <span>Ниже порога 80%</span><strong>{{ lowConfidenceCount }}</strong>
+        </div>
+      </article>
+      <article class="stat-card review">
+        <div class="stat-icon" aria-hidden="true">
+          <img src="assets/ai-analysis/metric-review.svg" alt="" width="30" height="30" />
+        </div>
+        <div>
+          <span>Сейчас на проверке</span><strong>{{ reviewRequiredCount }}</strong>
+        </div>
+      </article>
+    </section>
+  </section>
 
+  <section class="distribution-panel" aria-labelledby="classes-heading">
+    <div class="section-heading">
       <div>
-
-        <span class="section-eyebrow">
-          РАСПРЕДЕЛЕНИЕ РЕЗУЛЬТАТОВ
-        </span>
-
-        <h2>
-          Классы документов
-        </h2>
-
+        <span class="section-eyebrow">РАСПРЕДЕЛЕНИЕ РЕЗУЛЬТАТОВ</span>
+        <h2 id="classes-heading">Классы документов</h2>
       </div>
-
-      <span class="total-label">
-        Всего классификаций:
-        <strong>{{ analyzedCount }}</strong>
-      </span>
-
+      <span class="total-label"
+        >Всего классификаций: <strong>{{ analyzedCount }}</strong></span
+      >
     </div>
-
-
     <div class="class-grid">
-
-      <article class="class-card contract">
-
-        <div class="class-top">
-
-          <span class="class-icon">
-            Д
+      @for (documentClass of documentClasses; track documentClass.type) {
+        @let count = getTypeCount(documentClass.type);
+        @let share = getTypeShare(documentClass.type);
+        <article [class]="'class-card ' + documentClass.tone">
+          <img
+            class="class-art"
+            [src]="'assets/ai-analysis/class-' + documentClass.tone + '.svg'"
+            alt=""
+            width="54"
+            height="54"
+            aria-hidden="true"
+          />
+          <span class="class-name"
+            >{{ documentClass.title }}
+            @if (documentClass.detail) {
+              <span>{{ documentClass.detail }}</span>
+            }
           </span>
-
-          <strong>
-            {{ getTypeCount('CONTRACT') }}
-          </strong>
-
-        </div>
-
-        <span class="class-name">
-          Договор
-        </span>
-
-        <div class="class-track">
-          <i
-            [style.width.%]="
-              getTypeShare('CONTRACT')
-            "
-          ></i>
-        </div>
-
-        <span class="share">
-          {{ getTypeShare('CONTRACT').toFixed(1) }}%
-        </span>
-
-      </article>
-
-
-      <article class="class-card change">
-
-        <div class="class-top">
-
-          <span class="class-icon">
-            И
-          </span>
-
-          <strong>
-            {{ getTypeCount('AMENDMENT_CHANGE') }}
-          </strong>
-
-        </div>
-
-        <span class="class-name">
-          Доп. соглашение — изменение
-        </span>
-
-        <div class="class-track">
-          <i
-            [style.width.%]="
-              getTypeShare('AMENDMENT_CHANGE')
-            "
-          ></i>
-        </div>
-
-        <span class="share">
-          {{ getTypeShare('AMENDMENT_CHANGE').toFixed(1) }}%
-        </span>
-
-      </article>
-
-
-      <article class="class-card prolongation">
-
-        <div class="class-top">
-
-          <span class="class-icon">
-            П
-          </span>
-
-          <strong>
-            {{ getTypeCount('AMENDMENT_PROLONGATION') }}
-          </strong>
-
-        </div>
-
-        <span class="class-name">
-          Доп. соглашение — продление
-        </span>
-
-        <div class="class-track">
-          <i
-            [style.width.%]="
-              getTypeShare('AMENDMENT_PROLONGATION')
-            "
-          ></i>
-        </div>
-
-        <span class="share">
-          {{ getTypeShare('AMENDMENT_PROLONGATION').toFixed(1) }}%
-        </span>
-
-      </article>
-
-
-      <article class="class-card appendix">
-
-        <div class="class-top">
-
-          <span class="class-icon">
-            A
-          </span>
-
-          <strong>
-            {{ getTypeCount('APPENDIX') }}
-          </strong>
-
-        </div>
-
-        <span class="class-name">
-          Приложение
-        </span>
-
-        <div class="class-track">
-          <i
-            [style.width.%]="
-              getTypeShare('APPENDIX')
-            "
-          ></i>
-        </div>
-
-        <span class="share">
-          {{ getTypeShare('APPENDIX').toFixed(1) }}%
-        </span>
-
-      </article>
-
-    </div>
-
-  </section>
-
-
-  <section class="filters">
-
-    <label class="search-field">
-
-      <svg viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="7"/>
-        <path d="M16 16l5 5"/>
-      </svg>
-
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        placeholder="Поиск по файлу, номеру, предмету или классу..."
-      />
-
-    </label>
-
-
-    <label class="filter-field">
-
-      <span>
-        Класс
-      </span>
-
-      <select
-        [(ngModel)]="typeFilter"
-      >
-
-        <option value="ALL">
-          Все классы
-        </option>
-
-        <option value="CONTRACT">
-          Договор
-        </option>
-
-        <option value="AMENDMENT_CHANGE">
-          Изменение
-        </option>
-
-        <option value="AMENDMENT_PROLONGATION">
-          Продление
-        </option>
-
-        <option value="APPENDIX">
-          Приложение
-        </option>
-
-      </select>
-
-    </label>
-
-
-    <label class="filter-field">
-
-      <span>
-        Уверенность
-      </span>
-
-      <select
-        [(ngModel)]="confidenceFilter"
-      >
-
-        <option value="ALL">
-          Любая
-        </option>
-
-        <option value="HIGH">
-          80% и выше
-        </option>
-
-        <option value="LOW">
-          Ниже 80%
-        </option>
-
-      </select>
-
-    </label>
-
-
-    <button
-      class="reset-button"
-      type="button"
-      (click)="resetFilters()"
-    >
-      Сбросить
-    </button>
-
-  </section>
-
-
-  @if (loading) {
-
-    <section class="state-card">
-
-      <div class="loader"></div>
-
-      <strong>
-        Загружаем AI-результаты
-      </strong>
-
-      <span>
-        Получаем документы и результаты интеллектуальной классификации...
-      </span>
-
-    </section>
-
-  } @else if (errorMessage) {
-
-    <section class="state-card error">
-
-      <div class="state-icon">
-        !
-      </div>
-
-      <strong>
-        Не удалось загрузить AI-анализ
-      </strong>
-
-      <span>
-        {{ errorMessage }}
-      </span>
-
-      <button
-        type="button"
-        (click)="loadAnalysis()"
-      >
-        Повторить
-      </button>
-
-    </section>
-
-  } @else if (filteredRows.length === 0) {
-
-    <section class="state-card empty">
-
-      <div class="state-icon success">
-        AI
-      </div>
-
-      <strong>
-        Результаты не найдены
-      </strong>
-
-      <span>
-        Для выбранных фильтров нет результатов AI-классификации.
-      </span>
-
-    </section>
-
-  } @else {
-
-    <div class="table-header">
-
-      <span>
-        Документ
-      </span>
-
-      <span>
-        Предсказанный класс
-      </span>
-
-      <span>
-        Уверенность
-      </span>
-
-      <span>
-        AI-обработка
-      </span>
-
-      <span>
-        Текущий статус
-      </span>
-
-      <span></span>
-
-    </div>
-
-
-    <section class="results-list">
-
-      @for (
-        row of filteredRows;
-        track row.document.documentId
-      ) {
-
-        <article class="result-card">
-
-          <div class="document-cell">
-
-            <div class="file-icon">
-              PDF
-            </div>
-
-            <div class="document-info">
-
-              <span class="document-id">
-                ДОКУМЕНТ #{{ row.document.documentId }}
-              </span>
-
-              <strong
-                class="file-name"
-                [title]="row.document.originalName || 'Документ'"
-              >
-                {{ row.document.originalName || 'Документ' }}
-              </strong>
-
-              <div class="document-meta">
-
-                <span>
-                  {{
-                    row.document.documentNumber
-                      ? '№ ' + row.document.documentNumber
-                      : 'Без номера'
-                  }}
-                </span>
-
-                <i></i>
-
-                <span>
-                  {{ formatDateTime(row.createdAt) }}
-                </span>
-
-              </div>
-
-            </div>
-
+          <div class="class-top">
+            <strong>{{ count }}</strong
+            ><span>док.</span>
           </div>
-
-
-          <div class="type-cell">
-
-            <span>
-              AI определил
-            </span>
-
-            <strong>
-              {{
-                getDocumentTypeLabel(
-                  row.document.ai?.predictedType || null
-                )
-              }}
-            </strong>
-
+          <div class="class-footer">
+            <div class="class-track" aria-hidden="true"><i [style.width.%]="share"></i></div>
+            <span class="share">{{ share.toFixed(1) }}%</span>
           </div>
-
-
-          <div class="confidence-cell">
-
-            <div class="confidence-header">
-
-              <strong
-                [class]="
-                  getConfidenceClass(
-                    row.document
-                  )
-                "
-              >
-                {{
-                  getConfidenceLabel(
-                    row.document
-                  )
-                }}
-              </strong>
-
-              <span>
-                порог 80%
-              </span>
-
-            </div>
-
-
-            <div class="confidence-track">
-
-              <i
-                [class]="
-                  getConfidenceClass(
-                    row.document
-                  )
-                "
-                [style.width.%]="
-                  getConfidencePercent(
-                    row.document
-                  )
-                "
-              ></i>
-
-              <b></b>
-
-            </div>
-
-
-            <span
-              [class]="
-                'confidence-caption ' +
-                getConfidenceClass(
-                  row.document
-                )
-              "
-            >
-
-              @if (
-                getConfidencePercent(
-                  row.document
-                ) < confidenceThreshold
-              ) {
-                Ниже порога
-              } @else {
-                Выше порога
-              }
-
-            </span>
-
-          </div>
-
-
-          <div class="ai-status-cell">
-
-            <span class="status-dot"></span>
-
-            <div>
-
-              <span>
-                Статус AI
-              </span>
-
-              <strong>
-                {{
-                  getAiStatusLabel(
-                    row.document.ai?.processingStatus || null
-                  )
-                }}
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <div class="document-status-cell">
-
-            <span
-              [class]="
-                getDocumentStatusClass(
-                  row.document.status
-                )
-              "
-            >
-              {{
-                getDocumentStatusLabel(
-                  row.document.status
-                )
-              }}
-            </span>
-
-          </div>
-
-
-          <div class="action-cell">
-
-            <button
-              type="button"
-              (click)="
-                openDocument(
-                  row.document.documentId
-                )
-              "
-            >
-              Открыть
-            </button>
-
-          </div>
-
         </article>
-
       }
+    </div>
+  </section>
 
+  <section class="results-panel" aria-labelledby="results-heading">
+    <div class="section-heading results-heading">
+      <div>
+        <span class="section-eyebrow">РЕЗУЛЬТАТЫ AI-АНАЛИЗА</span>
+        <h2 id="results-heading">Классификация документов</h2>
+      </div>
+      @if (!loading && !errorMessage) {
+        <span class="total-label" role="status"
+          >Найдено: <strong>{{ filteredRows.length }}</strong> из {{ analyzedCount }}</span
+        >
+      }
+    </div>
+    <section class="filters" aria-label="Поиск и фильтры результатов">
+      <label class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M16 16l5 5" />
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          aria-label="Поиск по файлу, номеру, предмету или классу"
+          placeholder="Название, номер или предмет..."
+        />
+      </label>
+      <label class="filter-field">
+        <span>Класс</span>
+        <select [(ngModel)]="typeFilter">
+          <option value="ALL">Все классы</option>
+          <option value="CONTRACT">Договор</option>
+          <option value="AMENDMENT_CHANGE">Изменение</option>
+          <option value="AMENDMENT_PROLONGATION">Продление</option>
+          <option value="APPENDIX">Приложение</option>
+        </select>
+      </label>
+      <label class="filter-field">
+        <span>Уверенность</span>
+        <select [(ngModel)]="confidenceFilter">
+          <option value="ALL">Любая</option>
+          <option value="HIGH">80% и выше</option>
+          <option value="LOW">Ниже 80%</option>
+        </select>
+      </label>
+      <button class="reset-button" type="button" (click)="resetFilters()">Сбросить</button>
     </section>
 
-  }
-
+    @if (loading) {
+      <section class="state-card" role="status">
+        <div class="loader" aria-hidden="true"></div>
+        <strong>Загружаем AI-результаты</strong>
+        <span>Получаем документы и результаты интеллектуальной классификации...</span>
+      </section>
+    } @else if (errorMessage) {
+      <section class="state-card error" role="alert">
+        <div class="state-icon" aria-hidden="true">!</div>
+        <strong>Не удалось загрузить AI-анализ</strong>
+        <span>{{ errorMessage }}</span>
+        <button type="button" (click)="loadAnalysis()">Повторить</button>
+      </section>
+    } @else if (filteredRows.length === 0) {
+      <section class="state-card empty" role="status">
+        <div class="state-icon success" aria-hidden="true">AI</div>
+        <strong>Результаты не найдены</strong>
+        <span>Для выбранных фильтров нет результатов AI-классификации.</span>
+      </section>
+    } @else {
+      <div class="table-header" aria-hidden="true">
+        <span>Документ</span><span>Предсказанный класс</span><span>Уверенность</span
+        ><span>AI-обработка</span><span>Текущий статус</span><span></span>
+      </div>
+      <section class="results-list" aria-label="Документы с результатами классификации">
+        @for (row of filteredRows; track row.document.documentId) {
+          <article class="result-card" [attr.data-confidence]="getConfidenceClass(row.document)">
+            <div class="document-cell">
+              <div class="file-icon" aria-hidden="true">
+                <img
+                  src="assets/ai-analysis/pdf-file-3d.png"
+                  alt=""
+                  width="1024"
+                  height="1024"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="document-info">
+                <span class="document-id">ДОКУМЕНТ #{{ row.document.documentId }}</span>
+                <strong class="file-name" [title]="row.document.originalName || 'Документ'">{{
+                  row.document.originalName || 'Документ'
+                }}</strong>
+                <div class="document-meta">
+                  <span>{{
+                    row.document.documentNumber ? '№ ' + row.document.documentNumber : 'Без номера'
+                  }}</span>
+                  <i aria-hidden="true"></i>
+                  <span>{{ formatDateTime(row.createdAt) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="type-cell">
+              <span
+                ><span class="desktop-label">AI определил</span
+                ><span class="mobile-label">Предсказанный класс</span></span
+              >
+              <strong>{{ getDocumentTypeLabel(row.document.ai?.predictedType || null) }}</strong>
+            </div>
+            <div class="confidence-cell">
+              <span class="mobile-label cell-label">Уверенность</span>
+              <div class="confidence-header">
+                <strong [class]="getConfidenceClass(row.document)">{{
+                  getConfidenceLabel(row.document)
+                }}</strong>
+                <span>порог 80%</span>
+              </div>
+              <div class="confidence-track" aria-hidden="true">
+                <i
+                  [class]="getConfidenceClass(row.document)"
+                  [style.width.%]="getConfidencePercent(row.document)"
+                ></i
+                ><b></b>
+              </div>
+              <span [class]="'confidence-caption ' + getConfidenceClass(row.document)">
+                @if (getConfidencePercent(row.document) < confidenceThreshold) {
+                  Ниже порога
+                } @else {
+                  Выше порога
+                }
+              </span>
+            </div>
+            <div class="ai-status-cell">
+              <div>
+                <span>Статус AI</span
+                ><strong>{{ getAiStatusLabel(row.document.ai?.processingStatus || null) }}</strong>
+              </div>
+            </div>
+            <div class="document-status-cell">
+              <span class="mobile-label cell-label">Текущий статус</span>
+              <span [class]="getDocumentStatusClass(row.document.status)">{{
+                getDocumentStatusLabel(row.document.status)
+              }}</span>
+            </div>
+            <div class="action-cell">
+              <button
+                type="button"
+                [attr.aria-label]="
+                  'Открыть документ ' + (row.document.originalName || row.document.documentId)
+                "
+                (click)="openDocument(row.document.documentId)"
+              >
+                Открыть
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </div>
+          </article>
+        }
+      </section>
+    }
+  </section>
 </section>
