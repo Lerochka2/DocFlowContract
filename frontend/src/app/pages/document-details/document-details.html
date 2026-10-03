@@ -1,4 +1,4 @@
-<section class="details-page">
+<section class="details-page df-workspace">
 
   <button
     class="back-button"
@@ -38,7 +38,7 @@
 
   } @else if (document) {
 
-    <header class="document-header">
+    <header class="document-header df-hero">
 
       <div class="document-title">
 
@@ -48,15 +48,15 @@
 
         <div>
 
-          <span class="eyebrow">
+          <span class="eyebrow df-section-label">
             ДОКУМЕНТ #{{ document.documentId }}
           </span>
 
-          <h1>
+          <h1 class="df-page-title">
             {{ document.originalName || 'Документ' }}
           </h1>
 
-          <div class="header-meta">
+          <div class="header-meta df-muted-text">
 
             <span>
               {{ getDocumentTypeLabel(document.documentType) }}
@@ -83,7 +83,7 @@
 
         <span
           [class]="
-            'document-status ' +
+            'document-status df-status-chip ' +
             getStatusClass(document.status)
           "
         >
@@ -251,17 +251,17 @@
 
       <div class="document-data-column">
 
-        <article class="panel main-info">
+        <article class="panel main-info df-card">
 
           <div class="panel-heading">
 
             <div>
 
-              <span class="section-eyebrow">
+              <span class="section-eyebrow df-section-label">
                 ОСНОВНЫЕ ДАННЫЕ
               </span>
 
-              <h2>
+              <h2 class="df-card-title">
                 Информация о документе
               </h2>
 
@@ -496,7 +496,7 @@
               <div class="form-actions wide">
 
                 <button
-                  class="save-button"
+                  class="save-button df-primary-button"
                   type="submit"
                   [disabled]="savingMetadata"
                 >
@@ -636,23 +636,23 @@
         </article>
 
 
-        <article class="panel ai-panel">
+        <article class="panel ai-panel df-card">
 
           <div class="panel-heading">
 
             <div>
 
-              <span class="section-eyebrow">
+              <span class="section-eyebrow df-section-label">
                 ИНТЕЛЛЕКТУАЛЬНЫЙ АНАЛИЗ
               </span>
 
-              <h2>
+              <h2 class="df-card-title">
                 AI-классификация
               </h2>
 
             </div>
 
-            <span class="ai-badge">
+            <span class="ai-badge df-status-chip">
               AI
             </span>
 
@@ -740,7 +740,7 @@
 
                 </div>
 
-                <span class="ai-review-badge">
+                <span class="ai-review-badge success df-status-chip">
                   ПОДТВЕРЖДЕНО
                 </span>
 
@@ -748,7 +748,7 @@
 
             }
 
-            <div class="ai-status">
+            <div class="ai-status df-status-chip">
 
               <span class="status-dot"></span>
 
@@ -782,7 +782,7 @@
 
                 <button
                   type="button"
-                  class="ai-retry-button"
+                  class="ai-retry-button df-primary-button"
                   [disabled]="analyzingDocument"
                   (click)="analyzeDocument()"
                 >
@@ -884,7 +884,7 @@
 
 
               <button
-                class="review-button"
+                class="review-button df-primary-button"
                 type="button"
                 [disabled]="
                   selectedReviewDocumentType === null
@@ -925,17 +925,17 @@
 
     
 
-      <article class="panel preview-panel">
+      <article class="panel preview-panel df-card">
 
           <div class="preview-heading">
 
             <div>
 
-              <span class="section-eyebrow">
+              <span class="section-eyebrow df-section-label">
                 ИСХОДНЫЙ ФАЙЛ
               </span>
 
-              <h2>
+              <h2 class="df-card-title">
                 Просмотр документа
               </h2>
 
@@ -1085,17 +1085,17 @@
     </section>
 
 
-    <article class="panel version-panel">
+    <article class="panel version-panel df-card">
 
       <div class="version-heading">
 
         <div>
 
-          <span class="section-eyebrow">
+          <span class="section-eyebrow df-section-label">
             РЕДАКЦИИ ДОКУМЕНТА
           </span>
 
-          <h2>
+          <h2 class="df-card-title">
             Версии документа
           </h2>
 
@@ -1107,7 +1107,7 @@
 
         @if (documentVersions.length > 0) {
 
-          <span class="version-count">
+          <span class="version-count df-status-chip">
             {{ documentVersions.length }}
           </span>
 
@@ -1156,7 +1156,7 @@
 
                   @if (version.currentVersion) {
 
-                    <span class="version-current">
+                    <span class="version-current df-status-chip">
                       Текущая
                     </span>
 
@@ -1168,7 +1168,7 @@
                   {{ version.fileName }}
                 </span>
 
-                <div class="version-meta">
+                <div class="version-meta df-muted-text">
 
                   <span>
                     {{ formatFileSize(version.sizeBytes) }}
@@ -1190,7 +1190,7 @@
 
                 @if (version.changeNote) {
 
-                  <p class="version-note">
+                  <p class="version-note df-muted-text">
                     {{ version.changeNote }}
                   </p>
 
@@ -1367,7 +1367,7 @@
 
 
           <button
-            class="version-upload-button"
+            class="version-upload-button df-primary-button"
             type="button"
             [disabled]="
               uploadingVersion
@@ -1404,17 +1404,17 @@
 
         <div>
 
-          <span class="section-eyebrow">
+          <span class="section-eyebrow df-section-label">
             ЖИЗНЕННЫЙ ЦИКЛ
           </span>
 
-          <h2>
+          <h2 class="df-card-title">
             Обработка документа
           </h2>
 
         </div>
 
-        <span class="workflow-description">
+        <span class="workflow-description df-muted-text">
           Маршрут, связи и передача документа в корпоративную СЭД
         </span>
 
@@ -1423,7 +1423,7 @@
 
       <div class="workflow-grid">
 
-        <article class="panel workflow-card">
+        <article class="panel workflow-card df-card">
 
           <div class="workflow-icon route">
             ↗
@@ -1431,11 +1431,11 @@
 
           <div class="workflow-content">
 
-            <span class="section-eyebrow">
+            <span class="section-eyebrow df-section-label">
               МАРШРУТИЗАЦИЯ
             </span>
 
-            <h2>
+            <h2 class="df-card-title">
               Маршрут документа
             </h2>
 
@@ -1495,7 +1495,7 @@
         </article>
 
 
-        <article class="panel workflow-card">
+        <article class="panel workflow-card df-card">
 
           <div class="workflow-icon link">
             ⛓
@@ -1503,11 +1503,11 @@
 
           <div class="workflow-content">
 
-            <span class="section-eyebrow">
+            <span class="section-eyebrow df-section-label">
               СВЯЗИ ДОКУМЕНТА
             </span>
 
-            <h2>
+            <h2 class="df-card-title">
               Привязка к договору
             </h2>
 
@@ -1602,13 +1602,13 @@
                 comparisonExpanded
               ) {
 
-                <section class="document-comparison">
+                <section class="document-comparison df-card">
 
                   <div class="comparison-header">
 
                     <div>
 
-                      <span class="comparison-eyebrow">
+                      <span class="comparison-eyebrow df-section-label">
                         СРАВНЕНИЕ ДОКУМЕНТОВ
                       </span>
 
@@ -2003,7 +2003,7 @@
 
 
                 <button
-                  class="link-button"
+                  class="link-button df-primary-button"
                   type="button"
                   [disabled]="
                     selectedContractDocumentId === null
@@ -2087,7 +2087,7 @@
         </article>
 
 
-        <article class="panel workflow-card sed-workflow-card">
+        <article class="panel workflow-card sed-workflow-card df-card">
 
           <div class="workflow-icon sed">
             S
@@ -2095,11 +2095,11 @@
 
           <div class="workflow-content">
 
-            <span class="section-eyebrow">
+            <span class="section-eyebrow df-section-label">
               КОРПОРАТИВНАЯ СЭД
             </span>
 
-            <h2>
+            <h2 class="df-card-title">
               Отправка в СЭД
             </h2>
 
@@ -2228,13 +2228,13 @@
                 decisionHistory.length > 0
               ) {
 
-                <div class="decision-panel">
+                <div class="decision-panel df-card">
 
                   <div class="decision-panel-header">
 
                     <div>
 
-                      <span class="decision-eyebrow">
+                      <span class="decision-eyebrow df-section-label">
                         СОГЛАСОВАНИЕ
                       </span>
 
@@ -2246,7 +2246,7 @@
                         currentApprovalStep?.documentVersionNumber
                       ) {
 
-                        <span class="approval-version-badge">
+                        <span class="approval-version-badge df-status-chip">
                           Версия
                           {{
                             currentApprovalStep
@@ -2264,7 +2264,7 @@
                       currentApprovalStep?.status === 'PENDING'
                     ) {
 
-                      <span class="decision-status decision-waiting">
+                      <span class="decision-status decision-waiting df-status-chip">
                         Ожидает начала
                       </span>
 
@@ -2274,7 +2274,7 @@
                       currentApprovalStep?.status === 'IN_PROGRESS'
                     ) {
 
-                      <span class="decision-status decision-progress">
+                      <span class="decision-status decision-progress df-status-chip">
                         @if (isApprovalAssignedToCurrentUser) {
                           У вас в работе
                         } @else {
@@ -2288,7 +2288,7 @@
                       document.status === 'APPROVED'
                     ) {
 
-                      <span class="decision-status decision-approved">
+                      <span class="decision-status decision-approved df-status-chip">
                         Согласован
                       </span>
 
@@ -2296,7 +2296,7 @@
                       document.status === 'RETURNED_FOR_CORRECTION'
                     ) {
 
-                      <span class="decision-status decision-returned">
+                      <span class="decision-status decision-returned df-status-chip">
                         На доработке
                       </span>
 
@@ -2304,7 +2304,7 @@
                       document.status === 'REJECTED'
                     ) {
 
-                      <span class="decision-status decision-rejected">
+                      <span class="decision-status decision-rejected df-status-chip">
                         Отклонён
                       </span>
                     }
@@ -2324,7 +2324,7 @@
 
                     @if (loadingApprovalState) {
 
-                      <div class="approval-state-card loading">
+                      <div class="approval-state-card loading df-card">
 
                         <strong>
                           Загружаем состояние согласования
@@ -2350,7 +2350,7 @@
 
                           <div>
 
-                            <span class="approval-state-eyebrow">
+                            <span class="approval-state-eyebrow df-section-label">
                               ТЕКУЩИЙ ЭТАП
                             </span>
 
@@ -2438,7 +2438,7 @@
 
                     } @else {
 
-                      <div class="approval-state-card warning">
+                      <div class="approval-state-card warning df-card">
 
                         <strong>
                           Активный этап согласования не найден
@@ -2570,7 +2570,7 @@
                       </div>
 
                       <button
-                        class="decision-resubmit-button"
+                        class="decision-resubmit-button df-primary-button"
                         type="button"
                         [disabled]="
                           resubmittingDocument
@@ -2670,7 +2670,7 @@
                                   </strong>
 
                                   <span
-                                    class="decision-history-badge"
+                                    class="decision-history-badge df-status-chip"
                                     [class.approved]="
                                       item.decision === 'APPROVE'
                                     "
@@ -2713,12 +2713,12 @@
                 </div>
               }
 
-              <div class="comments-panel">
+              <div class="comments-panel df-card">
 
                 <div class="comments-header">
 
                   <div>
-                    <span class="comments-eyebrow">
+                    <span class="comments-eyebrow df-section-label">
                       ОБСУЖДЕНИЕ
                     </span>
 
@@ -2756,7 +2756,7 @@
 
                     <button
                       type="button"
-                      class="comment-send-button"
+                      class="comment-send-button df-primary-button"
                       [disabled]="
                         submittingComment
                         ||
@@ -2867,7 +2867,7 @@
               @if (canPrepareForSed) {
 
                 <button
-                  class="sed-prepare-button"
+                  class="sed-prepare-button df-primary-button"
                   type="button"
                   [disabled]="preparingForSed"
                   (click)="prepareForSed()"
@@ -2886,7 +2886,7 @@
               } @else if (canSendToSed) {
 
                 <button
-                  class="sed-send-button"
+                  class="sed-send-button df-primary-button"
                   type="button"
                   [disabled]="sendingToSed"
                   (click)="sendToSed()"
