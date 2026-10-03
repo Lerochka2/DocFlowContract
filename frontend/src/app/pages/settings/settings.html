@@ -1,36 +1,515 @@
-<section class="settings-page">
-
-  <header class="page-header">
-
-    <div>
-
-      <span class="eyebrow">
-        НАСТРОЙКИ DOCFLOW
-      </span>
-
-      <h1>
-        Настройки
-      </h1>
-
-      <!-- ==================================================
-           DOCFLOW PASSWORD CHANGE UI START
-           ================================================== -->
-
-      <section class="settings-card security-card">
+<link rel="stylesheet" [attr.href]="workspaceStyles" />
+<section class="settings-page df-workspace"><header class="page-header settings-hero df-hero"><img class="settings-hero-art" src="assets/settings/settings-glass-waves.svg" alt="" aria-hidden="true" width="1400" height="220" /><div class="settings-hero-copy"><span class="eyebrow df-section-label">НАСТРОЙКИ DOCFLOW</span><h1 class="df-page-title">Настройки</h1>@if (isAdmin()) {<p>Параметры интерфейса, сведения о пользователе и системная конфигурация обработки документов.</p>} @else {<p>Персональные параметры интерфейса и сведения о текущей учетной записи.</p>}</div>@if(isAdmin()) {<div class="system-summary" aria-label="Состав системной конфигурации"><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span><div><span>Модули системы</span><strong>4 / 4</strong><small class="configured"><i></i>В конфигурации</small></div></div><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h5l3-8 4 16 3-8h5"/></svg></span><div><span>Состояние</span><strong class="summary-state">Рабочая конфигурация</strong><small>Интерфейс, API, AI и адаптер СЭД.</small></div></div></div>}</header>@if(successMessage) {<div class="message success">{{successMessage}}</div>} @if(errorMessage) {<div class="message error">{{errorMessage}}</div>}<div class="settings-layout"><div class="settings-main"><section class="settings-card interface-card df-card">
 
         <div class="card-heading">
 
-          <div class="heading-icon security">
-            ⛨
-          </div>
+          <div class="heading-icon interface"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
 
           <div>
 
-            <span class="section-eyebrow">
+            <span class="section-eyebrow df-section-label">
+              ИНТЕРФЕЙС
+            </span>
+
+            <h2 class="df-card-title">
+              Отображение
+            </h2>
+
+            <p>
+              Настройте внешний вид своего рабочего пространства.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="setting-row"><span class="row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M8 12v2M16 12v2M9 17h6"/></svg></span>
+
+          <div>
+
+            <strong>
+              AI-карточка в боковом меню
+            </strong>
+
+            <span>
+              Показывать информационный блок
+              «Сила AI в каждом документе».
+            </span>
+
+          </div>
+
+
+          <label class="switch">
+
+            <input
+              type="checkbox"
+              [(ngModel)]="form.showAiPromoCard" aria-label="AI-карточка в боковом меню"
+            />
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+
+        <div class="setting-row"><span class="row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1M10 9h1M14 9h1M18 9h1M6 13h1M10 13h1M14 13h1M18 13h1M7 16h10"/></svg></span>
+
+          <div>
+
+            <strong>
+              Подсказка Ctrl K
+            </strong>
+
+            <span>
+              Показывать обозначение горячей клавиши
+              в верхней строке поиска.
+            </span>
+
+          </div>
+
+
+          <label class="switch">
+
+            <input
+              type="checkbox"
+              [(ngModel)]="form.showSearchShortcut" aria-label="Подсказка Ctrl K"
+            />
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+
+        <div class="settings-actions">
+
+          <button
+            class="primary-button df-primary-button"
+            type="button"
+            [disabled]="saving"
+            (click)="save()"
+          >
+            @if (saving) {
+              Сохраняем...
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 6"/></svg> Сохранить настройки
+            }
+          </button>
+
+
+          <button
+            class="secondary-button"
+            type="button"
+            [disabled]="saving"
+            (click)="reset()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v6h6M4 10a8 8 0 1 1 0 6"/></svg> По умолчанию
+          </button>
+
+        </div>
+
+      </section>@if(isAdmin()) {<section class="settings-card ai-card df-card">
+
+          <div class="card-heading">
+
+            <div class="heading-icon ai">
+              AI
+            </div>
+
+            <div>
+
+              <span class="section-eyebrow df-section-label">
+                AI-КЛАССИФИКАЦИЯ
+              </span>
+
+              <h2 class="df-card-title">
+                Параметры модели
+              </h2>
+
+              <p>
+                Серверная конфигурация интеллектуального анализа.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="system-grid">
+
+            <div class="system-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3 1 3h4l1-3 3 2-1 3 2 3 3 1-1 4-3-1-3 2v4H9v-4l-3-2-3 1-1-4 3-1 2-3-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+
+              <span>
+                Метод классификации
+              </span>
+
+              <strong>
+                TF-IDF + Logistic Regression
+              </strong>
+
+              <small>
+                Серверный параметр
+              </small>
+
+            </div>
+
+
+            <div class="system-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6"/></svg></span>
+
+              <span>
+                Порог уверенности
+              </span>
+
+              <strong class="highlight">
+                80%
+              </strong>
+
+              <small>
+                Ниже порога требуется ручная проверка
+              </small>
+
+            </div>
+
+
+            <div class="system-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span>
+
+              <span>
+                Количество классов
+              </span>
+
+              <strong>
+                4
+              </strong>
+
+              <small>
+                Договоры, соглашения и приложения
+              </small>
+
+            </div>
+
+
+            <div class="system-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 2-8 12h6l-2 8 8-12h-6Z"/></svg></span>
+
+              <span>
+                Режим обработки
+              </span>
+
+              <strong class="status-value success df-status-chip">
+                <i></i>
+                Активен
+              </strong>
+
+              <small>
+                AI-сервис доступен для обработки
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="readonly-note df-muted-text">
+
+            <span>
+              i
+            </span>
+
+            <p>
+              Эти параметры задаются на стороне AI-сервиса
+              и отображаются здесь только для просмотра.
+            </p>
+
+          </div>
+
+        </section><section class="settings-card routing-card df-card">
+
+          <div class="card-heading">
+
+            <div class="heading-icon routing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M5 7v3l7 7M19 7v3l-7 7"/></svg></div>
+
+            <div>
+
+              <span class="section-eyebrow df-section-label">
+                МАРШРУТИЗАЦИЯ
+              </span>
+
+              <h2 class="df-card-title">
+                Правила маршрутов
+              </h2>
+
+              <p>
+                Интеллектуальный выбор маршрута по типу документа,
+                AI-риску и изменениям относительно основного договора.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="routing-rules">
+
+            <div class="routing-rule">
+
+              <span class="document-type contract df-muted-text df-status-chip">
+                Договор · риск ≥ 60
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type contract df-muted-text df-status-chip">
+                Договор · риск &lt; 60
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Менеджер по договорам
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type change df-muted-text df-status-chip">
+                Доп. соглашение — изменение
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type prolongation df-muted-text df-status-chip">
+                Продление + существенные изменения
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Юрист
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type prolongation df-muted-text df-status-chip">
+                Только продление срока
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Менеджер по договорам
+              </strong>
+
+            </div>
+
+
+            <div class="routing-rule">
+
+              <span class="document-type appendix df-muted-text df-status-chip">
+                Приложение
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+              <strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg>
+                Менеджер по договорам
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="readonly-note df-muted-text">
+
+            <span>
+              i
+            </span>
+
+            <p>
+              Маршрут формируется автоматически и может уточняться
+              после AI-анализа риска или сравнения связанного документа.
+            </p>
+
+          </div>
+
+        </section>}</div><aside class="settings-sidebar"><section class="about-card df-card">
+
+        <div class="card-heading"><div class="heading-icon about"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg></div><div><span class="section-eyebrow df-section-label">
+          О СИСТЕМЕ
+        </span>
+
+        <h3>
+          DocFlow
+        </h3></div></div>
+
+        <img class="glass-stack" src="assets/settings/glass-stack.svg" alt="" aria-hidden="true" width="180" height="180" />
+        <p>
+          Программное средство интеллектуальной
+          классификации и автоматизированной
+          маршрутизации документов в корпоративной СЭД.
+        </p>
+
+
+        <div class="technology-list">
+
+          <span>
+            <b aria-hidden="true" style="color:#e83950">A</b> Angular
+          </span>
+
+          <span>
+            <b aria-hidden="true" style="color:#67b74a">S</b> Spring Boot
+          </span>
+
+          <span>
+            <b aria-hidden="true" style="color:#14a99b">ϟ</b> FastAPI
+          </span>
+
+          <span>
+            <b aria-hidden="true" style="color:#5598b9">M</b> MySQL
+          </span>
+
+        </div>
+
+      </section>@if(isAdmin()) {<section class="settings-card sed-card df-card">
+
+          <div class="card-heading">
+
+            <div class="heading-icon sed"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/></svg></div>
+
+            <div>
+
+              <span class="section-eyebrow df-section-label">
+                ИНТЕГРАЦИЯ
+              </span>
+
+              <h2 class="df-card-title">
+                Корпоративная СЭД
+              </h2>
+
+              <p>
+                Параметры текущего тестового контура отправки.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="integration-status">
+
+            <div>
+
+              <span class="integration-check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 6"/></svg></span>
+
+              <div>
+
+                <strong>
+                  Тестовый контур активен
+                </strong>
+
+                <span>
+                  Документы могут быть подготовлены
+                  и зарегистрированы через текущий адаптер СЭД.
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <span class="status-badge active success df-status-chip">
+              ACTIVE
+            </span>
+
+          </div>
+
+
+          <div class="integration-details">
+
+            <div><span class="detail-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg></span><span>
+                Поддерживаемая операция
+              </span>
+
+              <strong>
+                Регистрация документа
+              </strong>
+
+            </div>
+
+
+            <div><span class="detail-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6ZM14 3v5h4M9 12h6M9 16h6"/></svg></span><span>
+                Результат успешной отправки
+              </span>
+
+              <strong>
+                Внешний SED-ID
+              </strong>
+
+            </div>
+
+
+            <div><span class="detail-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span><span>
+                История отправок
+              </span>
+
+              <strong>
+                Сохраняется
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section><section class="settings-card audit-card df-card"><div class="card-heading"><div class="heading-icon audit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6"/></svg></div><div><span class="section-eyebrow df-section-label">Безопасность и аудит</span><p>Контроль действий и сохранность данных.</p></div></div><div class="audit-grid"><div class="audit-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6ZM14 3v5h4M9 12h6M9 16h6"/></svg></span><span>Журнал действий</span><strong><i></i>Включён</strong><small>События документов сохраняются</small></div><div class="audit-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3Z"/></svg></span><span>Ролевой доступ</span><strong><i></i>Настроен</strong><small>Разграничение прав по ролям</small></div><div class="audit-item"><span class="mini-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6"/></svg></span><span>JWT-защита</span><strong><i></i>Настроена</strong><small>Защищённые запросы к API</small></div></div></section>}</aside></div><details class="account-settings" [open]="passwordStep !== 'EMAIL'"><summary>Учётная запись и смена пароля <span aria-hidden="true">⌄</span></summary><div class="account-layout"><section class="settings-card security-card df-card">
+
+        <div class="card-heading">
+
+          <div class="heading-icon security"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6"/></svg></div>
+
+          <div>
+
+            <span class="section-eyebrow df-section-label">
               БЕЗОПАСНОСТЬ
             </span>
 
-            <h2>
+            <h2 class="df-card-title">
               Изменение пароля
             </h2>
 
@@ -213,7 +692,7 @@
             <div class="password-actions">
 
               <button
-                class="password-primary-button"
+                class="password-primary-button df-primary-button"
                 type="button"
                 [disabled]="
                   passwordLoading
@@ -339,7 +818,7 @@
 
 
                 <button
-                  class="password-primary-button"
+                  class="password-primary-button df-primary-button"
                   type="button"
                   [disabled]="
                     passwordLoading
@@ -491,7 +970,7 @@
 
 
               <button
-                class="password-primary-button"
+                class="password-primary-button df-primary-button"
                 type="button"
                 [disabled]="
                   passwordLoading
@@ -516,550 +995,9 @@
 
         }
 
-      </section>
+      </section><section class="profile-card df-card">
 
-      <!-- ==================================================
-           DOCFLOW PASSWORD CHANGE UI END
-           ================================================== -->
-
-      @if (isAdmin()) {
-
-        <p>
-          Параметры интерфейса, сведения о пользователе
-          и системная конфигурация обработки документов.
-        </p>
-
-      } @else {
-
-        <p>
-          Персональные параметры интерфейса
-          и сведения о текущей учетной записи.
-        </p>
-
-      }
-
-    </div>
-
-  </header>
-
-
-  @if (successMessage) {
-
-    <div class="message success">
-      {{ successMessage }}
-    </div>
-
-  }
-
-
-  @if (errorMessage) {
-
-    <div class="message error">
-      {{ errorMessage }}
-    </div>
-
-  }
-
-
-  <div class="settings-layout">
-
-    <div class="settings-main">
-
-      <section class="settings-card">
-
-        <div class="card-heading">
-
-          <div class="heading-icon interface">
-            ◫
-          </div>
-
-          <div>
-
-            <span class="section-eyebrow">
-              ИНТЕРФЕЙС
-            </span>
-
-            <h2>
-              Отображение
-            </h2>
-
-            <p>
-              Настройте внешний вид своего рабочего пространства.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="setting-row">
-
-          <div>
-
-            <strong>
-              AI-карточка в боковом меню
-            </strong>
-
-            <span>
-              Показывать информационный блок
-              «Сила AI в каждом документе».
-            </span>
-
-          </div>
-
-
-          <label class="switch">
-
-            <input
-              type="checkbox"
-              [(ngModel)]="form.showAiPromoCard"
-            />
-
-            <span class="slider"></span>
-
-          </label>
-
-        </div>
-
-
-        <div class="setting-row">
-
-          <div>
-
-            <strong>
-              Подсказка Ctrl K
-            </strong>
-
-            <span>
-              Показывать обозначение горячей клавиши
-              в верхней строке поиска.
-            </span>
-
-          </div>
-
-
-          <label class="switch">
-
-            <input
-              type="checkbox"
-              [(ngModel)]="form.showSearchShortcut"
-            />
-
-            <span class="slider"></span>
-
-          </label>
-
-        </div>
-
-
-        <div class="settings-actions">
-
-          <button
-            class="primary-button"
-            type="button"
-            [disabled]="saving"
-            (click)="save()"
-          >
-            @if (saving) {
-              Сохраняем...
-            } @else {
-              Сохранить настройки
-            }
-          </button>
-
-
-          <button
-            class="secondary-button"
-            type="button"
-            [disabled]="saving"
-            (click)="reset()"
-          >
-            По умолчанию
-          </button>
-
-        </div>
-
-      </section>
-
-
-      @if (isAdmin()) {
-
-        <section class="settings-card">
-
-          <div class="card-heading">
-
-            <div class="heading-icon ai">
-              AI
-            </div>
-
-            <div>
-
-              <span class="section-eyebrow">
-                AI-КЛАССИФИКАЦИЯ
-              </span>
-
-              <h2>
-                Параметры модели
-              </h2>
-
-              <p>
-                Серверная конфигурация интеллектуального анализа.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <div class="system-grid">
-
-            <div class="system-item">
-
-              <span>
-                Метод классификации
-              </span>
-
-              <strong>
-                TF-IDF + Logistic Regression
-              </strong>
-
-              <small>
-                Серверный параметр
-              </small>
-
-            </div>
-
-
-            <div class="system-item">
-
-              <span>
-                Порог уверенности
-              </span>
-
-              <strong class="highlight">
-                80%
-              </strong>
-
-              <small>
-                Ниже порога требуется ручная проверка
-              </small>
-
-            </div>
-
-
-            <div class="system-item">
-
-              <span>
-                Количество классов
-              </span>
-
-              <strong>
-                4
-              </strong>
-
-              <small>
-                Договоры, соглашения и приложения
-              </small>
-
-            </div>
-
-
-            <div class="system-item">
-
-              <span>
-                Режим обработки
-              </span>
-
-              <strong class="status-value">
-                <i></i>
-                Активен
-              </strong>
-
-              <small>
-                AI-сервис доступен для обработки
-              </small>
-
-            </div>
-
-          </div>
-
-
-          <div class="readonly-note">
-
-            <span>
-              i
-            </span>
-
-            <p>
-              Эти параметры задаются на стороне AI-сервиса
-              и отображаются здесь только для просмотра.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <section class="settings-card">
-
-          <div class="card-heading">
-
-            <div class="heading-icon routing">
-              ↗
-            </div>
-
-            <div>
-
-              <span class="section-eyebrow">
-                МАРШРУТИЗАЦИЯ
-              </span>
-
-              <h2>
-                Правила маршрутов
-              </h2>
-
-              <p>
-                Интеллектуальный выбор маршрута по типу документа,
-                AI-риску и изменениям относительно основного договора.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <div class="routing-rules">
-
-            <div class="routing-rule">
-
-              <span class="document-type contract">
-                Договор · риск ≥ 60
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Юрист
-              </strong>
-
-            </div>
-
-
-            <div class="routing-rule">
-
-              <span class="document-type contract">
-                Договор · риск &lt; 60
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Менеджер по договорам
-              </strong>
-
-            </div>
-
-
-            <div class="routing-rule">
-
-              <span class="document-type change">
-                Доп. соглашение — изменение
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Юрист
-              </strong>
-
-            </div>
-
-
-            <div class="routing-rule">
-
-              <span class="document-type prolongation">
-                Продление + существенные изменения
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Юрист
-              </strong>
-
-            </div>
-
-
-            <div class="routing-rule">
-
-              <span class="document-type prolongation">
-                Только продление срока
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Менеджер по договорам
-              </strong>
-
-            </div>
-
-
-            <div class="routing-rule">
-
-              <span class="document-type appendix">
-                Приложение
-              </span>
-
-              <span class="arrow">
-                →
-              </span>
-
-              <strong>
-                Менеджер по договорам
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <div class="readonly-note">
-
-            <span>
-              i
-            </span>
-
-            <p>
-              Маршрут формируется автоматически и может уточняться
-              после AI-анализа риска или сравнения связанного документа.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <section class="settings-card">
-
-          <div class="card-heading">
-
-            <div class="heading-icon sed">
-              S
-            </div>
-
-            <div>
-
-              <span class="section-eyebrow">
-                ИНТЕГРАЦИЯ
-              </span>
-
-              <h2>
-                Корпоративная СЭД
-              </h2>
-
-              <p>
-                Параметры текущего тестового контура отправки.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <div class="integration-status">
-
-            <div>
-
-              <span class="integration-dot"></span>
-
-              <div>
-
-                <strong>
-                  Тестовый контур активен
-                </strong>
-
-                <span>
-                  Документы могут быть подготовлены
-                  и зарегистрированы через текущий адаптер СЭД.
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <span class="status-badge">
-              ACTIVE
-            </span>
-
-          </div>
-
-
-          <div class="integration-details">
-
-            <div>
-
-              <span>
-                Поддерживаемая операция
-              </span>
-
-              <strong>
-                Регистрация документа
-              </strong>
-
-            </div>
-
-
-            <div>
-
-              <span>
-                Результат успешной отправки
-              </span>
-
-              <strong>
-                Внешний SED-ID
-              </strong>
-
-            </div>
-
-
-            <div>
-
-              <span>
-                История отправок
-              </span>
-
-              <strong>
-                Сохраняется
-              </strong>
-
-            </div>
-
-          </div>
-
-        </section>
-
-      }
-
-    </div>
-
-
-    <aside class="settings-sidebar">
-
-      <section class="profile-card">
-
-        <span class="section-eyebrow">
+        <span class="section-eyebrow df-section-label">
           ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ
         </span>
 
@@ -1156,50 +1094,4 @@
 
         }
 
-      </section>
-
-
-      <section class="about-card">
-
-        <span class="section-eyebrow">
-          О СИСТЕМЕ
-        </span>
-
-        <h3>
-          DocFlow
-        </h3>
-
-        <p>
-          Программное средство интеллектуальной
-          классификации и автоматизированной
-          маршрутизации документов в корпоративной СЭД.
-        </p>
-
-
-        <div class="technology-list">
-
-          <span>
-            Angular
-          </span>
-
-          <span>
-            Spring Boot
-          </span>
-
-          <span>
-            FastAPI
-          </span>
-
-          <span>
-            MySQL
-          </span>
-
-        </div>
-
-      </section>
-
-    </aside>
-
-  </div>
-
-</section>
+      </section></div></details></section>

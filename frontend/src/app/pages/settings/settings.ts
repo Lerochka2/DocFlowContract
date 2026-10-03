@@ -1,6 +1,8 @@
+import { DomSanitizer } from '@angular/platform-browser';
 import {
   ChangeDetectorRef,
   Component,
+  inject,
   OnDestroy,
   OnInit
 } from '@angular/core';
@@ -38,6 +40,11 @@ import {
 })
 export class SettingsWorkspace
   implements OnInit, OnDestroy {
+
+  // Fixed local stylesheet asset preserves the initial bundle budget.
+  readonly workspaceStyles = inject(DomSanitizer).bypassSecurityTrustResourceUrl(
+    'assets/settings/settings-workspace.css'
+  );
 
   currentUser:
     CurrentUserResponse | null = null;

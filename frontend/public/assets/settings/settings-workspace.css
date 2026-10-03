@@ -1,0 +1,1294 @@
+/* Page-scoped presentation styles; existing password flow remains unchanged. */
+.settings-page.df-workspace.settings-page {
+  --df-title-size:42px;
+  --df-section-size:24px;
+  --df-card-title-size:24px;
+  --df-body-size:16px;
+  --df-table-size:15px;
+  --df-description-size:17px;
+  --df-caption-size:14px;
+  --df-label-size:15px;
+  max-width: none;
+  min-width: 0;
+}
+
+.settings-page.df-workspace.settings-page svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.settings-page.df-workspace.settings-page .settings-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 170px;
+  padding: 24px 28px;
+  border: 1px solid white;
+  margin-bottom: 18px;
+  background: linear-gradient(115deg, rgba(229, 246, 255, 0.9294117647), rgba(229, 237, 255, 0.8588235294) 48%, rgba(241, 226, 255, 0.8588235294));
+}
+.settings-page.df-workspace.settings-page .settings-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+.settings-page.df-workspace.settings-page .settings-hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 54%;
+}
+.settings-page.df-workspace.settings-page .settings-hero h1 {
+  font-size: 42px;
+  margin: 5px 0 8px;
+}
+.settings-page.df-workspace.settings-page .settings-hero p {
+  margin: 0;
+  font-size: 17px;
+  max-width: 680px;
+}
+.settings-page.df-workspace.settings-page .system-summary {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  flex: 0 0 40%;
+  min-width: 400px;
+  gap: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8784313725);
+  border: 1px solid white;
+  border-radius: 19px;
+  box-shadow: 0 7px 24px rgba(147, 154, 219, 0.0745098039);
+}
+.settings-page.df-workspace.settings-page .system-summary > div {
+  display: flex;
+  align-items: start;
+  gap: 13px;
+}
+.settings-page.df-workspace.settings-page .system-summary > div + div {
+  border-left: 1px solid #e2dcf7;
+  padding-left: 18px;
+}
+.settings-page.df-workspace.settings-page .summary-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  flex: 0 0 auto;
+  color: #547aff;
+  background: linear-gradient(135deg, #e1efff, #eee7ff);
+}
+.settings-page.df-workspace.settings-page .summary-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.settings-page.df-workspace.settings-page .system-summary span:not(.summary-icon) {
+  display: block;
+  font-size: 14px;
+  color: var(--df-muted);
+}
+.settings-page.df-workspace.settings-page .system-summary strong {
+  display: block;
+  font-size: 27px;
+  color: var(--df-ink);
+  margin: 5px 0;
+}
+.settings-page.df-workspace.settings-page .system-summary .summary-state {
+  font-size: 17px;
+  line-height: 1.4;
+}
+.settings-page.df-workspace.settings-page .system-summary small {
+  display: block;
+  font-size: 13.5px;
+  color: var(--df-muted);
+  line-height: 1.45;
+}
+.settings-page.df-workspace.settings-page .system-summary .configured {
+  color: #278855;
+}
+.settings-page.df-workspace.settings-page .configured i, .settings-page.df-workspace.settings-page .audit-item i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0db555;
+  margin-right: 6px;
+}
+.settings-page.df-workspace.settings-page .settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.15fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.settings-page.df-workspace.settings-page .settings-main, .settings-page.df-workspace.settings-page .settings-sidebar {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.settings-page.df-workspace.settings-page .settings-card, .settings-page.df-workspace.settings-page .about-card, .settings-page.df-workspace.settings-page .profile-card {
+  border: 1px solid #e1e8ff;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9803921569), rgba(255, 255, 255, 0.8078431373));
+  box-shadow: 0 9px 25px rgba(129, 149, 200, 0.0666666667), inset 0 1px 0 white;
+  padding: 20px;
+  min-width: 0;
+}
+.settings-page.df-workspace.settings-page .card-heading {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.settings-page.df-workspace.settings-page .card-heading > div:last-child {
+  min-width: 0;
+}
+.settings-page.df-workspace.settings-page .heading-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 23px;
+  font-weight: 800;
+  color: white;
+  background: linear-gradient(140deg, #9e84ff, #6852f0);
+  box-shadow: 0 5px 12px rgba(123, 117, 236, 0.1333333333);
+}
+.settings-page.df-workspace.settings-page .heading-icon svg {
+  width: 28px;
+  height: 28px;
+}
+.settings-page.df-workspace.settings-page .heading-icon.about {
+  background: linear-gradient(140deg, #69a7ff, #4264f5);
+}
+.settings-page.df-workspace.settings-page .heading-icon.sed {
+  background: linear-gradient(140deg, #5dd48c, #22af62);
+}
+.settings-page.df-workspace.settings-page .heading-icon.audit {
+  background: linear-gradient(140deg, #66d4ca, #20b68d);
+}
+.settings-page.df-workspace.settings-page .section-eyebrow {
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: 0.035em;
+}
+.settings-page.df-workspace.settings-page .card-heading h2, .settings-page.df-workspace.settings-page .card-heading h3 {
+  font-size: 24px;
+  margin: 2px 0 4px;
+  color: var(--df-ink);
+}
+.settings-page.df-workspace.settings-page .card-heading p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--df-muted);
+  line-height: 1.5;
+}
+.settings-page.df-workspace.settings-page .setting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 8px;
+  border-top: 1px solid #ebeffb;
+}
+.settings-page.df-workspace.settings-page .setting-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.settings-page.df-workspace.settings-page .setting-row strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 650;
+}
+.settings-page.df-workspace.settings-page .setting-row div > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: var(--df-muted);
+}
+.settings-page.df-workspace.settings-page .row-icon, .settings-page.df-workspace.settings-page .mini-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #4875dc;
+  background: linear-gradient(135deg, #eff6ff, #ddeaff);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+}
+.settings-page.df-workspace.settings-page .row-icon svg, .settings-page.df-workspace.settings-page .mini-icon svg {
+  width: 23px;
+  height: 23px;
+}
+.settings-page.df-workspace.settings-page .switch {
+  position: relative;
+  display: block;
+  width: 54px;
+  height: 29px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.settings-page.df-workspace.settings-page .switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.settings-page.df-workspace.settings-page .slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #cdd7ef;
+  pointer-events: none;
+  transition: background 0.18s;
+}
+.settings-page.df-workspace.settings-page .slider::before {
+  content: "";
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 6px rgba(67, 92, 171, 0.2);
+  transition: transform 0.18s;
+}
+.settings-page.df-workspace.settings-page .switch input:checked + .slider {
+  background: linear-gradient(100deg, #577eff, #7565ff);
+}
+.settings-page.df-workspace.settings-page .switch input:checked + .slider::before {
+  transform: translateX(25px);
+}
+.settings-page.df-workspace.settings-page .switch input:focus-visible + .slider {
+  outline: 3px solid #b8caff;
+  outline-offset: 3px;
+}
+.settings-page.df-workspace.settings-page .settings-actions {
+  display: flex;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #ebeffb;
+}
+.settings-page.df-workspace.settings-page .primary-button, .settings-page.df-workspace.settings-page .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  border: 1px solid #dce5ff;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.settings-page.df-workspace.settings-page .primary-button {
+  color: white;
+  border: 0;
+  background: linear-gradient(110deg, #4e91ff, #9a58ff);
+  box-shadow: 0 5px 12px rgba(120, 116, 232, 0.168627451);
+}
+.settings-page.df-workspace.settings-page .secondary-button {
+  color: #486fff;
+  background: white;
+}
+.settings-page.df-workspace.settings-page .settings-actions svg {
+  width: 20px;
+  height: 20px;
+}
+.settings-page.df-workspace.settings-page .settings-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(135, 146, 211, 0.1490196078);
+}
+.settings-page.df-workspace.settings-page .settings-actions button:disabled {
+  opacity: 0.6;
+}
+.settings-page.df-workspace.settings-page .system-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.settings-page.df-workspace.settings-page .system-item {
+  position: relative;
+  min-width: 0;
+  padding: 14px 12px 12px 49px;
+  border: 1px solid #e7ecfb;
+  border-radius: 12px;
+  background: rgba(249, 251, 255, 0.7803921569);
+}
+.settings-page.df-workspace.settings-page .system-item .mini-icon {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  width: 30px;
+  height: 32px;
+}
+.settings-page.df-workspace.settings-page .system-item .mini-icon svg {
+  width: 21px;
+  height: 21px;
+}
+.settings-page.df-workspace.settings-page .system-item > span:not(.mini-icon) {
+  display: block;
+  font-size: 14px;
+  color: var(--df-muted);
+}
+.settings-page.df-workspace.settings-page .system-item strong {
+  display: block;
+  font-size: 17px;
+  margin: 7px 0;
+  color: var(--df-ink);
+  overflow-wrap: anywhere;
+}
+.settings-page.df-workspace.settings-page .system-item small {
+  display: block;
+  font-size: 13.5px;
+  color: var(--df-muted);
+  line-height: 1.45;
+}
+.settings-page.df-workspace.settings-page .system-item .status-value {
+  display: inline-flex;
+  gap: 7px;
+  font-size: 14px;
+  color: #278964;
+  background: #e6f8ee;
+  padding: 5px 9px;
+}
+.settings-page.df-workspace.settings-page .status-value i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.settings-page.df-workspace.settings-page .readonly-note {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: rgba(240, 243, 252, 0.6901960784);
+}
+.settings-page.df-workspace.settings-page .readonly-note > span {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #536aa6;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settings-page.df-workspace.settings-page .readonly-note p {
+  font-size: 14px;
+  margin: 0;
+  color: var(--df-muted);
+}
+.settings-page.df-workspace.settings-page .routing-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.settings-page.df-workspace.settings-page .routing-rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) 30px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid #e5ebfa;
+  border-radius: 10px;
+  background: rgba(250, 253, 255, 0.737254902);
+}
+.settings-page.df-workspace.settings-page .document-type {
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 650;
+  color: #4c73e7;
+  background: #e3edff;
+}
+.settings-page.df-workspace.settings-page .arrow {
+  color: #a0acd0;
+  text-align: center;
+}
+.settings-page.df-workspace.settings-page .routing-rule strong {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 650;
+}
+.settings-page.df-workspace.settings-page .routing-rule strong svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 9px;
+  background: #f1e7ff;
+  color: #9164d8;
+}
+.settings-page.df-workspace.settings-page .about-card {
+  position: relative;
+  overflow: hidden;
+}
+.settings-page.df-workspace.settings-page .about-card .card-heading, .settings-page.df-workspace.settings-page .about-card > p, .settings-page.df-workspace.settings-page .technology-list {
+  position: relative;
+  z-index: 1;
+}
+.settings-page.df-workspace.settings-page .about-card > p {
+  max-width: 77%;
+  margin: 0 0 14px;
+  color: var(--df-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.settings-page.df-workspace.settings-page .glass-stack {
+  position: absolute;
+  right: -5px;
+  top: 32px;
+  width: 150px;
+  height: 150px;
+  opacity: 0.72;
+  pointer-events: none;
+}
+.settings-page.df-workspace.settings-page .technology-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.settings-page.df-workspace.settings-page .technology-list > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f0f3fc;
+  font-size: 15px;
+}
+.settings-page.df-workspace.settings-page .technology-list b {
+  font-size: 20px;
+}
+.settings-page.df-workspace.settings-page .integration-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #cfeddb;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #eaf9ef, #f1faf7);
+  margin-bottom: 10px;
+}
+.settings-page.df-workspace.settings-page .integration-status > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.settings-page.df-workspace.settings-page .integration-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: white;
+  background: linear-gradient(135deg, #39bf75, #079f5c);
+}
+.settings-page.df-workspace.settings-page .integration-check svg {
+  width: 20px;
+  height: 20px;
+}
+.settings-page.df-workspace.settings-page .integration-status strong {
+  display: block;
+  font-size: 16px;
+  color: #188b4e;
+}
+.settings-page.df-workspace.settings-page .integration-status div div > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #6c8b80;
+}
+.settings-page.df-workspace.settings-page .integration-status .status-badge {
+  font-size: 13px;
+  padding: 5px 7px;
+}
+.settings-page.df-workspace.settings-page .integration-details {
+  border: 1px solid #e7ecfa;
+  border-radius: 12px;
+  padding: 0 10px;
+}
+.settings-page.df-workspace.settings-page .integration-details > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+}
+.settings-page.df-workspace.settings-page .integration-details > div + div {
+  border-top: 1px solid #e8edfa;
+}
+.settings-page.df-workspace.settings-page .detail-icon {
+  display: grid;
+  place-items: center;
+  color: #7185c6;
+}
+.settings-page.df-workspace.settings-page .detail-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.settings-page.df-workspace.settings-page .integration-details span:not(.detail-icon) {
+  color: var(--df-muted);
+  font-size: 14px;
+}
+.settings-page.df-workspace.settings-page .integration-details strong {
+  font-size: 15px;
+}
+.settings-page.df-workspace.settings-page .audit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.settings-page.df-workspace.settings-page .audit-item {
+  position: relative;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e7ecfa;
+  border-radius: 12px;
+  background: #fafcff;
+}
+.settings-page.df-workspace.settings-page .audit-item .mini-icon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 8px;
+}
+.settings-page.df-workspace.settings-page .audit-item > span:not(.mini-icon) {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+}
+.settings-page.df-workspace.settings-page .audit-item strong {
+  display: block;
+  font-size: 14px;
+  color: #19854c;
+  margin: 8px 0;
+}
+.settings-page.df-workspace.settings-page .audit-item small {
+  display: block;
+  color: var(--df-muted);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.settings-page.df-workspace.settings-page .account-settings {
+  margin-top: 20px;
+  border: 1px solid #e1e8ff;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.8117647059);
+}
+.settings-page.df-workspace.settings-page .account-settings > summary {
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 18px 22px;
+}
+.settings-page.df-workspace.settings-page .account-settings summary > span {
+  float: right;
+  color: #6c80d0;
+}
+.settings-page.df-workspace.settings-page .account-layout {
+  padding: 0 18px 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.settings-page.df-workspace.settings-page .profile-header {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 17px 0;
+}
+.settings-page.df-workspace.settings-page .avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: #e8edff;
+  color: #5c73e6;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.settings-page.df-workspace.settings-page .profile-header strong, .settings-page.df-workspace.settings-page .profile-header span {
+  display: block;
+}
+.settings-page.df-workspace.settings-page .profile-header span {
+  color: var(--df-muted);
+  margin-top: 5px;
+}
+.settings-page.df-workspace.settings-page .profile-card dl {
+  margin: 0;
+}
+.settings-page.df-workspace.settings-page .profile-card dl > div {
+  padding: 12px 0;
+  border-top: 1px solid #e8edfa;
+}
+.settings-page.df-workspace.settings-page .profile-card dt {
+  color: var(--df-muted);
+  font-size: 14px;
+}
+.settings-page.df-workspace.settings-page .profile-card dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+.settings-page.df-workspace.settings-page .message {
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+}
+.settings-page.df-workspace.settings-page .message.success {
+  color: #278964;
+  background: #eaf7ef;
+}
+.settings-page.df-workspace.settings-page .message.error {
+  color: #b94460;
+  background: #ffebef;
+}
+@container (max-width:1200px) {
+  .settings-page.df-workspace.settings-page .system-summary {
+    min-width: 350px;
+    padding: 16px;
+    gap: 12px;
+  }
+  .settings-page.df-workspace.settings-page .summary-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 13px;
+  }
+  .settings-page.df-workspace.settings-page .system-summary > div {
+    gap: 10px;
+  }
+  .settings-page.df-workspace.settings-page .system-summary > div + div {
+    padding-left: 12px;
+  }
+  .settings-page.df-workspace.settings-page .system-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .settings-page.df-workspace.settings-page .settings-layout {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .audit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .audit-item {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 6px 10px;
+  }
+  .settings-page.df-workspace.settings-page .audit-item .mini-icon {
+    grid-row: 1/4;
+    margin: 0;
+  }
+  .settings-page.df-workspace.settings-page .audit-item strong {
+    margin: 0;
+  }
+  .settings-page.df-workspace.settings-page .audit-item small {
+    grid-column: 2;
+  }
+}
+@container (max-width:950px) {
+  .settings-page.df-workspace.settings-page .settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .settings-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .settings-page.df-workspace.settings-page .audit-card {
+    grid-column: 1/-1;
+  }
+  .settings-page.df-workspace.settings-page .audit-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .settings-page.df-workspace.settings-page .settings-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .settings-page.df-workspace.settings-page .settings-hero-copy {
+    max-width: 100%;
+  }
+  .settings-page.df-workspace.settings-page .system-summary {
+    min-width: 0;
+  }
+  .settings-page.df-workspace.settings-page .settings-hero-art {
+    opacity: 0.65;
+  }
+  .settings-page.df-workspace.settings-page .account-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container (max-width:600px) {
+  .settings-page.df-workspace.settings-page .settings-hero {
+    padding: 22px;
+  }
+  .settings-page.df-workspace.settings-page .settings-hero h1 {
+    font-size: 34px;
+  }
+  .settings-page.df-workspace.settings-page .system-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .system-summary > div + div {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid #e2dcf7;
+    padding-top: 12px;
+  }
+  .settings-page.df-workspace.settings-page .settings-sidebar, .settings-page.df-workspace.settings-page .system-grid, .settings-page.df-workspace.settings-page .audit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .settings-card, .settings-page.df-workspace.settings-page .about-card {
+    padding: 17px;
+  }
+  .settings-page.df-workspace.settings-page .card-heading {
+    gap: 12px;
+  }
+  .settings-page.df-workspace.settings-page .heading-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .settings-page.df-workspace.settings-page .card-heading h2, .settings-page.df-workspace.settings-page .card-heading h3 {
+    font-size: 22px;
+  }
+  .settings-page.df-workspace.settings-page .setting-row {
+    padding: 14px 0;
+    gap: 10px;
+  }
+  .settings-page.df-workspace.settings-page .setting-row .row-icon {
+    display: none;
+  }
+  .settings-page.df-workspace.settings-page .settings-actions {
+    flex-wrap: wrap;
+  }
+  .settings-page.df-workspace.settings-page .settings-actions button {
+    flex: 1;
+    white-space: nowrap;
+  }
+  .settings-page.df-workspace.settings-page .routing-rule {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .settings-page.df-workspace.settings-page .routing-rule .arrow {
+    display: none;
+  }
+  .settings-page.df-workspace.settings-page .routing-rule strong {
+    padding-left: 5px;
+  }
+  .settings-page.df-workspace.settings-page .about-card > p {
+    max-width: 100%;
+  }
+  .settings-page.df-workspace.settings-page .glass-stack {
+    opacity: 0.22;
+  }
+  .settings-page.df-workspace.settings-page .integration-status {
+    flex-wrap: wrap;
+  }
+  .settings-page.df-workspace.settings-page .integration-details > div {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+  .settings-page.df-workspace.settings-page .integration-details strong {
+    grid-column: 2;
+  }
+  .settings-page.df-workspace.settings-page .account-layout {
+    padding: 0 12px 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-page.df-workspace.settings-page .slider, .settings-page.df-workspace.settings-page .slider::before, .settings-page.df-workspace.settings-page .settings-actions button {
+    transition: none;
+  }
+  .settings-page.df-workspace.settings-page .settings-actions button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+.settings-page.df-workspace.settings-page .heading-icon.security {
+  color: #5c63cf;
+  background: linear-gradient(135deg, #eef2ff, #f3efff);
+  border: 1px solid #e0e5fb;
+  font-size: 18px;
+}
+
+.settings-page.df-workspace.settings-page .security-card {
+  overflow: hidden;
+}
+
+.settings-page.df-workspace.settings-page .password-stepper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 55px minmax(0, 1fr) 55px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 22px 4px 20px;
+}
+
+.settings-page.df-workspace.settings-page .password-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  opacity: 0.55;
+  transition: 0.18s ease;
+}
+
+.settings-page.df-workspace.settings-page .password-step.active, .settings-page.df-workspace.settings-page .password-step.done {
+  opacity: 1;
+}
+
+.settings-page.df-workspace.settings-page .password-step-number {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid #dde3ed;
+  border-radius: 50%;
+  color: #8994a6;
+  background: #f8f9fc;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.settings-page.df-workspace.settings-page .password-step.active .password-step-number {
+  border-color: #b9c8f5;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f76df, #725ed1);
+  box-shadow: 0 5px 14px rgba(77, 102, 190, 0.16);
+}
+
+.settings-page.df-workspace.settings-page .password-step.done .password-step-number {
+  border-color: #c8e8da;
+  color: #34765e;
+  background: #eaf7f1;
+}
+
+.settings-page.df-workspace.settings-page .password-step div {
+  min-width: 0;
+}
+
+.settings-page.df-workspace.settings-page .password-step strong, .settings-page.df-workspace.settings-page .password-step div > span {
+  display: block;
+}
+
+.settings-page.df-workspace.settings-page .password-step strong {
+  color: #4a566b;
+  font-size: var(--df-body-size);
+  font-weight: 720;
+}
+
+.settings-page.df-workspace.settings-page .password-step div > span {
+  margin-top: 2px;
+  overflow: hidden;
+  color: #929baa;
+  font-size: var(--df-body-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-page.df-workspace.settings-page .password-step-line {
+  height: 2px;
+  border-radius: 999px;
+  background: #e6eaf1;
+}
+
+.settings-page.df-workspace.settings-page .password-step-line.done {
+  background: linear-gradient(90deg, #7f9be8, #83c5ad);
+}
+
+.settings-page.df-workspace.settings-page .password-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0 0 16px;
+  padding: 11px 13px;
+  border-radius: 9px;
+}
+
+.settings-page.df-workspace.settings-page .password-message > span {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font-size: var(--df-body-size);
+  font-weight: 800;
+}
+
+.settings-page.df-workspace.settings-page .password-message p {
+  margin: 1px 0 0;
+  font-size: var(--df-body-size);
+  line-height: 1.45;
+}
+
+.settings-page.df-workspace.settings-page .password-message.success {
+  border: 1px solid #cee9de;
+  color: #39745e;
+  background: #eff9f5;
+}
+
+.settings-page.df-workspace.settings-page .password-message.success > span {
+  color: #ffffff;
+  background: #55a884;
+}
+
+.settings-page.df-workspace.settings-page .password-message.error {
+  border: 1px solid #f1d2ce;
+  color: #9e514c;
+  background: #fff5f3;
+}
+
+.settings-page.df-workspace.settings-page .password-message.error > span {
+  color: #ffffff;
+  background: #d8756d;
+}
+
+.settings-page.df-workspace.settings-page .password-panel {
+  padding-top: 3px;
+}
+
+.settings-page.df-workspace.settings-page .password-info-box {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #e4e8f5;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #f8faff, #fbfaff);
+}
+
+.settings-page.df-workspace.settings-page .password-info-icon, .settings-page.df-workspace.settings-page .code-mail-icon {
+  width: 41px;
+  height: 41px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: #596fd0;
+  background: #edf1ff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.settings-page.df-workspace.settings-page .password-info-box span, .settings-page.df-workspace.settings-page .password-info-box strong, .settings-page.df-workspace.settings-page .password-info-box small {
+  display: block;
+}
+
+.settings-page.df-workspace.settings-page .password-info-box span {
+  color: #8993a4;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .password-info-box strong {
+  margin-top: 4px;
+  color: #3d4b63;
+  font-size: var(--df-body-size);
+  overflow-wrap: anywhere;
+}
+
+.settings-page.df-workspace.settings-page .password-info-box small {
+  margin-top: 5px;
+  color: #9aa3b0;
+  font-size: var(--df-body-size);
+  line-height: 1.45;
+}
+
+.settings-page.df-workspace.settings-page .password-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 16px;
+}
+
+.settings-page.df-workspace.settings-page .password-actions-between {
+  justify-content: space-between;
+}
+
+.settings-page.df-workspace.settings-page .password-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.settings-page.df-workspace.settings-page .password-primary-button, .settings-page.df-workspace.settings-page .password-secondary-button, .settings-page.df-workspace.settings-page .password-link-button {
+  min-height: 39px;
+  padding: 0 15px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: var(--df-table-size);
+  font-weight: 680;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.settings-page.df-workspace.settings-page .password-primary-button {
+  border: 0;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f75dc, #6b5dcc);
+}
+
+.settings-page.df-workspace.settings-page .password-primary-button:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.settings-page.df-workspace.settings-page .password-secondary-button {
+  border: 1px solid #dce3ed;
+  color: #667389;
+  background: #ffffff;
+}
+
+.settings-page.df-workspace.settings-page .password-secondary-button:hover:not(:disabled) {
+  background: #f8faff;
+}
+
+.settings-page.df-workspace.settings-page .password-link-button {
+  border: 0;
+  color: #5973c4;
+  background: transparent;
+}
+
+.settings-page.df-workspace.settings-page .password-link-button:hover:not(:disabled) {
+  background: #f3f6fe;
+}
+
+.settings-page.df-workspace.settings-page .password-primary-button:disabled, .settings-page.df-workspace.settings-page .password-secondary-button:disabled, .settings-page.df-workspace.settings-page .password-link-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.settings-page.df-workspace.settings-page .code-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.settings-page.df-workspace.settings-page .code-heading strong {
+  display: block;
+  color: #3e4b61;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .code-heading p {
+  margin: 4px 0 0;
+  color: #8e98a8;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .code-heading b {
+  color: #6072a9;
+}
+
+.settings-page.df-workspace.settings-page .verification-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.settings-page.df-workspace.settings-page .verification-code-input {
+  width: 210px;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid #cfd8ed;
+  border-radius: 11px;
+  outline: none;
+  color: #33425c;
+  background: #fbfcff;
+  font: inherit;
+  font-size: var(--df-body-size);
+  font-weight: 760;
+  letter-spacing: 0.28em;
+  text-align: center;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-page.df-workspace.settings-page .verification-code-input:focus {
+  border-color: #8ea7ec;
+  box-shadow: 0 0 0 4px rgba(79, 113, 207, 0.08);
+}
+
+.settings-page.df-workspace.settings-page .verification-code-input::placeholder {
+  color: #c5ccda;
+}
+
+.settings-page.df-workspace.settings-page .code-timer {
+  min-width: 110px;
+}
+
+.settings-page.df-workspace.settings-page .code-timer span, .settings-page.df-workspace.settings-page .code-timer strong {
+  display: block;
+}
+
+.settings-page.df-workspace.settings-page .code-timer span {
+  color: #9aa3b1;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .code-timer strong {
+  margin-top: 3px;
+  color: #516cbf;
+  font-size: var(--df-body-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-page.df-workspace.settings-page .code-timer strong.expired, .settings-page.df-workspace.settings-page .change-token-timer strong.expired {
+  color: #bd625b;
+}
+
+.settings-page.df-workspace.settings-page .password-confirmed-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 17px;
+  padding: 13px 14px;
+  border: 1px solid #cfe8de;
+  border-radius: 10px;
+  background: #f1f9f6;
+}
+
+.settings-page.df-workspace.settings-page .password-confirmed-note > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #55a584;
+  font-size: var(--df-body-size);
+  font-weight: 800;
+}
+
+.settings-page.df-workspace.settings-page .password-confirmed-note strong {
+  display: block;
+  color: #3e755f;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .password-confirmed-note p {
+  margin: 3px 0 0;
+  color: #719080;
+  font-size: var(--df-body-size);
+  line-height: 1.45;
+}
+
+.settings-page.df-workspace.settings-page .password-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-page.df-workspace.settings-page .password-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.settings-page.df-workspace.settings-page .password-fields label > span {
+  color: #68758a;
+  font-size: var(--df-body-size);
+  font-weight: 680;
+}
+
+.settings-page.df-workspace.settings-page .password-fields input {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  outline: none;
+  color: #2d3b53;
+  background: #fbfcfe;
+  font: inherit;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .password-fields input:focus {
+  border-color: #91a9e8;
+  box-shadow: 0 0 0 3px rgba(74, 111, 216, 0.07);
+}
+
+.settings-page.df-workspace.settings-page .password-fields small {
+  min-height: 17px;
+  color: #9aa3b0;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .password-field-error {
+  color: #b65d56 !important;
+}
+
+.settings-page.df-workspace.settings-page .password-field-ok {
+  color: #428064 !important;
+}
+
+.settings-page.df-workspace.settings-page .change-token-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: #8d97a7;
+  font-size: var(--df-body-size);
+}
+
+.settings-page.df-workspace.settings-page .change-token-timer strong {
+  color: #5671c1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@container (max-width: 850px) {
+  .settings-page.df-workspace.settings-page .password-stepper {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .settings-page.df-workspace.settings-page .password-step-line {
+    width: 2px;
+    height: 16px;
+    margin-left: 15px;
+  }
+  .settings-page.df-workspace.settings-page .password-fields {
+    grid-template-columns: 1fr;
+  }
+  .settings-page.df-workspace.settings-page .password-actions-between, .settings-page.df-workspace.settings-page .password-right-actions, .settings-page.df-workspace.settings-page .verification-code-wrap {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .settings-page.df-workspace.settings-page .verification-code-input {
+    width: 100%;
+  }
+  .settings-page.df-workspace.settings-page .password-right-actions {
+    width: 100%;
+  }
+  .settings-page.df-workspace.settings-page .password-primary-button, .settings-page.df-workspace.settings-page .password-secondary-button, .settings-page.df-workspace.settings-page .password-link-button {
+    width: 100%;
+  }
+}
