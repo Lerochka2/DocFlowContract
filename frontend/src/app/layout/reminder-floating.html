@@ -1,45 +1,31 @@
 @if (visible) {
-
-  <aside class="floating-reminder">
-
+  <aside class="floating-reminder" aria-label="Личные напоминания">
     <header>
+      <span class="reminder-symbol" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <path d="M6 3h12v18l-6-4-6 4Z" />
+          <path d="M9 8h6M9 11h4" /></svg
+      ></span>
 
-      <div>
+      <div class="floating-copy">
+        <span> НЕ ЗАБУДЬТЕ </span>
 
-        <span>
-          НЕ ЗАБУДЬТЕ
-        </span>
-
-        <strong>
-          Личные напоминания
-        </strong>
-
+        <strong> Личные напоминания </strong>
       </div>
 
-      <button
-        type="button"
-        title="Открыть профиль"
-        (click)="openProfile()"
-      >
-        ›
-      </button>
-
+      <button type="button" title="Открыть профиль" (click)="openProfile()">›</button>
     </header>
 
-
     <div class="floating-list">
-
-      @for (
-        reminder of visibleReminders;
-        track reminder.id
-      ) {
-
+      @for (reminder of visibleReminders; track reminder.id) {
         <article>
-
-          <i></i>
+          <i aria-hidden="true"
+            ><svg viewBox="0 0 24 24">
+              <rect x="5" y="3" width="14" height="18" rx="3" />
+              <path d="M9 8h6M9 12h6M9 16h4" /></svg
+          ></i>
 
           <div>
-
             <p>
               {{ reminder.text }}
             </p>
@@ -47,41 +33,19 @@
             <span>
               {{ formatDate(reminder.createdAt) }}
             </span>
-
           </div>
-
         </article>
-
       }
-
     </div>
 
-
     <footer>
-
       @if (hiddenCount > 0) {
-
-        <span>
-          Ещё {{ hiddenCount }}
-        </span>
-
+        <span> Ещё {{ hiddenCount }} </span>
       } @else {
-
-        <span>
-          Сохранено в профиле
-        </span>
-
+        <span> Сохранено в профиле </span>
       }
 
-      <button
-        type="button"
-        (click)="openProfile()"
-      >
-        Открыть профиль
-      </button>
-
+      <button type="button" (click)="openProfile()">Открыть профиль →</button>
     </footer>
-
   </aside>
-
 }
