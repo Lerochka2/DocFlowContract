@@ -1,8 +1,8 @@
-﻿<section class="review-page" [attr.aria-busy]="loading">
-  <header class="page-header">
+﻿<section class="review-page df-workspace" [attr.aria-busy]="loading">
+  <header class="page-header df-hero df-ornament">
     <div class="hero-copy">
-      <span class="eyebrow">КОНТРОЛЬ AI-КЛАССИФИКАЦИИ</span>
-      <h1>Ручная проверка</h1>
+      <span class="eyebrow df-section-label">КОНТРОЛЬ AI-КЛАССИФИКАЦИИ</span>
+      <h1 class="df-page-title">Ручная проверка</h1>
       <p>
         Документы, для которых уверенность AI оказалась ниже установленного порога и требуется
         подтверждение пользователя.
@@ -10,7 +10,7 @@
     </div>
     <div class="header-actions">
       <div class="queue-counter">
-        <span class="counter-icon" aria-hidden="true">▤</span><strong>{{ documents.length }}</strong
+        <span class="counter-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6ZM14 3v5h4M9 12h6M9 16h6"/></svg></span><strong>{{ documents.length }}</strong
         ><span>Требуют<br />проверки</span>
       </div>
       <button class="refresh-button" type="button" [disabled]="loading" (click)="loadQueue()">
@@ -29,9 +29,9 @@
     </div>
   </header>
   <section class="info-banner" aria-labelledby="review-explanation">
-    <div class="banner-icon" aria-hidden="true">AI<span>✦</span></div>
+    <div class="banner-icon" aria-hidden="true">AI<svg viewBox="0 0 24 24"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></svg></div>
     <div>
-      <h2 id="review-explanation">Почему документы попадают сюда?</h2>
+      <h2 class="df-card-title" id="review-explanation">Почему документы попадают сюда?</h2>
       <p>
         Если уверенность модели ниже <strong>80%</strong>, DocFlow не принимает классификацию
         автоматически. Пользователь должен проверить предложенный AI тип документа и подтвердить или
@@ -61,7 +61,7 @@
     <section class="review-grid" aria-label="Документы для ручной проверки">
       @for (document of documents; track document.documentId) {
         <article
-          class="review-card"
+          class="review-card df-card"
           [class.confidence-low]="getConfidencePercent(document) < 40"
           [class.confidence-medium]="
             getConfidencePercent(document) >= 40 && getConfidencePercent(document) < 60
@@ -73,21 +73,16 @@
           [class.confidence-unknown]="document.ai?.confidence == null"
         >
           <div class="document-cell">
-            <div class="file-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6M8 13h8M8 17h6" />
-              </svg>
-            </div>
+            <div class="file-icon" aria-hidden="true"><img src="assets/ai-analysis/pdf-file-3d.png" alt="" width="52" height="62" loading="lazy" /></div>
             <div class="document-info">
               <div class="document-topline">
                 <span>Документ #{{ document.documentId }}</span
-                ><span class="review-status">Требует проверки</span>
+                ><span class="review-status warning df-status-chip">Требует проверки</span>
               </div>
-              <h2 class="file-name" [title]="document.originalName || 'Документ'">
+              <h2 class="file-name df-card-title" [title]="document.originalName || 'Документ'">
                 {{ document.originalName || 'Документ' }}
               </h2>
-              <div class="document-meta">
+              <div class="document-meta df-muted-text">
                 <span>{{
                   document.documentNumber ? '№ ' + document.documentNumber : 'Без номера'
                 }}</span
@@ -96,10 +91,10 @@
             </div>
           </div>
           @if (document.subject) {
-            <p class="subject" [title]="document.subject">{{ document.subject }}</p>
+            <p class="subject df-muted-text" [title]="document.subject">{{ document.subject }}</p>
           }
           <div class="confidence-cell">
-            <div class="confidence-label">
+            <div class="confidence-label df-muted-text">
               <span class="signal-icon" aria-hidden="true"><i></i><i></i><i></i></span>Уверенность
               AI
             </div>
@@ -131,11 +126,11 @@
               >
                 <i [style.width.%]="getConfidencePercent(document)"></i><b aria-hidden="true"></b>
               </div>
-              <span class="threshold-label">Порог 80%</span>
+              <span class="threshold-label df-muted-text">Порог 80%</span>
             </div>
           </div>
           <div class="classification-cell">
-            <span class="class-icon" aria-hidden="true">▤</span>
+            <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6ZM14 3v5h4M9 12h6M9 16h6"/></svg></span>
             <div>
               <span>Предсказанный класс</span
               ><strong>{{ getDocumentTypeLabel(document.ai?.predictedType || null) }}</strong>

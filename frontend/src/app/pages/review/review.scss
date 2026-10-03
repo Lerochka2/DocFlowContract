@@ -51,25 +51,19 @@
   flex: 1;
   min-width: 0;
 }
-.eyebrow {
-  color: #4669d1;
-  font-size: 14px;
-  font-weight: 750;
-  letter-spacing: 0.07em;
-}
 .page-header h1 {
   margin: 8px 0 12px;
-  font-size: clamp(32px, 3vw, 48px);
-  line-height: 1.12;
-  letter-spacing: -0.035em;
+
+
+
   overflow-wrap: anywhere;
 }
 .page-header p {
   max-width: 660px;
   margin: 0;
-  color: #52617e;
-  font-size: 17px;
-  line-height: 1.65;
+
+
+
 }
 .header-actions {
   position: relative;
@@ -104,13 +98,13 @@
 }
 .queue-counter strong {
   color: #b75b37;
-  font-size: 36px;
+  font-size: var(--df-kpi-size);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .queue-counter > span:last-child {
   color: #607091;
-  font-size: 15px;
+  font-size: var(--df-body-size);
   line-height: 1.4;
 }
 button {
@@ -136,7 +130,7 @@ button:focus-visible {
   border-radius: 13px;
   color: #3655b4;
   background: #ffffffb3;
-  font-size: 15px;
+  font-size: var(--df-table-size);
   font-weight: 650;
 }
 .refresh-button svg {
@@ -248,14 +242,14 @@ button:focus-visible {
 }
 .info-banner h2 {
   margin: 0 0 5px;
-  font-size: 19px;
-  line-height: 1.4;
+
+
 }
 .info-banner p {
   max-width: 1100px;
   margin: 0;
   color: #657391;
-  font-size: 16px;
+  font-size: var(--df-body-size);
   line-height: 1.6;
 }
 .review-grid {
@@ -391,7 +385,7 @@ button:focus-visible {
 }
 .document-topline > span:first-child {
   color: #6b7894;
-  font-size: 14px;
+  font-size: var(--df-body-size);
   font-weight: 650;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -401,13 +395,13 @@ button:focus-visible {
   border-radius: 999px;
   color: #9b5931;
   background: #fff0de;
-  font-size: 14px;
+  font-size: var(--df-body-size);
   font-weight: 650;
 }
 .file-name {
   margin: 0;
   color: #222d48;
-  font-size: 20px;
+  font-size: var(--df-table-size);
   font-weight: 700;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -419,7 +413,7 @@ button:focus-visible {
   gap: 6px 9px;
   margin-top: 7px;
   color: #6d7c99;
-  font-size: 14px;
+  font-size: var(--df-body-size);
   overflow-wrap: anywhere;
 }
 .document-meta i {
@@ -434,7 +428,7 @@ button:focus-visible {
   overflow: hidden;
   margin: 12px 0 0;
   color: #66758e;
-  font-size: 14px;
+  font-size: var(--df-body-size);
   line-height: 1.5;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -461,7 +455,7 @@ button:focus-visible {
   align-items: center;
   gap: 9px;
   color: #6d7b98;
-  font-size: 14px;
+  font-size: var(--df-body-size);
 }
 .signal-icon {
   display: inline-flex;
@@ -502,7 +496,7 @@ button:focus-visible {
   border-radius: 999px;
   color: var(--accent);
   background: var(--tint-secondary);
-  font-size: 14px;
+  font-size: var(--df-body-size);
   font-weight: 550;
 }
 .confidence-progress {
@@ -537,7 +531,7 @@ button:focus-visible {
 .threshold-label {
   flex-shrink: 0;
   color: #6b7997;
-  font-size: 14px;
+  font-size: var(--df-body-size);
 }
 .classification-cell {
   display: flex;
@@ -564,13 +558,13 @@ button:focus-visible {
 .classification-cell div > span {
   display: block;
   color: #6d7b98;
-  font-size: 14px;
+  font-size: var(--df-table-size);
 }
 .classification-cell strong {
   display: block;
   margin-top: 2px;
   color: #26324c;
-  font-size: 16px;
+  font-size: var(--df-table-size);
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
@@ -593,11 +587,11 @@ button:focus-visible {
   box-shadow:
     inset 0 1px 0 #ffffff33,
     0 4px 12px #617cdf1a;
-  font-size: 15px;
+  font-size: var(--df-table-size);
   font-weight: 650;
 }
 .action-cell button span {
-  font-size: 22px;
+  font-size: var(--df-table-size);
   line-height: 1;
   transition: transform 0.2s ease;
 }
@@ -627,11 +621,11 @@ button:focus-visible {
 }
 .state-card strong {
   color: #34415e;
-  font-size: 20px;
+  font-size: var(--df-body-size);
 }
 .state-card > span {
   max-width: 480px;
-  font-size: 16px;
+  font-size: var(--df-body-size);
   line-height: 1.6;
 }
 .state-icon {
@@ -695,15 +689,6 @@ button:focus-visible {
     gap: 22px;
     border-radius: 20px;
   }
-  .page-header h1 {
-    font-size: 34px;
-  }
-  .page-header p {
-    font-size: 16px;
-  }
-  .eyebrow {
-    font-size: 14px;
-  }
   .header-actions {
     flex-wrap: wrap;
     width: 100%;
@@ -718,14 +703,14 @@ button:focus-visible {
     gap: 9px;
   }
   .queue-counter strong {
-    font-size: 30px;
+    font-size: var(--df-kpi-size);
   }
   .queue-counter > span:last-child {
-    font-size: 13px;
+    font-size: var(--df-body-size);
   }
   .refresh-button {
     padding-inline: 12px;
-    font-size: 14px;
+    font-size: var(--df-table-size);
   }
   .info-banner {
     align-items: flex-start;
@@ -738,11 +723,8 @@ button:focus-visible {
     font-size: 20px;
     border-radius: 13px;
   }
-  .info-banner h2 {
-    font-size: 17px;
-  }
   .info-banner p {
-    font-size: 14px;
+    font-size: var(--df-body-size);
   }
   .review-card {
     padding: 21px;
@@ -765,3 +747,23 @@ button:focus-visible {
     animation: none;
   }
 }
+
+// Local polish preserves the existing review-card composition and confidence states.
+.review-page {
+ --df-body-size:16px; --df-table-size:16px; --df-caption-size:14px; --df-description-size:17px; --df-label-size:17px;
+ .page-header .eyebrow { letter-spacing:.1em; font-size:17px; }
+ .review-card { padding:24px; gap:0; border-color:var(--edge); background:linear-gradient(145deg,#fffffffa,#f8fbfff0 72%,var(--tint)); box-shadow:0 10px 26px #7f91c31a,inset 0 1px 0 white; }
+ .review-card:hover { transform:translateY(-2px); box-shadow:0 15px 30px #7f91c327,inset 0 1px 0 white; }
+ .file-icon { width:52px; height:62px; border-radius:0; background:transparent; box-shadow:none; }.file-icon img { display:block; width:52px; height:62px; object-fit:contain; }
+ .document-cell { align-items:center; gap:14px; }.document-topline { gap:8px; margin-bottom:8px; }.document-topline > span:first-child { font-size:14px; }.document-topline .review-status { font-size:14px; padding:5px 10px; }.file-name { font-size:16px; line-height:1.45; }.document-meta { font-size:14px; }
+ .confidence-cell { margin-top:23px; padding:17px; border-radius:17px; background:linear-gradient(120deg,#fff9,var(--tint)); }
+ .confidence-value { margin:12px 0 15px; gap:10px; }.confidence-value strong { font-size:34px; font-weight:800; color:var(--accent); line-height:1.1; }.confidence-warning { font-size:14px; font-weight:650; padding:6px 10px; }.confidence-label { font-size:15px; }.threshold-label { font-size:14px; }.confidence-track { height:9px; background:linear-gradient(90deg,var(--tint-secondary),#eeeaff); }.confidence-track b { width:3px; background:#9295ca; }
+ .classification-cell { margin:22px 0; padding:14px 0 0; border-top:1px solid #e8ecfa; }.classification-cell div > span { font-size:14px; color:var(--df-muted); }.classification-cell strong { font-size:16px; margin-top:5px; color:var(--df-ink); }.class-icon svg,.counter-icon svg { width:23px; height:27px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linejoin:round; }
+ .action-cell button { font-size:16px; min-height:49px; background:var(--df-primary-bg); box-shadow:0 6px 14px #7476ed24,inset 0 1px 0 #ffffff44; }.action-cell button:hover { transform:translateY(-1px); box-shadow:0 8px 18px #7476ed36; }
+ .info-banner { align-items:center; padding:21px 24px; gap:18px; }.info-banner h2 { margin-bottom:7px; font-size:23px; }.info-banner p { font-size:16px; line-height:1.6; }.banner-icon { width:52px; height:52px; border-radius:17px; background:linear-gradient(135deg,#788af8,#9563ea); }.banner-icon svg { position:absolute; top:-5px; right:-5px; width:19px; height:19px; fill:#b2a4f8; stroke:white; stroke-width:1; }
+ @container(max-width:680px) { .review-card { padding:20px; }.info-banner { align-items:flex-start; padding:20px; }.page-header .eyebrow { font-size:16px; }.confidence-progress { gap:9px; }.confidence-value strong { font-size:32px; } }
+ @media(prefers-reduced-motion:reduce) { .review-card:hover,.action-cell button:hover { transform:none; } }
+}
+
+.review-page .info-banner > div:last-child { min-width:0; overflow-wrap:anywhere; }
+@container(max-width:420px) { .review-page .info-banner { flex-direction:column; align-items:flex-start; gap:14px; } }
