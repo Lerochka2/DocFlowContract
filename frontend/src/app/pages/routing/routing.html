@@ -1,14 +1,14 @@
-<section class="routing-page">
+<section class="routing-page df-workspace">
 
-  <header class="page-header">
+  <header class="page-header df-hero df-ornament routing-hero">
 
-    <div>
+    <div class="routing-hero-copy">
 
-      <span class="eyebrow">
+      <span class="eyebrow df-section-label">
         {{ pageEyebrow }}
       </span>
 
-      <h1>
+      <h1 class="df-page-title">
         {{ pageTitle }}
       </h1>
 
@@ -19,12 +19,15 @@
     </div>
 
 
+    <img class="routing-hero-art" src="assets/sed/dispatch-glass.svg" alt="" aria-hidden="true" width="700" height="270" />
+
     <button
       class="refresh-button"
       type="button"
       [disabled]="loading"
       (click)="loadRoutingWorkspace()"
     >
+      <svg class="refresh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" /></svg>
       @if (loading) {
         Обновляем...
       } @else {
@@ -39,7 +42,7 @@
 
     <section class="statistics admin-statistics">
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon all">
           ↗
@@ -50,10 +53,11 @@
           <strong>{{ documents.length }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon manager">
           M
@@ -64,10 +68,11 @@
           <strong>{{ contractManagerCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon lawyer">
           Ю
@@ -78,10 +83,11 @@
           <strong>{{ lawyerCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon routed">
           ✓
@@ -92,12 +98,13 @@
           <strong>{{ routedCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
     </section>
 
 
-    <section class="route-rules">
+    <section class="route-rules df-card">
 
       <div class="rule-title">
         <span>Умная маршрутизация</span>
@@ -260,18 +267,6 @@
 
     } @else {
 
-      <div class="admin-table-header">
-
-        <span>Документ</span>
-        <span>Класс</span>
-        <span>Получатель</span>
-        <span>Маршрутизация</span>
-        <span>Статус документа</span>
-        <span></span>
-
-      </div>
-
-
       <section class="routing-list">
 
         @for (
@@ -283,13 +278,11 @@
 
             <div class="document-cell">
 
-              <div class="file-icon">
-                PDF
-              </div>
+              <div class="file-icon" aria-hidden="true"><img src="assets/ai-analysis/pdf-file-3d.png" alt="" width="52" height="62" /></div>
 
               <div class="document-info">
 
-                <span class="document-id">
+                <span class="document-id df-muted-text">
                   ДОКУМЕНТ #{{ document.documentId }}
                 </span>
 
@@ -300,7 +293,7 @@
                   {{ document.originalName || 'Документ' }}
                 </strong>
 
-                <span class="document-number">
+                <span class="document-number df-muted-text">
                   {{
                     document.documentNumber
                       ? '№ ' + document.documentNumber
@@ -313,7 +306,7 @@
             </div>
 
 
-            <div class="type-cell">
+            <div class="type-cell"><svg class="cell-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7Z M14 3v5h4M10 12h5M10 16h5" /></svg>
               <span>Тип документа</span>
 
               <strong>
@@ -322,7 +315,7 @@
             </div>
 
 
-            <div class="target-cell">
+            <div class="target-cell"><svg class="cell-symbol" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 21v-4a7 7 0 0 1 14 0v4Z" /></svg>
 
               <span
                 [class]="
@@ -359,7 +352,7 @@
 
             <div class="routing-cell">
 
-              <span class="routing-status">
+              <span class="routing-status df-status-chip" [class.success]="document.routing?.routingStatus === 'ROUTED'" [class.failed]="document.routing?.routingStatus === 'FAILED'" [class.warning]="document.routing?.routingStatus === 'READY'" [attr.data-routing-status]="document.routing?.routingStatus">
                 <i></i>
 
                 {{
@@ -369,7 +362,7 @@
                 }}
               </span>
 
-              <span class="routing-date">
+              <span class="routing-date df-muted-text">
                 {{
                   formatDateTime(
                     document.routing?.routedAt || null
@@ -391,7 +384,7 @@
             </div>
 
 
-            <div class="document-status-cell">
+            <div class="document-status-cell" [attr.data-status]="document.status">
 
               <span>
                 {{
@@ -410,7 +403,7 @@
                 type="button"
                 (click)="openDocument(document.documentId)"
               >
-                Открыть
+                Открыть <span aria-hidden="true">›</span>
               </button>
 
             </div>
@@ -428,7 +421,7 @@
 
     <section class="statistics specialist-statistics">
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon pending">
           !
@@ -439,10 +432,11 @@
           <strong>{{ pendingTaskCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon progress">
           ↻
@@ -453,10 +447,11 @@
           <strong>{{ inProgressTaskCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon soon">
           ⌛
@@ -467,10 +462,11 @@
           <strong>{{ dueSoonTaskCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
 
-      <article class="stat-card">
+      <article class="stat-card df-card">
 
         <div class="stat-icon overdue">
           ⏱
@@ -481,6 +477,7 @@
           <strong>{{ overdueTaskCount }}</strong>
         </div>
 
+        <span class="metric-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       </article>
 
     </section>
@@ -639,7 +636,7 @@
 
     } @else {
 
-      <div class="task-table-header">
+      <div class="task-table-header df-table-header">
 
         <span>Документ</span>
         <span>Причина назначения</span>
@@ -665,13 +662,11 @@
 
             <div class="document-cell">
 
-              <div class="file-icon">
-                PDF
-              </div>
+              <div class="file-icon" aria-hidden="true"><img src="assets/ai-analysis/pdf-file-3d.png" alt="" width="52" height="62" /></div>
 
               <div class="document-info">
 
-                <span class="document-id">
+                <span class="document-id df-muted-text">
                   ДОКУМЕНТ #{{ task.documentId }}
                 </span>
 
@@ -689,7 +684,7 @@
                   }}
                 </strong>
 
-                <span class="task-document-meta">
+                <span class="task-document-meta df-muted-text">
                   {{ getDocumentTypeLabel(task.documentType) }}
 
                   @if (task.documentNumber) {
@@ -786,11 +781,11 @@
             </div>
 
 
-            <div class="task-status">
+            <div class="task-status df-status-chip">
 
               <span
                 [class]="
-                  'status-badge ' +
+                  'status-badge df-status-chip ' +
                   getApprovalStatusClass(task.status)
                 "
               >
