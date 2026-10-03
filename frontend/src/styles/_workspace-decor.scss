@@ -1,0 +1,32 @@
+// Shared background ornaments are opt-in; never decorate the forms or tables.
+main.page-content > :not(app-sed) > .df-workspace {
+  .df-ornament {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .df-ornament::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: url('/assets/ui/workspace-ornament.svg') center / 100% 100% no-repeat;
+  }
+  .df-ornament > :not([aria-hidden='true']) { position: relative; z-index: 1; }
+  .df-compact-hero {
+    min-height: 164px;
+    padding: 26px 30px;
+    border: 1px solid #ffffffed;
+    border-radius: var(--df-radius-card);
+  }
+  .settings-title-hero { margin-bottom: 22px; }
+  .df-compact-hero > p { max-width: 75%; }
+  .df-compact-hero .user-counter, .df-compact-hero .refresh-button { flex: 0 0 auto; }
+  @media (max-width: 650px) {
+    .df-compact-hero { min-height: 0; padding: 22px 20px; gap: 16px; }
+    .df-compact-hero:has(.user-counter) { flex-direction: column; align-items: flex-start; }
+    .df-compact-hero > p { max-width: none; }
+    .df-ornament::after { opacity: .65; }
+  }
+}
