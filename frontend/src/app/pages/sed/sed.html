@@ -1,6 +1,7 @@
 <section class="sed-page">
 
   <header class="page-header">
+    <div class="decorative-scene hero-scene" aria-hidden="true"></div>
 
     <div>
 
@@ -27,6 +28,7 @@
       [disabled]="loading"
       (click)="loadSedWorkspace()"
     >
+      <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 8a8 8 0 0 0-14-2L3 9m0-5v5h5M4 16a8 8 0 0 0 14 2l3-3m0 5v-5h-5"/></svg>
       @if (loading) {
         Обновляем...
       } @else {
@@ -42,7 +44,7 @@
     <article class="stat-card total">
 
       <div class="stat-icon">
-        S
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/></svg>
       </div>
 
       <div>
@@ -57,13 +59,14 @@
 
       </div>
 
+      <div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </article>
 
 
     <article class="stat-card ready">
 
       <div class="stat-icon">
-        →
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-7-7 7 7-7 7"/></svg>
       </div>
 
       <div>
@@ -78,13 +81,14 @@
 
       </div>
 
+      <div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </article>
 
 
     <article class="stat-card sent">
 
       <div class="stat-icon">
-        ✓
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
       </div>
 
       <div>
@@ -99,6 +103,7 @@
 
       </div>
 
+      <div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </article>
 
   </section>
@@ -106,7 +111,7 @@
 
   @if (loading) {
 
-    <section class="state-card">
+    <section class="state-card" role="status">
 
       <div class="loader"></div>
 
@@ -122,7 +127,7 @@
 
   } @else if (errorMessage) {
 
-    <section class="state-card error">
+    <section class="state-card error" role="alert">
 
       <div class="state-icon">
         !
@@ -147,18 +152,16 @@
 
   } @else {
 
-    <section class="sed-section">
+    <section class="sed-section queue-section" aria-labelledby="queue-title">
+      <div class="decorative-scene queue-scene" aria-hidden="true"></div>
 
       <div class="section-heading">
+        <div class="section-icon send-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 18-7-7 18-3-8-8-3Z"/><path d="m11 13 10-10"/></svg></div>
 
         <div>
 
-          <span class="section-eyebrow">
-            ОЧЕРЕДЬ ОТПРАВКИ
-          </span>
-
-          <h2>
-            Готовы к отправке
+          <h2 id="queue-title">
+            Очередь отправки
           </h2>
 
           <p>
@@ -180,7 +183,7 @@
         <div class="empty-block">
 
           <div class="empty-icon">
-            ✓
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/></svg>
           </div>
 
           <div>
@@ -210,9 +213,7 @@
 
               <div class="file-block">
 
-                <div class="file-icon">
-                  PDF
-                </div>
+                <span class="pdf-icon" aria-hidden="true"><img src="assets/ai-analysis/pdf-file-3d.png" alt="" width="1254" height="1254" loading="lazy" decoding="async" /></span>
 
                 <div class="file-info">
 
@@ -312,19 +313,16 @@
     </section>
 
 
-    <section class="sed-section history-section">
+    <section class="sed-section history-section" aria-labelledby="history-title">
+      <div class="decorative-scene history-scene" aria-hidden="true"></div>
 
       <div class="section-heading">
+        <div class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
 
         <div>
 
-          <span class="section-eyebrow">
-            ИСТОРИЯ РЕГИСТРАЦИИ
-          </span>
-
-          <h2>
-            Отправлены в СЭД
-          </h2>
+          <h2 id="history-title">История регистрации</h2>
+          <h3>Отправлены в СЭД</h3>
 
           <p>
             Документы, уже зарегистрированные
@@ -345,7 +343,7 @@
         <div class="empty-block">
 
           <div class="empty-icon neutral">
-            S
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
           </div>
 
           <div>
@@ -364,6 +362,7 @@
 
       } @else {
 
+        <div class="history-table-scroll" tabindex="0" role="region" aria-label="История отправленных документов">
         <div class="history-table">
 
           <div class="history-header">
@@ -398,9 +397,7 @@
 
               <div class="history-document">
 
-                <div class="history-file-icon">
-                  PDF
-                </div>
+                <span class="pdf-icon" aria-hidden="true"><img src="assets/ai-analysis/pdf-file-3d.png" alt="" width="1254" height="1254" loading="lazy" decoding="async" /></span>
 
                 <div>
 
@@ -433,7 +430,7 @@
 
               <div>
 
-                <span class="sed-result">
+                <span class="sed-result" [class.failed]="document.sed?.dispatchStatus === 'FAILED' || document.sed?.dispatchStatus === 'ERROR'" [class.unknown]="document.sed?.dispatchStatus !== 'SUCCESS' && document.sed?.dispatchStatus !== 'SENT' && document.sed?.dispatchStatus !== 'FAILED' && document.sed?.dispatchStatus !== 'ERROR'">
 
                   <i></i>
 
@@ -449,6 +446,7 @@
 
 
               <div class="sent-date">
+                <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16M8 15h2m4 0h2M8 18h2"/></svg>
                 {{ formatDateTime(document.sed?.sentAt || null) }}
               </div>
 
@@ -459,7 +457,7 @@
                   type="button"
                   (click)="openDocument(document.documentId)"
                 >
-                  Открыть
+                  Открыть <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
                 </button>
 
               </div>
@@ -468,6 +466,7 @@
 
           }
 
+        </div>
         </div>
 
       }
