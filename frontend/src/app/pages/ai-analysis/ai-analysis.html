@@ -1,13 +1,13 @@
-<section class="ai-page" [attr.aria-busy]="loading">
-  <header class="page-header">
+<section class="ai-page df-workspace" [attr.aria-busy]="loading">
+  <header class="page-header df-hero df-ornament">
     <div class="header-copy">
-      <span class="eyebrow">ИНТЕЛЛЕКТУАЛЬНАЯ КЛАССИФИКАЦИЯ</span>
-      <h1>AI-анализ документов</h1>
+      <span class="eyebrow df-section-label">ИНТЕЛЛЕКТУАЛЬНАЯ КЛАССИФИКАЦИЯ</span>
+      <h1 class="df-page-title">AI-анализ документов</h1>
       <p>
         Результаты автоматической классификации договоров, дополнительных соглашений и приложений.
       </p>
       <div class="header-controls">
-        <span class="threshold-note"
+        <span class="threshold-note df-muted-text"
           ><span aria-hidden="true">✓</span> Порог автоматического принятия —
           {{ confidenceThreshold }}%</span
         >
@@ -36,12 +36,12 @@
     </div>
   </header>
 
-  <section class="overview-panel" aria-labelledby="overview-heading">
+  <section class="overview-panel df-card" aria-labelledby="overview-heading">
     <div class="section-heading">
-      <div><h2 id="overview-heading">Обзор AI-анализа</h2></div>
+      <div><h2 class="df-card-title" id="overview-heading">Обзор AI-анализа</h2></div>
     </div>
     <section class="statistics" aria-label="Сводка AI-анализа">
-      <article class="stat-card analyzed">
+      <article class="stat-card analyzed df-card">
         <div class="stat-icon" aria-hidden="true">
           <img src="assets/ai-analysis/metric-processed.svg" alt="" width="30" height="30" />
         </div>
@@ -49,7 +49,7 @@
           <span>Обработано AI</span><strong>{{ analyzedCount }}</strong>
         </div>
       </article>
-      <article class="stat-card confidence">
+      <article class="stat-card confidence df-card">
         <div class="stat-icon" aria-hidden="true">
           <img src="assets/ai-analysis/metric-confidence.svg" alt="" width="30" height="30" />
         </div>
@@ -57,7 +57,7 @@
           <span>Средняя уверенность</span><strong>{{ averageConfidence.toFixed(1) }}%</strong>
         </div>
       </article>
-      <article class="stat-card low">
+      <article class="stat-card low df-card">
         <div class="stat-icon" aria-hidden="true">
           <img src="assets/ai-analysis/metric-threshold.svg" alt="" width="30" height="30" />
         </div>
@@ -65,7 +65,7 @@
           <span>Ниже порога 80%</span><strong>{{ lowConfidenceCount }}</strong>
         </div>
       </article>
-      <article class="stat-card review">
+      <article class="stat-card review df-card">
         <div class="stat-icon" aria-hidden="true">
           <img src="assets/ai-analysis/metric-review.svg" alt="" width="30" height="30" />
         </div>
@@ -76,11 +76,11 @@
     </section>
   </section>
 
-  <section class="distribution-panel" aria-labelledby="classes-heading">
+  <section class="distribution-panel df-card" aria-labelledby="classes-heading">
     <div class="section-heading">
       <div>
-        <span class="section-eyebrow">РАСПРЕДЕЛЕНИЕ РЕЗУЛЬТАТОВ</span>
-        <h2 id="classes-heading">Классы документов</h2>
+        <span class="section-eyebrow df-section-label">РАСПРЕДЕЛЕНИЕ РЕЗУЛЬТАТОВ</span>
+        <h2 class="df-card-title" id="classes-heading">Классы документов</h2>
       </div>
       <span class="total-label"
         >Всего классификаций: <strong>{{ analyzedCount }}</strong></span
@@ -118,11 +118,11 @@
     </div>
   </section>
 
-  <section class="results-panel" aria-labelledby="results-heading">
+  <section class="results-panel df-card" aria-labelledby="results-heading">
     <div class="section-heading results-heading">
       <div>
-        <span class="section-eyebrow">РЕЗУЛЬТАТЫ AI-АНАЛИЗА</span>
-        <h2 id="results-heading">Классификация документов</h2>
+        <span class="section-eyebrow df-section-label">РЕЗУЛЬТАТЫ AI-АНАЛИЗА</span>
+        <h2 class="df-card-title" id="results-heading">Классификация документов</h2>
       </div>
       @if (!loading && !errorMessage) {
         <span class="total-label" role="status"
@@ -184,7 +184,7 @@
         <span>Для выбранных фильтров нет результатов AI-классификации.</span>
       </section>
     } @else {
-      <div class="table-header" aria-hidden="true">
+      <div class="table-header df-table-header" aria-hidden="true">
         <span>Документ</span><span>Предсказанный класс</span><span>Уверенность</span
         ><span>AI-обработка</span><span>Текущий статус</span><span></span>
       </div>
@@ -203,11 +203,11 @@
                 />
               </div>
               <div class="document-info">
-                <span class="document-id">ДОКУМЕНТ #{{ row.document.documentId }}</span>
+                <span class="document-id df-muted-text">ДОКУМЕНТ #{{ row.document.documentId }}</span>
                 <strong class="file-name" [title]="row.document.originalName || 'Документ'">{{
                   row.document.originalName || 'Документ'
                 }}</strong>
-                <div class="document-meta">
+                <div class="document-meta df-muted-text">
                   <span>{{
                     row.document.documentNumber ? '№ ' + row.document.documentNumber : 'Без номера'
                   }}</span>
@@ -218,13 +218,13 @@
             </div>
             <div class="type-cell">
               <span
-                ><span class="desktop-label">AI определил</span
-                ><span class="mobile-label">Предсказанный класс</span></span
+                ><span class="desktop-label df-muted-text">AI определил</span
+                ><span class="mobile-label df-muted-text">Предсказанный класс</span></span
               >
               <strong>{{ getDocumentTypeLabel(row.document.ai?.predictedType || null) }}</strong>
             </div>
             <div class="confidence-cell">
-              <span class="mobile-label cell-label">Уверенность</span>
+              <span class="mobile-label cell-label df-muted-text">Уверенность</span>
               <div class="confidence-header">
                 <strong [class]="getConfidenceClass(row.document)">{{
                   getConfidenceLabel(row.document)
@@ -253,8 +253,8 @@
               </div>
             </div>
             <div class="document-status-cell">
-              <span class="mobile-label cell-label">Текущий статус</span>
-              <span [class]="getDocumentStatusClass(row.document.status)">{{
+              <span class="mobile-label cell-label df-muted-text">Текущий статус</span>
+              <span [class]="'df-status-chip ' + getDocumentStatusClass(row.document.status)">{{
                 getDocumentStatusLabel(row.document.status)
               }}</span>
             </div>
