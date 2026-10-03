@@ -1,340 +1,355 @@
-<section class="profile-page">
-
-  <header class="page-header">
-
-    <span class="eyebrow">
-      ЛИЧНЫЙ КАБИНЕТ
-    </span>
-
-    <h1>
-      Профиль
-    </h1>
-
-    <p>
-      Данные учетной записи, личные напоминания и безопасность.
-    </p>
-
+<link rel="stylesheet" [attr.href]="workspaceStyles" />
+<section class="profile-page df-workspace">
+  <header class="page-header df-hero">
+    <div>
+      <span class="eyebrow df-section-label">ЛИЧНЫЙ КАБИНЕТ</span>
+      <h1 class="df-page-title">Профиль</h1>
+      <p>Данные учетной записи, личные напоминания и параметры безопасности.</p>
+    </div>
+    <img
+      src="assets/profile/profile-hero.svg"
+      class="profile-header-art"
+      alt=""
+      aria-hidden="true"
+    />
   </header>
-
-
   @if (!loadingUser) {
-
-    <section class="profile-hero">
-
-      <div class="big-avatar">
-        {{ getInitials() }}
+    <section class="profile-hero df-card">
+      <div class="avatar-area">
+        <div class="big-avatar">
+          @if (localProfile.photo) {
+            <img [src]="localProfile.photo" alt="Фото профиля" />
+          } @else {
+            {{ getInitials() }}
+          }
+        </div>
+        <label class="photo-upload" title="Изменить фото"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h4l2-3h4l2 3h4v13H4z" />
+            <circle cx="12" cy="13" r="3" /></svg
+          ><span class="sr-only">Изменить фото</span
+          ><input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="selectPhoto($event)"
+        /></label>
       </div>
-
       <div class="hero-user">
-
-        <span class="active-label">
-          <i></i>
-          Аккаунт активен
-        </span>
-
-        <h2>
-          {{ currentUser?.fullName || 'Пользователь' }}
-        </h2>
-
-        <p>
-          {{ getRoleLabel() }}
-        </p>
-
+        <span class="active-label df-status-chip"><i></i>Аккаунт активен</span>
+        <h2>{{ currentUser?.fullName || 'Пользователь' }}</h2>
+        <p>{{ getRoleLabel() }}</p>
+        <div class="user-contacts">
+          <span>✉ {{ currentUser?.email || 'Email не указан' }}</span
+          ><span>＠ {{ currentUser?.login }}</span>
+        </div>
+        <div class="photo-actions">
+          <button type="button" (click)="photoInput.click()">Изменить фото</button
+          ><input
+            #photoInput
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="selectPhoto($event)"
+            hidden
+          />
+          @if (localProfile.photo) {
+            <button type="button" (click)="removePhoto()">Удалить фото</button>
+          }
+        </div>
+        <small>Фото хранится на этом устройстве · JPG, PNG, WebP до 2 МБ</small>
       </div>
-
+      <div class="hero-facts">
+        <article>
+          <span class="fact-icon">♛</span><small>Роль</small><strong>{{ getRoleLabel() }}</strong
+          ><span>{{ accessLabel }}</span>
+        </article>
+        <article>
+          <span class="fact-icon">▦</span><small>Подразделение</small
+          ><strong>{{ localProfile.department || 'Не указано' }}</strong
+          ><span>Рабочий профиль</span>
+        </article>
+        <article>
+          <span class="fact-icon">◷</span><small>ID пользователя</small
+          ><strong>{{ currentUser?.userId || '—' }}</strong
+          ><span class="green-text">Текущая учётная запись</span>
+        </article>
+      </div>
     </section>
-
-
+    @if (localSaveError) {
+      <div class="message error" role="alert">{{ localSaveError }}</div>
+    }
+    @if (photoError) {
+      <div class="message error" role="alert">{{ photoError }}</div>
+    }
     <div class="profile-layout">
-
       <div class="profile-main">
-
-        <section class="profile-card">
-
+        <section class="profile-card account-card df-card">
           <div class="card-heading">
-
-            <div class="card-icon">
-              U
-            </div>
-
+            <div class="card-icon">U</div>
             <div>
-
-              <span class="section-eyebrow">
-                ЛИЧНЫЕ ДАННЫЕ
-              </span>
-
-              <h2>
-                Учетная запись
-              </h2>
-
-              <p>
-                Основные сведения текущего пользователя.
-              </p>
-
+              <span class="section-eyebrow df-section-label">ЛИЧНЫЕ ДАННЫЕ</span>
+              <h2>Учётная запись</h2>
+              <p>Основные сведения текущего пользователя.</p>
             </div>
-
           </div>
-
-
           @if (profileSuccessMessage) {
-
-            <div class="message success">
-              {{ profileSuccessMessage }}
-            </div>
-
+            <div class="message success" role="status">{{ profileSuccessMessage }}</div>
           }
-
-
+          @if (localSaveMessage) {
+            <div class="message success" role="status">{{ localSaveMessage }}</div>
+          }
           @if (profileErrorMessage) {
-
-            <div class="message error">
-              {{ profileErrorMessage }}
-            </div>
-
+            <div class="message error" role="alert">{{ profileErrorMessage }}</div>
           }
-
-
           <div class="account-grid">
-
-            <label class="full-name-field">
-
-              <span>
-                ФИО
-              </span>
-
-              <div class="edit-row">
-
-                <input
-                  type="text"
-                  maxlength="255"
-                  name="fullName"
-                  [(ngModel)]="fullName"
-                />
-
-                <button
-                  type="button"
-                  [disabled]="
-                    savingProfile
-                    || !fullName.trim()
-                    || fullName.trim() === currentUser?.fullName
-                  "
-                  (click)="saveFullName()"
-                >
-                  @if (savingProfile) {
-                    Сохраняем...
-                  } @else {
-                    Сохранить
-                  }
-                </button>
-
-              </div>
-
-            </label>
-
-
+            <label class="info-field"
+              ><span>ФИО</span><input name="fullName" maxlength="255" [(ngModel)]="fullName"
+            /></label>
+            <label class="info-field"
+              ><span>Должность</span
+              ><input
+                name="position"
+                maxlength="255"
+                [(ngModel)]="localProfile.position"
+                placeholder="Не указано"
+            /></label>
+            <label class="info-field"
+              ><span>Email учётной записи</span
+              ><input
+                name="accountEmail"
+                [value]="currentUser?.email || 'Не указан'"
+                readonly
+              /><small>Для подтверждения безопасности</small></label
+            >
+            <label class="info-field"
+              ><span>Подразделение</span
+              ><input
+                name="department"
+                maxlength="255"
+                [(ngModel)]="localProfile.department"
+                placeholder="Не указано"
+            /></label>
             <div class="info-field">
-
-              <span>
-                Логин
-              </span>
-
-              <strong>
-                {{ currentUser?.login || '—' }}
-              </strong>
-
-              <small>
-                Используется для входа
-              </small>
-
+              <span>Логин</span><strong>{{ currentUser?.login || '—' }}</strong>
             </div>
-
-
+            <label class="info-field"
+              ><span>Телефон</span
+              ><input
+                name="phone"
+                type="tel"
+                maxlength="40"
+                [(ngModel)]="localProfile.phone"
+                placeholder="Не указано"
+            /></label>
             <div class="info-field">
-
-              <span>
-                Email
-              </span>
-
-              <strong>
-                {{ currentUser?.email || 'Не указан' }}
-              </strong>
-
-              <small>
-                Для подтверждения безопасности
-              </small>
-
+              <span>Роль</span><strong>{{ getRoleLabel() }}</strong>
             </div>
-
-
             <div class="info-field">
-
-              <span>
-                Роль
-              </span>
-
-              <strong>
-                {{ getRoleLabel() }}
-              </strong>
-
-              <small>
-                Определяет права доступа
-              </small>
-
+              <span>ID пользователя</span><strong>{{ currentUser?.userId || '—' }}</strong>
             </div>
-
-
-            <div class="info-field">
-
-              <span>
-                ID пользователя
-              </span>
-
-              <strong>
-                {{ currentUser?.userId }}
-              </strong>
-
-              <small>
-                Внутренний идентификатор
-              </small>
-
-            </div>
-
+            <label class="info-field contact-email"
+              ><span>Контактный email · на этом устройстве</span
+              ><input
+                name="contactEmail"
+                type="email"
+                maxlength="255"
+                [(ngModel)]="localProfile.contactEmail"
+                placeholder="Не указан"
+            /></label>
           </div>
-
+          <p class="local-note">
+            Телефон, должность, подразделение и контактный email сохраняются на этом устройстве.
+            Email учётной записи изменяет администратор в разделе «Пользователи».
+          </p>
+          <div class="account-actions">
+            <button
+              type="button"
+              class="primary-action"
+              [disabled]="savingProfile || !fullName.trim()"
+              (click)="saveProfileDetails()"
+            >
+              ✓ {{ savingProfile ? 'Сохраняем…' : 'Сохранить изменения' }}
+            </button>
+          </div>
         </section>
-
-
-        <section class="profile-card security-preview">
-
+        <section class="profile-card work-profile df-card">
           <div class="card-heading">
-
-            <div class="card-icon security">
-              S
-            </div>
-
+            <div class="card-icon mint">♙</div>
             <div>
-
-              <span class="section-eyebrow">
-                БЕЗОПАСНОСТЬ
-              </span>
-
-              <h2>
-                Пароль
-              </h2>
-
-              <p>
-                Смена пароля через подтверждение по электронной почте.
-              </p>
-
+              <span class="section-eyebrow df-section-label">РАБОЧИЙ ПРОФИЛЬ</span>
+              <h2>Доступ и активность</h2>
+              <p>Информация о роли и доступе в системе.</p>
             </div>
-
           </div>
-
-          <div class="security-placeholder">
-
+          <div class="work-grid">
+            <article>
+              <span>♛ Роль</span><strong>{{ getRoleLabel() }}</strong>
+            </article>
+            <article>
+              <span>◇ Уровень доступа</span><strong>{{ accessLabel }}</strong>
+            </article>
+            <article><span>● Статус</span><strong class="green-text">Активен</strong></article>
+            <article><span>▦ Дата создания</span><strong>Не указано</strong></article>
+            <article><span>◷ Последний вход</span><strong>Не указано</strong></article>
+            <article>
+              <span>▤ ID пользователя</span><strong>{{ currentUser?.userId || '—' }}</strong>
+            </article>
+          </div>
+        </section>
+      </div>
+      <div class="profile-side">
+        <section class="profile-card reminders-card df-card">
+          <div class="card-heading">
+            <div class="card-icon reminder">!</div>
             <div>
-
-              <strong>
-                Защищенная смена пароля
-              </strong>
-
-              <span>
-                {{
-                  currentUser?.email
-                  || 'Email не указан'
-                }}
-              </span>
-
+              <span class="section-eyebrow df-section-label">МОИ НАПОМИНАНИЯ</span>
+              <h2>Не забыть</h2>
+              <p>Личные заметки и задачи.</p>
             </div>
-
-            <span class="security-status">
-              Настроено
-            </span>
-
           </div>
-
+          <div class="reminder-overview" aria-label="Сводка задач">
+            <span
+              ><b>{{ reminders.length - completedReminderCount }}</b
+              >В работе</span
+            ><span
+              ><b>{{ completedReminderCount }}</b
+              >Выполнено</span
+            >
+          </div>
+          <div class="reminder-form">
+            <label for="profile-reminder" class="sr-only">Новое напоминание</label
+            ><textarea
+              id="profile-reminder"
+              rows="3"
+              maxlength="500"
+              name="reminderText"
+              [(ngModel)]="reminderText"
+              placeholder="Например: проверить договор и отправить юристу"
+            ></textarea>
+            <div>
+              <span>{{ reminderText.length }}/500</span
+              ><button
+                type="button"
+                class="primary-action"
+                [disabled]="reminderSaving || !reminderText.trim()"
+                (click)="addReminder()"
+              >
+                {{ reminderSaving ? 'Добавляем…' : '+ Добавить' }}
+              </button>
+            </div>
+          </div>
+          @if (reminderErrorMessage) {
+            <div class="message error" role="alert">{{ reminderErrorMessage }}</div>
+          }
+          @if (remindersLoading) {
+            <div class="reminder-state">Загружаем…</div>
+          } @else if (reminders.length === 0) {
+            <div class="empty-reminders">
+              <span>✓</span><strong>Нет напоминаний</strong>
+              <p>Добавьте задачу, чтобы вернуться к ней позже.</p>
+            </div>
+          } @else {
+            <div class="reminder-list">
+              @for (reminder of reminders; track reminder.id) {
+                <article class="reminder-item" [class.completed]="isReminderCompleted(reminder.id)">
+                  <button
+                    type="button"
+                    class="completion-button"
+                    [attr.aria-pressed]="isReminderCompleted(reminder.id)"
+                    [attr.aria-label]="
+                      isReminderCompleted(reminder.id)
+                        ? 'Вернуть задачу в работу'
+                        : 'Отметить выполненной'
+                    "
+                    (click)="toggleReminder(reminder.id)"
+                  >
+                    {{ isReminderCompleted(reminder.id) ? '✓' : '' }}
+                  </button>
+                  <div>
+                    <p>{{ reminder.text }}</p>
+                    <span>{{ formatReminderDate(reminder.createdAt) }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="delete-reminder"
+                    aria-label="Удалить напоминание"
+                    (click)="deleteReminder(reminder)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7" />
+                    </svg>
+                  </button>
+                </article>
+              }
+            </div>
+            <p class="local-note">Отметки выполнения сохраняются на этом устройстве.</p>
+          }
+        </section>
+        <section class="profile-card security-preview df-card">
+          <div class="card-heading">
+            <div class="card-icon security">◇</div>
+            <div>
+              <span class="section-eyebrow df-section-label">БЕЗОПАСНОСТЬ</span>
+              <h2>Пароль и защита</h2>
+              <p>Подтверждение смены пароля по email.</p>
+            </div>
+          </div>
+          <div class="security-facts">
+            <div><span>Пароль</span><strong class="green-text">Настроен</strong></div>
+            <div>
+              <span>Email для подтверждения</span
+              ><strong>{{ currentUser?.email || 'Не указан' }}</strong>
+            </div>
+            <div><span>Последняя смена пароля</span><strong>Не указано</strong></div>
+            <div><span>Последний вход</span><strong>Не указано</strong></div>
+          </div>
           <div class="password-security-form">
-
             @if (passwordSuccessMessage) {
-
               <div class="message success">
                 {{ passwordSuccessMessage }}
               </div>
-
             }
 
             @if (passwordErrorMessage) {
-
               <div class="message error">
                 {{ passwordErrorMessage }}
               </div>
-
             }
 
-
             @if (passwordStep === 'EMAIL') {
-
               <div class="password-panel">
-
                 <div class="password-email-box">
-
-                  <div class="password-email-icon">
-                    @
-                  </div>
+                  <div class="password-email-icon">@</div>
 
                   <div>
-
-                    <span>
-                      Код подтверждения будет отправлен на
-                    </span>
+                    <span> Код подтверждения будет отправлен на </span>
 
                     <strong>
-                      {{
-                        currentUser?.email
-                        || 'Email не указан'
-                      }}
+                      {{ currentUser?.email || 'Email не указан' }}
                     </strong>
 
-                    <small>
-                      Код действует 5 минут.
-                    </small>
-
+                    <small> Код действует 5 минут. </small>
                   </div>
-
                 </div>
 
                 <button
-                  class="password-primary"
+                  class="password-primary df-primary-button"
                   type="button"
-                  [disabled]="
-                    passwordLoading
-                    || !currentUser?.email
-                  "
+                  [disabled]="passwordLoading || !currentUser?.email"
                   (click)="requestPasswordCode()"
                 >
-
                   @if (passwordLoading) {
                     Отправляем...
                   } @else {
                     Получить код
                   }
-
                 </button>
-
               </div>
-
             }
 
-
             @if (passwordStep === 'CODE') {
-
               <div class="password-panel">
-
                 <label class="password-field">
-
-                  <span>
-                    Код из письма
-                  </span>
+                  <span> Код из письма </span>
 
                   <input
                     class="code-input"
@@ -347,81 +362,55 @@
                     placeholder="000000"
                     (keydown.enter)="verifyPasswordCode()"
                   />
-
                 </label>
 
                 <div class="password-timer">
-
-                  <span>
-                    Код действует
-                  </span>
+                  <span> Код действует </span>
 
                   <strong>
                     {{ getCodeExpiresLabel() }}
                   </strong>
-
                 </div>
 
-
                 <div class="password-actions">
-
-                  <button
-                    class="password-secondary"
-                    type="button"
-                    (click)="resetPasswordChange()"
-                  >
+                  <button class="password-secondary" type="button" (click)="resetPasswordChange()">
                     Назад
                   </button>
 
                   <button
                     class="password-link"
                     type="button"
-                    [disabled]="
-                      passwordLoading
-                      || resendAvailableInSeconds > 0
-                    "
+                    [disabled]="passwordLoading || resendAvailableInSeconds > 0"
                     (click)="resendPasswordCode()"
                   >
-
                     @if (resendAvailableInSeconds > 0) {
                       Повторно через {{ getResendLabel() }}
                     } @else {
                       Отправить повторно
                     }
-
                   </button>
 
                   <button
-                    class="password-primary"
+                    class="password-primary df-primary-button"
                     type="button"
                     [disabled]="
-                      passwordLoading
-                      || verificationCode.trim().length !== 6
-                      || codeExpiresInSeconds <= 0
+                      passwordLoading ||
+                      verificationCode.trim().length !== 6 ||
+                      codeExpiresInSeconds <= 0
                     "
                     (click)="verifyPasswordCode()"
                   >
                     Подтвердить код
                   </button>
-
                 </div>
-
               </div>
-
             }
 
-
             @if (passwordStep === 'PASSWORD') {
-
               <div class="password-panel">
-
                 <div class="password-grid">
-
                   <label class="password-field">
-
-                    <span>
-                      Новый пароль
-                    </span>
+                    <span> Новый пароль </span>
 
                     <input
                       type="password"
@@ -430,15 +419,10 @@
                       [(ngModel)]="newPassword"
                       placeholder="Минимум 8 символов"
                     />
-
                   </label>
 
-
                   <label class="password-field">
-
-                    <span>
-                      Повторите пароль
-                    </span>
+                    <span> Повторите пароль </span>
 
                     <input
                       type="password"
@@ -449,222 +433,75 @@
                       (keydown.enter)="confirmPasswordChange()"
                     />
 
-                    @if (
-                      confirmNewPassword
-                      &&
-                      newPassword !== confirmNewPassword
-                    ) {
-
-                      <small class="password-error">
-                        Пароли не совпадают
-                      </small>
-
+                    @if (confirmNewPassword && newPassword !== confirmNewPassword) {
+                      <small class="password-error"> Пароли не совпадают </small>
                     }
-
                   </label>
-
                 </div>
 
-
                 <div class="password-validity">
-
                   Подтверждение действительно еще
 
                   <strong>
                     {{ getChangeTokenExpiresLabel() }}
                   </strong>
-
                 </div>
 
-
                 <div class="password-actions">
-
-                  <button
-                    class="password-secondary"
-                    type="button"
-                    (click)="resetPasswordChange()"
-                  >
+                  <button class="password-secondary" type="button" (click)="resetPasswordChange()">
                     Начать заново
                   </button>
 
                   <button
-                    class="password-primary"
+                    class="password-primary df-primary-button"
                     type="button"
                     [disabled]="
-                      passwordLoading
-                      || newPassword.length < 8
-                      || newPassword !== confirmNewPassword
-                      || changeTokenExpiresInSeconds <= 0
+                      passwordLoading ||
+                      newPassword.length < 8 ||
+                      newPassword !== confirmNewPassword ||
+                      changeTokenExpiresInSeconds <= 0
                     "
                     (click)="confirmPasswordChange()"
                   >
-
                     @if (passwordLoading) {
                       Сохраняем...
                     } @else {
                       Сохранить новый пароль
                     }
-
                   </button>
-
                 </div>
-
               </div>
-
             }
-
           </div>
-
         </section>
-
+        <section class="profile-card activity-card df-card">
+          <div class="card-heading">
+            <div class="card-icon mint">▥</div>
+            <div>
+              <span class="section-eyebrow df-section-label">МОЯ АКТИВНОСТЬ</span>
+              <h2>Личные задачи</h2>
+              <p>Ваши напоминания в DocFlow.</p>
+            </div>
+          </div>
+          <div class="activity-metrics">
+            <div>
+              <strong>{{ reminders.length }}</strong
+              ><span>Напоминаний</span>
+            </div>
+            <div>
+              <strong>{{ completedReminderCount }}</strong
+              ><span>Выполнено</span>
+            </div>
+            <div>
+              <strong>{{ reminders.length - completedReminderCount }}</strong
+              ><span>В работе</span>
+            </div>
+          </div>
+          <p class="local-note">Статистика обработанных документов пока недоступна.</p>
+        </section>
       </div>
-
-
-      <aside class="profile-card reminders-card">
-
-        <div class="card-heading">
-
-          <div class="card-icon reminder">
-            !
-          </div>
-
-          <div>
-
-            <span class="section-eyebrow">
-              МОИ НАПОМИНАНИЯ
-            </span>
-
-            <h2>
-              Не забыть
-            </h2>
-
-            <p>
-              Простые личные заметки.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="reminder-form">
-
-          <textarea
-            rows="3"
-            maxlength="500"
-            name="reminderText"
-            [(ngModel)]="reminderText"
-            placeholder="Например: проверить договор и отправить юристу"
-          ></textarea>
-
-          <div>
-
-            <span>
-              {{ reminderText.length }}/500
-            </span>
-
-            <button
-              type="button"
-              [disabled]="
-                reminderSaving
-                || !reminderText.trim()
-              "
-              (click)="addReminder()"
-            >
-              @if (reminderSaving) {
-                Добавляем...
-              } @else {
-                + Добавить
-              }
-            </button>
-
-          </div>
-
-        </div>
-
-
-        @if (reminderErrorMessage) {
-
-          <div class="message error">
-            {{ reminderErrorMessage }}
-          </div>
-
-        }
-
-
-        @if (remindersLoading) {
-
-          <div class="reminder-state">
-            Загружаем...
-          </div>
-
-        } @else if (reminders.length === 0) {
-
-          <div class="empty-reminders">
-
-            <span>
-              ✓
-            </span>
-
-            <strong>
-              Всё выполнено
-            </strong>
-
-            <p>
-              Личных напоминаний пока нет.
-            </p>
-
-          </div>
-
-        } @else {
-
-          <div class="reminder-list">
-
-            @for (
-              reminder of reminders;
-              track reminder.id
-            ) {
-
-              <article class="reminder-item">
-
-                <div class="reminder-dot"></div>
-
-                <div>
-
-                  <p>
-                    {{ reminder.text }}
-                  </p>
-
-                  <span>
-                    {{
-                      formatReminderDate(
-                        reminder.createdAt
-                      )
-                    }}
-                  </span>
-
-                </div>
-
-                <button
-                  type="button"
-                  title="Выполнено"
-                  (click)="deleteReminder(reminder)"
-                >
-                  ✓
-                </button>
-
-              </article>
-
-            }
-
-          </div>
-
-        }
-
-      </aside>
-
     </div>
-
+  } @else {
+    <div class="profile-card">Загружаем профиль…</div>
   }
-
 </section>

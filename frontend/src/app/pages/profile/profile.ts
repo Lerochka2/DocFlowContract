@@ -1,47 +1,146 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 
-import {
-  FormsModule
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
-import {
-  HttpErrorResponse
-} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
-import {
-  Router
-} from '@angular/router';
+import { Router } from '@angular/router';
 
-import {
-  AuthService,
-  CurrentUserResponse
-} from '../../core/auth/auth.service';
+import { AuthService, CurrentUserResponse } from '../../core/auth/auth.service';
 
-import {
-  ProfileService,
-  UserReminder
-} from '../../core/profile/profile.service';
-
+import { ProfileService, UserReminder } from '../../core/profile/profile.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   templateUrl: './profile.html',
-  styleUrl: './profile.scss'
+  styleUrl: './profile.scss',
 })
-export class ProfileWorkspace
-  implements OnInit, OnDestroy {
+export class ProfileWorkspace implements OnInit, OnDestroy {
+  readonly workspaceStyles = inject(DomSanitizer).bypassSecurityTrustResourceUrl(
+    'assets/profile/profile-workspace.css',
+  );
+  localProfile = { phone: '', position: '', department: '', contactEmail: '', photo: '' };
+  completedReminders: number[] = [];
+  photoError = '';
+  localSaveMessage = '';
+  localSaveError = '';
+  private localUserId: number | null = null;
+  private photoReader: FileReader | null = null;
 
-  currentUser:
-    CurrentUserResponse | null = null;
+  get accessLabel(): string {
+    return this.currentUser?.role === 'ADMIN' ? 'Полный доступ' : 'По назначенной роли';
+  }
+  get completedReminderCount(): number {
+    return this.reminders.filter((r) => this.isReminderCompleted(r.id)).length;
+  }
+  isReminderCompleted(id: number): boolean {
+    return this.completedReminders.includes(id);
+  }
+  toggleReminder(id: number): void {
+    const previous = this.completedReminders;
+    this.completedReminders = previous.includes(id)
+      ? previous.filter((x) => x !== id)
+      : [...previous, id];
+    if (!this.persistLocalProfile()) this.completedReminders = previous;
+  }
+  saveProfileDetails(): void {
+    this.profileErrorMessage = '';
+    if (!this.fullName.trim()) {
+      this.profileErrorMessage = 'Введите ФИО.';
+      return;
+    }
+    if (
+      this.localProfile.contactEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.localProfile.contactEmail)
+    ) {
+      this.profileErrorMessage = 'Проверьте контактный email.';
+      return;
+    }
+    this.localSaveMessage = this.persistLocalProfile()
+      ? 'Дополнительные данные сохранены на этом устройстве.'
+      : '';
+    if (this.fullName.trim() !== this.currentUser?.fullName) this.saveFullName();
+  }
+  selectPhoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.photoError = '';
+    if (
+      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+      file.size > 2 * 1024 * 1024
+    ) {
+      this.photoError = 'Выберите JPG, PNG или WebP до 2 МБ.';
+      return;
+    }
+    this.photoReader?.abort();
+    const reader = new FileReader();
+    this.photoReader = reader;
+    const userId = this.currentUser?.userId;
+    reader.onload = () => {
+      if (userId !== this.currentUser?.userId || typeof reader.result !== 'string') return;
+      const previous = this.localProfile.photo;
+      this.localProfile.photo = reader.result;
+      if (!this.persistLocalProfile()) this.localProfile.photo = previous;
+      this.changeDetectorRef.markForCheck();
+    };
+    reader.onerror = () => {
+      this.photoError = 'Не удалось прочитать изображение.';
+      this.changeDetectorRef.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+  removePhoto(): void {
+    this.photoReader?.abort();
+    const previous = this.localProfile.photo;
+    this.localProfile.photo = '';
+    if (!this.persistLocalProfile()) this.localProfile.photo = previous;
+  }
+  private persistLocalProfile(): boolean {
+    if (!this.currentUser) return false;
+    this.localSaveError = '';
+    try {
+      localStorage.setItem(
+        'docflow.profile.' + this.currentUser.userId,
+        JSON.stringify({ ...this.localProfile, completedReminders: this.completedReminders }),
+      );
+      return true;
+    } catch {
+      this.localSaveError =
+        'Не удалось сохранить данные на этом устройстве. Освободите место или выберите фото меньшего размера.';
+      return false;
+    }
+  }
+  private loadLocalProfile(): void {
+    const id = this.currentUser?.userId;
+    if (id == null || this.localUserId === id) return;
+    this.localUserId = id;
+    this.localProfile = { phone: '', position: '', department: '', contactEmail: '', photo: '' };
+    this.completedReminders = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem('docflow.profile.' + id) || '{}');
+      for (const key of ['phone', 'position', 'department', 'contactEmail'] as const) {
+        if (typeof saved[key] === 'string') this.localProfile[key] = saved[key].slice(0, 255);
+      }
+      if (
+        typeof saved.photo === 'string' &&
+        /^data:image\/(png|jpeg|webp);base64,/.test(saved.photo)
+      )
+        this.localProfile.photo = saved.photo;
+      if (Array.isArray(saved.completedReminders))
+        this.completedReminders = saved.completedReminders.filter(
+          (x: unknown) => typeof x === 'number' && Number.isSafeInteger(x),
+        );
+    } catch {
+      /* Invalid local preferences never prevent loading the server profile. */
+    }
+  }
+
+  currentUser: CurrentUserResponse | null = null;
 
   loadingUser = true;
 
@@ -53,8 +152,7 @@ export class ProfileWorkspace
 
   profileErrorMessage = '';
 
-  reminders:
-    UserReminder[] = [];
+  reminders: UserReminder[] = [];
 
   reminderText = '';
 
@@ -64,11 +162,7 @@ export class ProfileWorkspace
 
   reminderErrorMessage = '';
 
-  passwordStep:
-    'EMAIL'
-    | 'CODE'
-    | 'PASSWORD'
-    = 'EMAIL';
+  passwordStep: 'EMAIL' | 'CODE' | 'PASSWORD' = 'EMAIL';
 
   passwordLoading = false;
 
@@ -92,56 +186,40 @@ export class ProfileWorkspace
 
   changeTokenExpiresInSeconds = 0;
 
-  private passwordTimerId:
-    number | null = null;
-
+  private passwordTimerId: number | null = null;
 
   constructor(
-    private readonly authService:
-      AuthService,
+    private readonly authService: AuthService,
 
-    private readonly profileService:
-      ProfileService,
+    private readonly profileService: ProfileService,
 
-    private readonly router:
-      Router,
+    private readonly router: Router,
 
-    private readonly changeDetectorRef:
-      ChangeDetectorRef
-  ) {
-  }
-
+    private readonly changeDetectorRef: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
-
     this.loadUser();
 
     this.loadReminders();
   }
 
-
   ngOnDestroy(): void {
-
+    this.photoReader?.abort();
     this.stopPasswordTimer();
   }
 
-
   saveFullName(): void {
-
     if (this.savingProfile) {
       return;
     }
 
-    const value =
-      this.fullName.trim();
+    const value = this.fullName.trim();
 
     if (!value) {
+      this.profileErrorMessage = 'Введите ФИО.';
 
-      this.profileErrorMessage =
-        'Введите ФИО.';
-
-      this.profileSuccessMessage =
-        '';
+      this.profileSuccessMessage = '';
 
       return;
     }
@@ -152,72 +230,42 @@ export class ProfileWorkspace
 
     this.profileSuccessMessage = '';
 
-    this.profileService
-      .updateFullName(
-        value
-      )
-      .subscribe({
+    this.profileService.updateFullName(value).subscribe({
+      next: (user) => {
+        this.savingProfile = false;
 
-        next: user => {
+        this.currentUser = user;
 
-          this.savingProfile = false;
+        this.fullName = user.fullName;
 
-          this.currentUser =
-            user;
+        this.authService.updateCachedUser(user);
 
-          this.fullName =
-            user.fullName;
+        window.dispatchEvent(new Event('docflow-user-updated'));
 
-          this.authService
-            .updateCachedUser(
-              user
-            );
+        this.profileSuccessMessage = 'ФИО успешно обновлено.';
 
-          window.dispatchEvent(
-            new Event(
-              'docflow-user-updated'
-            )
-          );
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.profileSuccessMessage =
-            'ФИО успешно обновлено.';
+      error: (error: HttpErrorResponse) => {
+        this.savingProfile = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
+        this.profileErrorMessage = this.resolveError(error, 'Не удалось обновить ФИО.');
 
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.savingProfile = false;
-
-          this.profileErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось обновить ФИО.'
-            );
-
-          this.changeDetectorRef
-            .markForCheck();
-        }
-      });
+        this.changeDetectorRef.markForCheck();
+      },
+    });
   }
 
-
   addReminder(): void {
-
     if (this.reminderSaving) {
       return;
     }
 
-    const text =
-      this.reminderText.trim();
+    const text = this.reminderText.trim();
 
     if (!text) {
-
-      this.reminderErrorMessage =
-        'Введите текст напоминания.';
+      this.reminderErrorMessage = 'Введите текст напоминания.';
 
       return;
     }
@@ -226,104 +274,56 @@ export class ProfileWorkspace
 
     this.reminderErrorMessage = '';
 
-    this.profileService
-      .createReminder(
-        text
-      )
-      .subscribe({
+    this.profileService.createReminder(text).subscribe({
+      next: (reminder) => {
+        this.reminderSaving = false;
 
-        next: reminder => {
+        this.reminderText = '';
 
-          this.reminderSaving = false;
+        this.reminders = [reminder, ...this.reminders];
 
-          this.reminderText = '';
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.reminders = [
-            reminder,
-            ...this.reminders
-          ];
+      error: (error: HttpErrorResponse) => {
+        this.reminderSaving = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
+        this.reminderErrorMessage = this.resolveError(error, 'Не удалось добавить напоминание.');
 
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.reminderSaving = false;
-
-          this.reminderErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось добавить напоминание.'
-            );
-
-          this.changeDetectorRef
-            .markForCheck();
-        }
-      });
+        this.changeDetectorRef.markForCheck();
+      },
+    });
   }
 
-
-  deleteReminder(
-    reminder: UserReminder
-  ): void {
-
-    const confirmed =
-      window.confirm(
-        'Отметить как выполненное и удалить напоминание?'
-      );
+  deleteReminder(reminder: UserReminder): void {
+    const confirmed = window.confirm('Удалить напоминание?');
 
     if (!confirmed) {
       return;
     }
 
-    this.profileService
-      .deleteReminder(
-        reminder.id
-      )
-      .subscribe({
+    this.profileService.deleteReminder(reminder.id).subscribe({
+      next: () => {
+        this.reminders = this.reminders.filter((item) => item.id !== reminder.id);
 
-        next: () => {
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.reminders =
-            this.reminders.filter(
-              item =>
-                item.id !== reminder.id
-            );
-
-          this.changeDetectorRef
-            .markForCheck();
-        },
-
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.reminderErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось удалить напоминание.'
-            );
-        }
-      });
+      error: (error: HttpErrorResponse) => {
+        this.reminderErrorMessage = this.resolveError(error, 'Не удалось удалить напоминание.');
+      },
+    });
   }
 
-
   requestPasswordCode(): void {
-
     if (this.passwordLoading) {
       return;
     }
 
     if (!this.currentUser?.email) {
+      this.passwordErrorMessage = 'Для учетной записи не указан email.';
 
-      this.passwordErrorMessage =
-        'Для учетной записи не указан email.';
-
-      this.passwordSuccessMessage =
-        '';
+      this.passwordSuccessMessage = '';
 
       return;
     }
@@ -334,105 +334,69 @@ export class ProfileWorkspace
 
     this.passwordSuccessMessage = '';
 
-    this.authService
-      .requestPasswordChangeCode()
-      .subscribe({
+    this.authService.requestPasswordChangeCode().subscribe({
+      next: (response) => {
+        this.passwordLoading = false;
 
-        next: response => {
+        this.maskedEmail = response.maskedEmail;
 
-          this.passwordLoading =
-            false;
+        this.verificationCode = '';
 
-          this.maskedEmail =
-            response.maskedEmail;
+        this.changeToken = '';
 
-          this.verificationCode =
-            '';
+        this.newPassword = '';
 
-          this.changeToken =
-            '';
+        this.confirmNewPassword = '';
 
-          this.newPassword =
-            '';
+        this.passwordStep = 'CODE';
 
-          this.confirmNewPassword =
-            '';
+        this.startPasswordTimer(response.expiresInSeconds, response.resendAvailableInSeconds, 0);
 
-          this.passwordStep =
-            'CODE';
+        this.passwordSuccessMessage = `Код отправлен на ${response.maskedEmail}.`;
 
-          this.startPasswordTimer(
-            response.expiresInSeconds,
-            response.resendAvailableInSeconds,
-            0
-          );
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.passwordSuccessMessage =
-            `Код отправлен на ${response.maskedEmail}.`;
+      error: (error: HttpErrorResponse) => {
+        this.passwordLoading = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
-
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.passwordLoading =
-            false;
-
-          this.passwordErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось отправить код подтверждения.'
-            );
-        }
-      });
+        this.passwordErrorMessage = this.resolveError(
+          error,
+          'Не удалось отправить код подтверждения.',
+        );
+      },
+    });
   }
 
-
   resendPasswordCode(): void {
-
     if (this.passwordLoading) {
       return;
     }
 
-    if (
-      this.resendAvailableInSeconds > 0
-    ) {
+    if (this.resendAvailableInSeconds > 0) {
       return;
     }
 
     this.requestPasswordCode();
   }
 
-
   verifyPasswordCode(): void {
-
     if (this.passwordLoading) {
       return;
     }
 
-    const code =
-      this.verificationCode.trim();
+    const code = this.verificationCode.trim();
 
     if (!/^\d{6}$/.test(code)) {
+      this.passwordErrorMessage = 'Введите шестизначный код подтверждения.';
 
-      this.passwordErrorMessage =
-        'Введите шестизначный код подтверждения.';
-
-      this.passwordSuccessMessage =
-        '';
+      this.passwordSuccessMessage = '';
 
       return;
     }
 
-    if (
-      this.codeExpiresInSeconds <= 0
-    ) {
-
-      this.passwordErrorMessage =
-        'Срок действия кода истек. Запросите новый код.';
+    if (this.codeExpiresInSeconds <= 0) {
+      this.passwordErrorMessage = 'Срок действия кода истек. Запросите новый код.';
 
       return;
     }
@@ -443,94 +407,54 @@ export class ProfileWorkspace
 
     this.passwordSuccessMessage = '';
 
-    this.authService
-      .verifyPasswordChangeCode(
-        code
-      )
-      .subscribe({
+    this.authService.verifyPasswordChangeCode(code).subscribe({
+      next: (response) => {
+        this.passwordLoading = false;
 
-        next: response => {
+        this.changeToken = response.changeToken;
 
-          this.passwordLoading =
-            false;
+        this.passwordStep = 'PASSWORD';
 
-          this.changeToken =
-            response.changeToken;
+        this.startPasswordTimer(0, 0, response.expiresInSeconds);
 
-          this.passwordStep =
-            'PASSWORD';
+        this.passwordSuccessMessage = 'Код подтвержден. Теперь задайте новый пароль.';
 
-          this.startPasswordTimer(
-            0,
-            0,
-            response.expiresInSeconds
-          );
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.passwordSuccessMessage =
-            'Код подтвержден. Теперь задайте новый пароль.';
+      error: (error: HttpErrorResponse) => {
+        this.passwordLoading = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
-
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.passwordLoading =
-            false;
-
-          this.passwordErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось подтвердить код.'
-            );
-        }
-      });
+        this.passwordErrorMessage = this.resolveError(error, 'Не удалось подтвердить код.');
+      },
+    });
   }
 
-
   confirmPasswordChange(): void {
-
     if (this.passwordLoading) {
       return;
     }
 
     if (!this.changeToken) {
-
-      this.passwordErrorMessage =
-        'Сначала подтвердите код из письма.';
+      this.passwordErrorMessage = 'Сначала подтвердите код из письма.';
 
       return;
     }
 
-    if (
-      this.newPassword.length < 8
-    ) {
-
-      this.passwordErrorMessage =
-        'Пароль должен содержать не менее 8 символов.';
+    if (this.newPassword.length < 8) {
+      this.passwordErrorMessage = 'Пароль должен содержать не менее 8 символов.';
 
       return;
     }
 
-    if (
-      this.newPassword
-      !== this.confirmNewPassword
-    ) {
-
-      this.passwordErrorMessage =
-        'Пароли не совпадают.';
+    if (this.newPassword !== this.confirmNewPassword) {
+      this.passwordErrorMessage = 'Пароли не совпадают.';
 
       return;
     }
 
-    if (
-      this.changeTokenExpiresInSeconds <= 0
-    ) {
-
-      this.passwordErrorMessage =
-        'Время подтверждения истекло. Начните заново.';
+    if (this.changeTokenExpiresInSeconds <= 0) {
+      this.passwordErrorMessage = 'Время подтверждения истекло. Начните заново.';
 
       return;
     }
@@ -543,284 +467,151 @@ export class ProfileWorkspace
 
     this.authService
       .confirmPasswordChange({
-        changeToken:
-          this.changeToken,
+        changeToken: this.changeToken,
 
-        newPassword:
-          this.newPassword,
+        newPassword: this.newPassword,
 
-        confirmPassword:
-          this.confirmNewPassword
+        confirmPassword: this.confirmNewPassword,
       })
       .subscribe({
-
         next: () => {
-
-          this.passwordLoading =
-            false;
+          this.passwordLoading = false;
 
           this.stopPasswordTimer();
 
-          this.passwordSuccessMessage =
-            'Пароль изменен. Выполняется выход из системы...';
+          this.passwordSuccessMessage = 'Пароль изменен. Выполняется выход из системы...';
 
-          window.setTimeout(
-            () => {
+          window.setTimeout(() => {
+            this.authService.logout();
 
-              this.authService
-                .logout();
-
-              void this.router.navigate(
-                ['/login']
-              );
-            },
-            1200
-          );
+            void this.router.navigate(['/login']);
+          }, 1200);
         },
 
-        error: (
-          error: HttpErrorResponse
-        ) => {
+        error: (error: HttpErrorResponse) => {
+          this.passwordLoading = false;
 
-          this.passwordLoading =
-            false;
-
-          this.passwordErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось изменить пароль.'
-            );
-        }
+          this.passwordErrorMessage = this.resolveError(error, 'Не удалось изменить пароль.');
+        },
       });
   }
 
-
   resetPasswordChange(): void {
-
     this.stopPasswordTimer();
 
-    this.passwordStep =
-      'EMAIL';
+    this.passwordStep = 'EMAIL';
 
-    this.passwordLoading =
-      false;
+    this.passwordLoading = false;
 
-    this.passwordSuccessMessage =
-      '';
+    this.passwordSuccessMessage = '';
 
-    this.passwordErrorMessage =
-      '';
+    this.passwordErrorMessage = '';
 
-    this.maskedEmail =
-      '';
+    this.maskedEmail = '';
 
-    this.verificationCode =
-      '';
+    this.verificationCode = '';
 
-    this.changeToken =
-      '';
+    this.changeToken = '';
 
-    this.newPassword =
-      '';
+    this.newPassword = '';
 
-    this.confirmNewPassword =
-      '';
+    this.confirmNewPassword = '';
 
-    this.codeExpiresInSeconds =
-      0;
+    this.codeExpiresInSeconds = 0;
 
-    this.resendAvailableInSeconds =
-      0;
+    this.resendAvailableInSeconds = 0;
 
-    this.changeTokenExpiresInSeconds =
-      0;
+    this.changeTokenExpiresInSeconds = 0;
   }
-
 
   getCodeExpiresLabel(): string {
-
-    return this.formatSeconds(
-      this.codeExpiresInSeconds
-    );
+    return this.formatSeconds(this.codeExpiresInSeconds);
   }
-
 
   getResendLabel(): string {
-
-    return this.formatSeconds(
-      this.resendAvailableInSeconds
-    );
+    return this.formatSeconds(this.resendAvailableInSeconds);
   }
-
 
   getChangeTokenExpiresLabel(): string {
-
-    return this.formatSeconds(
-      this.changeTokenExpiresInSeconds
-    );
+    return this.formatSeconds(this.changeTokenExpiresInSeconds);
   }
-
 
   private startPasswordTimer(
     codeSeconds: number,
     resendSeconds: number,
-    tokenSeconds: number
+    tokenSeconds: number,
   ): void {
-
     this.stopPasswordTimer();
 
-    this.codeExpiresInSeconds =
-      Math.max(
-        0,
-        Math.floor(codeSeconds)
-      );
+    this.codeExpiresInSeconds = Math.max(0, Math.floor(codeSeconds));
 
-    this.resendAvailableInSeconds =
-      Math.max(
-        0,
-        Math.floor(resendSeconds)
-      );
+    this.resendAvailableInSeconds = Math.max(0, Math.floor(resendSeconds));
 
-    this.changeTokenExpiresInSeconds =
-      Math.max(
-        0,
-        Math.floor(tokenSeconds)
-      );
+    this.changeTokenExpiresInSeconds = Math.max(0, Math.floor(tokenSeconds));
 
-    this.passwordTimerId =
-      window.setInterval(
-        () => {
+    this.passwordTimerId = window.setInterval(() => {
+      if (this.codeExpiresInSeconds > 0) {
+        this.codeExpiresInSeconds--;
+      }
 
-          if (
-            this.codeExpiresInSeconds > 0
-          ) {
-            this.codeExpiresInSeconds--;
+      if (this.resendAvailableInSeconds > 0) {
+        this.resendAvailableInSeconds--;
+      }
+
+      if (this.changeTokenExpiresInSeconds > 0) {
+        this.changeTokenExpiresInSeconds--;
+      }
+
+      this.changeDetectorRef.markForCheck();
+
+      if (this.codeExpiresInSeconds === 0) {
+        if (this.resendAvailableInSeconds === 0) {
+          if (this.changeTokenExpiresInSeconds === 0) {
+            this.stopPasswordTimer();
           }
-
-          if (
-            this.resendAvailableInSeconds > 0
-          ) {
-            this.resendAvailableInSeconds--;
-          }
-
-          if (
-            this.changeTokenExpiresInSeconds > 0
-          ) {
-            this.changeTokenExpiresInSeconds--;
-          }
-
-          this.changeDetectorRef
-            .markForCheck();
-
-          if (
-            this.codeExpiresInSeconds === 0
-          ) {
-
-            if (
-              this.resendAvailableInSeconds === 0
-            ) {
-
-              if (
-                this.changeTokenExpiresInSeconds === 0
-              ) {
-                this.stopPasswordTimer();
-              }
-            }
-          }
-        },
-        1000
-      );
+        }
+      }
+    }, 1000);
   }
 
-
   private stopPasswordTimer(): void {
-
-    if (
-      this.passwordTimerId === null
-    ) {
+    if (this.passwordTimerId === null) {
       return;
     }
 
-    window.clearInterval(
-      this.passwordTimerId
-    );
+    window.clearInterval(this.passwordTimerId);
 
-    this.passwordTimerId =
-      null;
+    this.passwordTimerId = null;
   }
 
+  private formatSeconds(totalSeconds: number): string {
+    const safe = Math.max(0, Math.floor(totalSeconds));
 
-  private formatSeconds(
-    totalSeconds: number
-  ): string {
+    const minutes = Math.floor(safe / 60);
 
-    const safe =
-      Math.max(
-        0,
-        Math.floor(totalSeconds)
-      );
+    const seconds = safe % 60;
 
-    const minutes =
-      Math.floor(
-        safe / 60
-      );
-
-    const seconds =
-      safe % 60;
-
-    return (
-      minutes
-        .toString()
-        .padStart(2, '0')
-      +
-      ':'
-      +
-      seconds
-        .toString()
-        .padStart(2, '0')
-    );
+    return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
   }
-
 
   getInitials(): string {
-
-    const value =
-      this.currentUser?.fullName
-        ?.trim();
+    const value = this.currentUser?.fullName?.trim();
 
     if (!value) {
       return 'U';
     }
 
-    const parts =
-      value
-        .split(/\s+/)
-        .filter(Boolean);
+    const parts = value.split(/\s+/).filter(Boolean);
 
     if (parts.length === 1) {
-
-      return parts[0]
-        .substring(
-          0,
-          1
-        )
-        .toUpperCase();
+      return parts[0].substring(0, 1).toUpperCase();
     }
 
-    return (
-      parts[0].substring(0, 1)
-      +
-      parts[1].substring(0, 1)
-    ).toUpperCase();
+    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 
-
   getRoleLabel(): string {
-
-    switch (
-      this.currentUser?.role
-    ) {
-
+    switch (this.currentUser?.role) {
       case 'ADMIN':
         return 'Администратор';
 
@@ -838,161 +629,97 @@ export class ProfileWorkspace
     }
   }
 
+  formatReminderDate(value: string): string {
+    const date = new Date(value);
 
-  formatReminderDate(
-    value: string
-  ): string {
-
-    const date =
-      new Date(value);
-
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    if (Number.isNaN(date.getTime())) {
       return value;
     }
 
-    return new Intl.DateTimeFormat(
-      'ru-RU',
-      {
-        day: '2-digit',
-        month: 'long',
-        hour: '2-digit',
-        minute: '2-digit'
-      }
-    ).format(date);
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: '2-digit',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
   }
-
 
   private loadUser(): void {
-
-    const cachedUser =
-      this.authService
-        .getCurrentUser();
+    const cachedUser = this.authService.getCurrentUser();
 
     if (cachedUser) {
-
       this.currentUser = {
-        userId:
-          cachedUser.userId,
+        userId: cachedUser.userId,
 
-        login:
-          cachedUser.login,
+        login: cachedUser.login,
 
-        fullName:
-          cachedUser.fullName,
+        fullName: cachedUser.fullName,
 
-        email:
-          cachedUser.email ?? null,
+        email: cachedUser.email ?? null,
 
-        role:
-          cachedUser.role
+        role: cachedUser.role,
       };
 
-      this.fullName =
-        cachedUser.fullName;
+      this.fullName = cachedUser.fullName;
 
-      this.loadingUser =
-        false;
+      this.loadLocalProfile();
+      this.loadingUser = false;
     }
 
-    this.authService
-      .me()
-      .subscribe({
+    this.authService.me().subscribe({
+      next: (user) => {
+        this.currentUser = user;
 
-        next: user => {
+        this.fullName = user.fullName;
 
-          this.currentUser =
-            user;
+        this.loadLocalProfile();
+        this.loadingUser = false;
 
-          this.fullName =
-            user.fullName;
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.loadingUser =
-            false;
+      error: () => {
+        this.loadingUser = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
-
-        error: () => {
-
-          this.loadingUser =
-            false;
-
-          this.changeDetectorRef
-            .markForCheck();
-        }
-      });
+        this.changeDetectorRef.markForCheck();
+      },
+    });
   }
-
 
   private loadReminders(): void {
-
     this.remindersLoading = true;
 
-    this.profileService
-      .getReminders()
-      .subscribe({
+    this.profileService.getReminders().subscribe({
+      next: (reminders) => {
+        this.reminders = reminders;
 
-        next: reminders => {
+        this.remindersLoading = false;
 
-          this.reminders =
-            reminders;
+        this.changeDetectorRef.markForCheck();
+      },
 
-          this.remindersLoading =
-            false;
+      error: (error: HttpErrorResponse) => {
+        this.remindersLoading = false;
 
-          this.changeDetectorRef
-            .markForCheck();
-        },
+        this.reminderErrorMessage = this.resolveError(error, 'Не удалось загрузить напоминания.');
 
-        error: (
-          error: HttpErrorResponse
-        ) => {
-
-          this.remindersLoading =
-            false;
-
-          this.reminderErrorMessage =
-            this.resolveError(
-              error,
-              'Не удалось загрузить напоминания.'
-            );
-
-          this.changeDetectorRef
-            .markForCheck();
-        }
-      });
+        this.changeDetectorRef.markForCheck();
+      },
+    });
   }
 
+  private resolveError(error: HttpErrorResponse, fallback: string): string {
+    const detail = error.error?.detail;
 
-  private resolveError(
-    error: HttpErrorResponse,
-    fallback: string
-  ): string {
-
-    const detail =
-      error.error?.detail;
-
-    if (
-      typeof detail === 'string'
-    ) {
-
+    if (typeof detail === 'string') {
       if (detail.trim()) {
         return detail;
       }
     }
 
-    const message =
-      error.error?.message;
+    const message = error.error?.message;
 
-    if (
-      typeof message === 'string'
-    ) {
-
+    if (typeof message === 'string') {
       if (message.trim()) {
         return message;
       }
