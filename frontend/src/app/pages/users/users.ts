@@ -1,6 +1,8 @@
+import { DomSanitizer } from '@angular/platform-browser';
 import {
   ChangeDetectorRef,
   Component,
+  inject,
   OnInit
 } from '@angular/core';
 
@@ -40,6 +42,11 @@ import {
 })
 export class UsersWorkspace
   implements OnInit {
+
+  // Fixed local stylesheet asset keeps the visual layer out of the initial JS bundle.
+  readonly workspaceStyles = inject(DomSanitizer).bypassSecurityTrustResourceUrl(
+    'assets/users/users-workspace.css'
+  );
 
   users: AdminUser[] = [];
   roles: RoleOption[] = [];

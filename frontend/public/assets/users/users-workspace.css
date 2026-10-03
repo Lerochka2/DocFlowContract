@@ -1,0 +1,656 @@
+/* Page-scoped visual styles served as an asset to preserve the initial bundle budget. */
+@charset "UTF-8";
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+.users-page.df-workspace.users-page {
+  --df-title-size: 44px;
+  --df-section-size: 27px;
+  --df-card-title-size: 27px;
+  --df-body-size: 16px;
+  --df-description-size: 18px;
+  --df-table-size: 16px;
+  --df-caption-size: 15px;
+  --df-label-size: 16px;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+}
+.users-page.df-workspace.users-page .users-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 26px;
+  min-height: 176px;
+  padding: 25px 28px;
+  margin-bottom: 22px;
+  border: 1px solid white;
+  background: linear-gradient(110deg, rgba(227, 245, 255, 0.9411764706), rgba(220, 232, 255, 0.8666666667) 52%, rgba(233, 220, 255, 0.8784313725));
+}
+.users-page.df-workspace.users-page .users-hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 70%;
+}
+.users-page.df-workspace.users-page .users-hero h1 {
+  margin: 8px 0 8px;
+  font-size: 44px;
+}
+.users-page.df-workspace.users-page .users-hero p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+}
+.users-page.df-workspace.users-page .users-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+.users-page.df-workspace.users-page .user-counter {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 60px auto;
+  column-gap: 16px;
+  align-items: center;
+  min-width: 220px;
+  padding: 18px;
+  border: 1px solid white;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8784313725);
+  box-shadow: 0 8px 26px rgba(135, 139, 221, 0.0980392157);
+}
+.users-page.df-workspace.users-page .counter-icon {
+  grid-row: 1/3;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  color: #6865ff;
+  background: linear-gradient(135deg, #efebff, #e6e6ff);
+}
+.users-page.df-workspace.users-page .counter-icon svg {
+  width: 31px;
+  height: 31px;
+}
+.users-page.df-workspace.users-page .user-counter strong {
+  color: #586bff;
+  font-size: 38px;
+  line-height: 1.1;
+}
+.users-page.df-workspace.users-page .user-counter > span:last-child {
+  color: var(--df-muted);
+  font-size: 16px;
+  margin-top: 6px;
+}
+.users-page.df-workspace.users-page svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.users-page.df-workspace.users-page .create-card, .users-page.df-workspace.users-page .users-card {
+  border: 1px solid rgba(255, 255, 255, 0.937254902);
+  border-radius: 26px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.9803921569), rgba(255, 255, 255, 0.8117647059));
+  box-shadow: 0 12px 30px rgba(132, 145, 211, 0.1019607843), inset 0 1px 0 white;
+}
+.users-page.df-workspace.users-page .create-card {
+  padding: 24px;
+  margin-bottom: 22px;
+}
+.users-page.df-workspace.users-page .users-card {
+  overflow: hidden;
+}
+.users-page.df-workspace.users-page .section-heading, .users-page.df-workspace.users-page .table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.users-page.df-workspace.users-page .section-heading {
+  margin-bottom: 24px;
+}
+.users-page.df-workspace.users-page .table-toolbar {
+  padding: 22px 24px;
+}
+.users-page.df-workspace.users-page .section-title-group {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 0;
+}
+.users-page.df-workspace.users-page .section-title-group > div {
+  min-width: 0;
+}
+.users-page.df-workspace.users-page .section-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #5f6cff;
+  background: linear-gradient(130deg, #e2f0ff, #ede7ff);
+  box-shadow: 0 5px 14px rgba(135, 139, 221, 0.0784313725);
+}
+.users-page.df-workspace.users-page .section-icon svg {
+  width: 30px;
+  height: 30px;
+}
+.users-page.df-workspace.users-page .section-heading .section-icon svg {
+  fill: #7480ff;
+  stroke: white;
+  width: 35px;
+  height: 35px;
+}
+.users-page.df-workspace.users-page .section-eyebrow {
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+.users-page.df-workspace.users-page .section-title-group h2 {
+  font-size: 27px;
+  margin: 4px 0 0;
+}
+.users-page.df-workspace.users-page .security-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e1e6ff;
+  border-radius: 13px;
+  background: rgba(246, 245, 255, 0.6901960784);
+  padding: 11px 14px;
+  font-size: 14px;
+}
+.users-page.df-workspace.users-page .security-note svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #8093df;
+}
+.users-page.df-workspace.users-page .create-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.3fr) minmax(145px, 0.8fr) minmax(200px, 1.1fr) minmax(155px, 0.8fr) minmax(230px, 1.1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+.users-page.df-workspace.users-page .create-form label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.users-page.df-workspace.users-page .create-form label > span:first-child {
+  font-size: 16px;
+  font-weight: 650;
+  color: #616f9d;
+}
+.users-page.df-workspace.users-page .field-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.users-page.df-workspace.users-page .field-control > svg {
+  position: absolute;
+  left: 14px;
+  width: 21px;
+  height: 21px;
+  color: #7087c9;
+  z-index: 1;
+  pointer-events: none;
+}
+.users-page.df-workspace.users-page .field-control input, .users-page.df-workspace.users-page .field-control select {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 12px 0 43px;
+  border: 1px solid #dce4ff;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8117647059);
+  color: var(--df-ink);
+  outline: none;
+}
+.users-page.df-workspace.users-page .field-control:has(input[type=password]), .users-page.df-workspace.users-page .field-control:has(input[name=login]) {
+  background: #edf3ff;
+  border-radius: 12px;
+}
+.users-page.df-workspace.users-page .field-select select {
+  appearance: none;
+  padding-right: 30px;
+}
+.users-page.df-workspace.users-page .field-select::after {
+  content: "⌄";
+  position: absolute;
+  right: 14px;
+  color: #5067b4;
+  pointer-events: none;
+}
+.users-page.df-workspace.users-page .create-button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(110deg, #3998ff, #9856ff);
+  box-shadow: 0 7px 16px rgba(114, 106, 250, 0.1803921569);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.users-page.df-workspace.users-page .create-button svg {
+  width: 21px;
+  height: 21px;
+}
+.users-page.df-workspace.users-page .create-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(114, 106, 250, 0.2666666667);
+}
+.users-page.df-workspace.users-page .create-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.users-page.df-workspace.users-page .search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(470px, 40%);
+  min-width: 230px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #e0e7ff;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.8509803922);
+}
+.users-page.df-workspace.users-page .search-box svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #8897c9;
+}
+.users-page.df-workspace.users-page .search-box input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  height: 46px;
+  border: 0;
+  background: transparent;
+  outline: 0;
+  font: inherit;
+  font-size: 16px;
+}
+.users-page.df-workspace.users-page .field-control input:focus, .users-page.df-workspace.users-page .field-control select:focus, .users-page.df-workspace.users-page .role-select:focus, .users-page.df-workspace.users-page .name-edit input:focus, .users-page.df-workspace.users-page .email-edit input:focus {
+  border-color: #a4b6ff;
+  box-shadow: 0 0 0 3px rgba(139, 161, 255, 0.1294117647);
+}
+.users-page.df-workspace.users-page .search-box:focus-within {
+  border-color: #a4b6ff;
+  box-shadow: 0 0 0 3px rgba(139, 161, 255, 0.1294117647);
+}
+.users-page.df-workspace.users-page .table-wrapper {
+  overflow-x: auto;
+  padding: 0 12px 12px;
+  scrollbar-color: #b9c9fa #f4f6ff;
+}
+.users-page.df-workspace.users-page table {
+  width: 100%;
+  min-width: 1470px;
+  border-collapse: separate;
+  border-spacing: 0 7px;
+  font-size: 16px;
+}
+.users-page.df-workspace.users-page thead {
+  background: linear-gradient(110deg, #f0f4ff, #f4f1ff);
+}
+.users-page.df-workspace.users-page th {
+  padding: 13px 12px;
+  text-align: left;
+  color: #6b78a4;
+  font-size: 14px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  white-space: nowrap;
+}
+.users-page.df-workspace.users-page td {
+  padding: 15px 12px;
+  color: #6e7aa6;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8784313725);
+  border-top: 1px solid #e9edff;
+  border-bottom: 1px solid #e9edff;
+  vertical-align: middle;
+}
+.users-page.df-workspace.users-page td:first-child {
+  border-left: 1px solid #e9edff;
+  border-radius: 17px 0 0 17px;
+}
+.users-page.df-workspace.users-page td:last-child {
+  border-right: 1px solid #e9edff;
+  border-radius: 0 17px 17px 0;
+}
+.users-page.df-workspace.users-page tbody tr {
+  transition: transform 0.18s, filter 0.18s;
+}
+.users-page.df-workspace.users-page tbody tr:hover {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 4px 6px rgba(126, 146, 203, 0.0941176471));
+}
+.users-page.df-workspace.users-page tbody tr:hover td {
+  background: #fafcff;
+}
+.users-page.df-workspace.users-page .disabled-user td {
+  opacity: 1;
+}
+.users-page.df-workspace.users-page .user-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 255px;
+}
+.users-page.df-workspace.users-page .avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  font-size: 19px;
+  font-weight: 750;
+  color: #526cff;
+  background: linear-gradient(140deg, #e8eaff, #e1edff);
+}
+.users-page.df-workspace.users-page .user-info {
+  min-width: 0;
+}
+.users-page.df-workspace.users-page .user-name-line, .users-page.df-workspace.users-page .email-value-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.users-page.df-workspace.users-page .user-name-line strong {
+  color: var(--df-ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.users-page.df-workspace.users-page .user-info > span {
+  display: block;
+  font-size: 14px;
+  margin-top: 5px;
+  color: #8795bc;
+}
+.users-page.df-workspace.users-page .email-value, .users-page.df-workspace.users-page .date-value, .users-page.df-workspace.users-page .login-value {
+  font-size: 16px;
+}
+.users-page.df-workspace.users-page .email-value {
+  overflow-wrap: anywhere;
+}
+.users-page.df-workspace.users-page .email-value-line {
+  max-width: 300px;
+}
+.users-page.df-workspace.users-page .edit-name-button, .users-page.df-workspace.users-page .edit-email-button {
+  flex-shrink: 0;
+  border: 0;
+  padding: 5px;
+  font: inherit;
+  font-size: 18px;
+  background: transparent;
+  color: #798bb9;
+  cursor: pointer;
+}
+.users-page.df-workspace.users-page .edit-name-button:hover, .users-page.df-workspace.users-page .edit-email-button:hover {
+  color: #526cff;
+  background: #edf2ff;
+  border-radius: 7px;
+}
+.users-page.df-workspace.users-page .role-select {
+  width: 240px;
+  height: 44px;
+  padding: 0 28px 0 12px;
+  border: 1px solid #e0e7ff;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--df-ink);
+  background: rgba(255, 255, 255, 0.937254902);
+  outline: none;
+}
+.users-page.df-workspace.users-page .role-select:disabled {
+  color: var(--df-ink);
+  opacity: 1;
+  cursor: not-allowed;
+}
+.users-page.df-workspace.users-page .status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.users-page.df-workspace.users-page .status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.users-page.df-workspace.users-page .status.active {
+  color: #278964;
+  background: #eaf7ef;
+}
+.users-page.df-workspace.users-page .status.blocked {
+  color: #d35d6e;
+  background: #fff0f2;
+}
+.users-page.df-workspace.users-page .current-user-label {
+  display: inline-block;
+  padding: 10px 13px;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #5c72c4;
+  background: #edf1ff;
+  white-space: nowrap;
+}
+.users-page.df-workspace.users-page .state-button {
+  padding: 10px 14px;
+  border: 1px solid;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.users-page.df-workspace.users-page .state-button.block {
+  border-color: #ffd3da;
+  color: #d4586b;
+  background: #fff6f7;
+}
+.users-page.df-workspace.users-page .state-button.unblock {
+  border-color: #cceee1;
+  color: #258a64;
+  background: #f0faf5;
+}
+.users-page.df-workspace.users-page .state-button:hover {
+  box-shadow: 0 5px 12px rgba(135, 145, 194, 0.1058823529);
+}
+.users-page.df-workspace.users-page .name-edit, .users-page.df-workspace.users-page .email-edit {
+  min-width: 230px;
+}
+.users-page.df-workspace.users-page .name-edit input, .users-page.df-workspace.users-page .email-edit input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dce4ff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  outline: 0;
+}
+.users-page.df-workspace.users-page .name-edit-actions, .users-page.df-workspace.users-page .email-edit-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 8px;
+}
+.users-page.df-workspace.users-page .name-save, .users-page.df-workspace.users-page .email-save, .users-page.df-workspace.users-page .name-cancel, .users-page.df-workspace.users-page .email-cancel {
+  border: 1px solid #dce4ff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: #506bb5;
+  background: #f1f5ff;
+  cursor: pointer;
+}
+.users-page.df-workspace.users-page .message {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border: 1px solid;
+  border-radius: 14px;
+  font-size: 16px;
+}
+.users-page.df-workspace.users-page .message.success {
+  color: #278964;
+  border-color: #cceee1;
+  background: #eaf7ef;
+}
+.users-page.df-workspace.users-page .message.error {
+  color: #b94460;
+  border-color: #ffd3da;
+  background: #fff0f2;
+}
+.users-page.df-workspace.users-page .state-panel {
+  padding: 60px 24px;
+  text-align: center;
+  font-size: 18px;
+  color: var(--df-muted);
+}
+@container (max-width:1450px) {
+  .users-page.df-workspace.users-page .create-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .users-page.df-workspace.users-page .create-button {
+    width: 100%;
+  }
+  .users-page.df-workspace.users-page .users-hero-copy {
+    max-width: 65%;
+  }
+  .users-page.df-workspace.users-page .users-hero p {
+    max-width: 690px;
+  }
+}
+@container (max-width:1000px) {
+  .users-page.df-workspace.users-page .users-hero h1 {
+    font-size: 40px;
+  }
+  .users-page.df-workspace.users-page .users-hero-copy {
+    max-width: 60%;
+  }
+  .users-page.df-workspace.users-page .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .users-page.df-workspace.users-page .security-note {
+    margin-left: 82px;
+  }
+  .users-page.df-workspace.users-page .create-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .users-page.df-workspace.users-page .table-toolbar {
+    flex-wrap: wrap;
+  }
+  .users-page.df-workspace.users-page .search-box {
+    width: 100%;
+  }
+}
+@container (max-width:650px) {
+  .users-page.df-workspace.users-page .users-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 22px;
+  }
+  .users-page.df-workspace.users-page .users-hero-copy {
+    max-width: 100%;
+  }
+  .users-page.df-workspace.users-page .users-hero h1 {
+    font-size: 34px;
+  }
+  .users-page.df-workspace.users-page .users-hero p {
+    font-size: 17px;
+  }
+  .users-page.df-workspace.users-page .users-hero-art {
+    opacity: 0.65;
+    object-position: 68% center;
+  }
+  .users-page.df-workspace.users-page .user-counter {
+    min-width: 210px;
+  }
+  .users-page.df-workspace.users-page .create-card {
+    padding: 20px;
+  }
+  .users-page.df-workspace.users-page .create-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .users-page.df-workspace.users-page .section-title-group {
+    gap: 14px;
+  }
+  .users-page.df-workspace.users-page .section-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 17px;
+  }
+  .users-page.df-workspace.users-page .section-title-group h2 {
+    font-size: 25px;
+  }
+  .users-page.df-workspace.users-page .section-eyebrow {
+    font-size: 14px;
+  }
+  .users-page.df-workspace.users-page .security-note {
+    margin-left: 0;
+    font-size: 14px;
+  }
+  .users-page.df-workspace.users-page .table-toolbar {
+    padding: 20px;
+  }
+  .users-page.df-workspace.users-page .search-box {
+    min-width: 0;
+  }
+  .users-page.df-workspace.users-page .users-hero .df-section-label {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .users-page.df-workspace.users-page .create-button, .users-page.df-workspace.users-page tbody tr {
+    transition: none;
+  }
+  .users-page.df-workspace.users-page .create-button:hover:not(:disabled), .users-page.df-workspace.users-page tbody tr:hover {
+    transform: none;
+  }
+}
+@container (max-width: 650px) { .users-page.df-workspace.users-page .user-counter { min-width:0; width:min(220px,100%); grid-template-columns:48px minmax(0,1fr); gap:10px; padding:14px; } .users-page.df-workspace.users-page .counter-icon { width:48px; height:48px; border-radius:16px; } }
