@@ -1,8 +1,8 @@
-<section class="documents-page">
-  <header class="page-heading">
-    <div>
-      <span class="eyebrow"> РАБОЧЕЕ ПРОСТРАНСТВО </span>
-      <h1>Документы</h1>
+<section class="documents-page df-workspace">
+  <header class="page-heading df-hero df-ornament">
+    <div class="documents-hero-copy">
+      <span class="eyebrow df-section-label"> РАБОЧЕЕ ПРОСТРАНСТВО </span>
+      <h1 class="df-page-title">Документы</h1>
       <p>Просматривайте, ищите и фильтруйте документы, загруженные в DocFlow.</p>
       @if (uploadMessage) {
         <p class="feedback success">
@@ -25,6 +25,10 @@
         </p>
       }
     </div>
+    <div class="documents-hero-art" aria-hidden="true">
+      <img src="assets/documents/documents-folder-glass.png" alt="" width="1536" height="1024" decoding="sync" fetchpriority="high" />
+      <span class="documents-float-card"><svg viewBox="0 0 48 54" fill="none"><path d="M12 6h17l8 8v32H12Z" fill="#eef4ff" stroke="white" stroke-width="1.5"/><path d="M29 6v9h8M19 23h11M19 29h11M19 35h7" stroke="#9aacfa" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+    </div>
     @if (canManageDocuments) {
       <input
         #fileInput
@@ -34,7 +38,7 @@
         (change)="onFileSelected($event)"
       />
       <button
-        class="upload-button"
+        class="upload-button df-primary-button"
         type="button"
         [disabled]="uploading || deleting"
         (click)="fileInput.click()"
@@ -49,7 +53,7 @@
       </button>
     }
   </header>
-  <section class="filter-panel" aria-label="Поиск и фильтры документов">
+  <section class="filter-panel df-card" aria-label="Поиск и фильтры документов">
     <div class="filter-heading">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
       Поиск и фильтры
@@ -100,14 +104,14 @@
         <option value="EXPIRED">Истёкшие</option>
         <option value="NOT_SPECIFIED">Срок не указан</option>
       </select>
-      <button class="apply-button" type="submit">Применить</button>
+      <button class="apply-button df-primary-button" type="submit">Применить</button>
       <button class="reset-button" type="button" (click)="resetFilters()">Сбросить</button>
     </form>
   </section>
-  <section class="documents-panel">
+  <section class="documents-panel df-card">
     <div class="panel-heading">
       <div>
-        <h2>
+        <h2 class="df-card-title">
           {{ documentsListTitle }}
         </h2>
         <span> Найдено: {{ documents.length }} </span>
@@ -128,7 +132,7 @@
             }
           </button>
         }
-        <span class="ai-label">
+        <span class="ai-label df-status-chip">
           <i></i>
           Данные из DocFlow
         </span>
@@ -152,7 +156,7 @@
         aria-label="Таблица документов с горизонтальной прокруткой"
       >
         <div class="documents-table" [class.read-only-table]="!canManageDocuments">
-          <div class="document-row table-head">
+          <div class="document-row table-head df-table-header">
             @if (canManageDocuments) {
               <span class="checkbox-cell">
                 <input
@@ -211,25 +215,25 @@
                   </strong>
                   <small> ID {{ document.documentId }} </small>
                   @if (document.subject) {
-                    <span class="subject">
+                    <span class="subject df-muted-text">
                       {{ document.subject }}
                     </span>
                   }
                 </div>
               </div>
               <div class="document-type-cell">
-                <span class="document-type">
+                <span class="document-type df-muted-text df-status-chip">
                   {{ getDocumentTypeLabel(document.documentType) }}
                 </span>
                 @if (document.documentType === 'CONTRACT' && document.expirationStatus) {
                   <span
-                    [class]="'expiration-mini ' + getExpirationClass(document.expirationStatus)"
+                    [class]="'expiration-mini df-status-chip ' + getExpirationClass(document.expirationStatus)"
                   >
                     {{ getExpirationLabel(document) }}
                   </span>
                 }
               </div>
-              <span [class]="'status ' + getStatusClass(document.status)">
+              <span [class]="'status df-status-chip ' + getStatusClass(document.status)">
                 {{ getStatusLabel(document.status) }}
               </span>
               <span>
