@@ -116,6 +116,9 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/public/access-requests").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/support", "/api/public/access-requests/options").permitAll()
+                        .requestMatchers("/api/admin/access-requests", "/api/admin/access-requests/**").hasRole("ADMIN")
 
                         .dispatcherTypeMatchers(
                                 DispatcherType.ERROR

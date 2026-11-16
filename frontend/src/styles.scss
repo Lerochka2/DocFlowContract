@@ -15,13 +15,13 @@ body {
 }
 
 html {
-  background: #f7f8fa;
+  background: #edf3f9;
 }
 
 body {
   min-height: 100vh;
   color: #252f40;
-  background: #f7f8fa;
+  background: #edf3f9;
   font-family:
     Inter,
     -apple-system,
@@ -31,7 +31,7 @@ body {
     Helvetica,
     Arial,
     sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -42,7 +42,7 @@ input,
 textarea,
 select {
   font-family: inherit;
-  font-size: 14px;
+  font-size: 17px;
 }
 
 button {
@@ -60,7 +60,7 @@ p {
 }
 
 small {
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.45;
 }
 
@@ -81,8 +81,8 @@ a {
 }
 
 ::selection {
-  color: #5147a9;
-  background: #e8e3ff;
+  color: #4771a9;
+  background: #e3efff;
 }
 
 ::-webkit-scrollbar {
@@ -126,9 +126,9 @@ a {
   border: 0;
   border-radius: 8px;
   color: #fff;
-  background: linear-gradient(135deg, #5855d1, #8063d4);
+  background: #2d80fa;
   font: inherit;
-  font-size: 13px;
+  font-size: 17px;
   cursor: pointer;
 }
 
@@ -141,7 +141,7 @@ a {
   margin-top: 13px;
   padding: 11px 13px;
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .comparison-message.error {
@@ -164,20 +164,20 @@ a {
 .comparison-header h3 {
   margin: 4px 0 5px;
   color: #303c52;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .comparison-header p {
   margin: 0;
   color: #7c8799;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
 }
 
 .comparison-eyebrow {
-  color: #7469ca;
-  font-size: 14px;
-  font-weight: 750;
+  color: #6993ca;
+  font-size: 17px;
+  font-weight: 700;
   letter-spacing: .08em;
 }
 
@@ -186,7 +186,7 @@ a {
   padding: 9px;
   border-radius: 10px;
   text-align: center;
-  background: #f4f5f8;
+  background: #f4f6f8;
 }
 
 .comparison-counter strong {
@@ -197,15 +197,15 @@ a {
 
 .comparison-counter span {
   color: #8a94a5;
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .comparison-counter.has-changes {
-  background: #f2f0ff;
+  background: #f0f6ff;
 }
 
 .comparison-counter.has-changes strong {
-  color: #6559c5;
+  color: #5988c5;
 }
 
 .comparison-documents {
@@ -218,7 +218,7 @@ a {
 
 .comparison-document {
   padding: 10px;
-  border: 1px solid #eceef4;
+  border: 1px solid #eceff4;
   border-radius: 9px;
   background: #fafbfc;
 }
@@ -227,29 +227,29 @@ a {
 .comparison-document small {
   display: block;
   color: #8a94a5;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .comparison-document strong {
   display: block;
   margin: 3px 0;
   color: #465267;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .comparison-document.additional {
-  background: #f8f7ff;
+  background: #f7faff;
 }
 
 .comparison-arrow {
-  color: #8176cf;
+  color: #769dcf;
 }
 
 .comparison-reference {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.45;
 }
 
@@ -276,7 +276,7 @@ a {
 .comparison-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .comparison-table th,
@@ -289,7 +289,7 @@ a {
 
 .comparison-table th {
   color: #8a94a5;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
 }
 
@@ -299,7 +299,7 @@ a {
 }
 
 .changed-row {
-  background: #fbfaff;
+  background: #fafcff;
 }
 
 .comparison-status {
@@ -308,7 +308,7 @@ a {
 }
 
 .comparison-status.changed {
-  color: #685bc8;
+  color: #5b8ac8;
 }
 
 .comparison-status.same {
@@ -323,7 +323,7 @@ a {
   margin-top: 12px;
   padding: 11px;
   border-radius: 8px;
-  background: #f7f6ff;
+  background: #f6faff;
 }
 
 .comparison-summary strong,
@@ -332,14 +332,14 @@ a {
 }
 
 .comparison-summary strong {
-  color: #5147a3;
-  font-size: 16px;
+  color: #476fa3;
+  font-size: 17px;
 }
 
 .comparison-summary span {
   margin-top: 4px;
   color: #7b8495;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.45;
 }
 
@@ -384,7 +384,7 @@ a {
   min-height: 44px;
   padding: 0 16px;
   border-radius: 11px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 650;
 }
 
@@ -394,7 +394,7 @@ a {
   padding: 0 16px;
   border-radius: 11px;
   font: inherit;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 650;
   cursor: pointer;
   transition:
@@ -408,19 +408,15 @@ a {
   border: 0;
   color: #ffffff;
   background:
-    linear-gradient(
-      135deg,
-      #5b55d8,
-      #7b61d5
-    );
+    #2d80fa;
   box-shadow:
-    0 7px 18px rgba(92, 79, 193, .16);
+    0 7px 18px rgba(79, 128, 193, .16);
 }
 
 .comparison-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow:
-    0 9px 22px rgba(92, 79, 193, .22);
+    0 9px 22px rgba(79, 128, 193, .22);
 }
 
 .comparison-button:disabled {
@@ -429,14 +425,14 @@ a {
 }
 
 .comparison-toggle-button {
-  border: 1px solid #ddd9f3;
-  color: #5f54c5;
+  border: 1px solid #d9e4f3;
+  color: #5485c5;
   background: #ffffff;
 }
 
 .comparison-toggle-button:hover {
-  border-color: #cfc8ef;
-  background: #f8f7ff;
+  border-color: #c8d9ef;
+  background: #f7faff;
 }
 
 
@@ -465,22 +461,22 @@ a {
   color: #252e46;
   font-size: 20px;
   line-height: 1.35;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .comparison-header p {
   max-width: 560px;
   margin: 0;
   color: #727d94;
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.6;
 }
 
 .comparison-eyebrow {
-  color: #6c60d4;
-  font-size: 15px;
+  color: #6092d4;
+  font-size: 17px;
   line-height: 1.3;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: .09em;
 }
 
@@ -511,7 +507,7 @@ a {
 
   text-align: center;
 
-  background: #f3f4f8;
+  background: #f3f5f8;
 }
 
 .comparison-counter strong {
@@ -522,7 +518,7 @@ a {
 
   font-size: 27px;
   line-height: 1;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .comparison-counter span {
@@ -531,7 +527,7 @@ a {
 
   color: #818aa0;
 
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.15;
   font-weight: 600;
 
@@ -542,13 +538,13 @@ a {
   background:
     linear-gradient(
       180deg,
-      #f0edff 0%,
-      #f6f4ff 100%
+      #edf5ff 0%,
+      #f4f9ff 100%
     );
 }
 
 .comparison-counter.has-changes strong {
-  color: #6253ce;
+  color: #5388ce;
 }
 
 
@@ -567,15 +563,15 @@ a {
 .comparison-document {
   padding: 14px;
 
-  border: 1px solid #e8eaf1;
+  border: 1px solid #e8ecf1;
   border-radius: 12px;
 
   background: #fafbfc;
 }
 
 .comparison-document.additional {
-  border-color: #e4e0f7;
-  background: #f8f7ff;
+  border-color: #e0eaf7;
+  background: #f7faff;
 }
 
 .comparison-document span,
@@ -584,7 +580,7 @@ a {
 
   color: #7d879e;
 
-  font-size: 12.5px;
+  font-size: 17px;
   line-height: 1.45;
 }
 
@@ -595,7 +591,7 @@ a {
 
   color: #333e56;
 
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.4;
   font-weight: 700;
 }
@@ -607,7 +603,7 @@ a {
 
   padding: 0 2px;
 
-  color: #7569cf;
+  color: #6995cf;
 
   font-size: 18px;
 }
@@ -621,7 +617,7 @@ a {
 
   border-radius: 10px;
 
-  font-size: 13.5px;
+  font-size: 17px;
   line-height: 1.55;
 }
 
@@ -656,7 +652,7 @@ a {
 
   border-collapse: collapse;
 
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .comparison-table th,
@@ -672,15 +668,15 @@ a {
 .comparison-table th {
   color: #7b859d;
 
-  font-size: 12.5px;
+  font-size: 17px;
   line-height: 1.4;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .comparison-table td {
   color: #253049;
 
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.5;
 }
 
@@ -690,7 +686,7 @@ a {
 }
 
 .changed-row {
-  background: #fbfaff;
+  background: #fafcff;
 }
 
 .comparison-status {
@@ -699,7 +695,7 @@ a {
 }
 
 .comparison-status.changed {
-  color: #6254cb;
+  color: #5488cb;
 }
 
 .comparison-status.same {
@@ -722,8 +718,8 @@ a {
   background:
     linear-gradient(
       135deg,
-      #f4f1ff,
-      #f8f7ff
+      #f1f7ff,
+      #f7faff
     );
 }
 
@@ -733,11 +729,11 @@ a {
 }
 
 .comparison-summary strong {
-  color: #5548b9;
+  color: #4879b9;
 
-  font-size: 14.5px;
+  font-size: 17px;
   line-height: 1.4;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .comparison-summary span {
@@ -745,7 +741,7 @@ a {
 
   color: #717b92;
 
-  font-size: 13.5px;
+  font-size: 17px;
   line-height: 1.55;
 }
 
@@ -793,7 +789,7 @@ a {
   .comparison-toggle-button,
   .linked-contract-actions .secondary-button {
     min-height: 42px;
-    font-size: 13.5px;
+    font-size: 17px;
   }
 }
 
@@ -827,7 +823,7 @@ a {
 
   border-radius: 11px;
 
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 650;
   line-height: 1;
 
@@ -835,21 +831,21 @@ a {
 }
 
 .linked-contract-actions .secondary-button {
-  border: 1px solid #ddd9f3;
+  border: 1px solid #d9e4f3;
   background: #ffffff;
-  color: #5f54c5;
+  color: #5485c5;
 }
 
 .linked-contract-actions .comparison-button {
   border: 0;
   color: #ffffff;
-  background: linear-gradient(135deg, #5b55d8, #7b61d5);
+  background: #2d80fa;
 }
 
 .linked-contract-actions .comparison-toggle-button {
-  border: 1px solid #ddd9f3;
+  border: 1px solid #d9e4f3;
   background: #ffffff;
-  color: #5f54c5;
+  color: #5485c5;
 }
 
 
@@ -894,7 +890,7 @@ a {
 
   border-radius: 11px !important;
 
-  font-size: 14px !important;
+  font-size: 17px !important;
   line-height: 1 !important;
   font-weight: 650 !important;
 
@@ -907,9 +903,9 @@ a {
 .linked-contract-actions .secondary-button {
   grid-column: 1;
 
-  border: 1px solid #ddd9f3 !important;
+  border: 1px solid #d9e4f3 !important;
 
-  color: #5f54c5 !important;
+  color: #5485c5 !important;
   background: #ffffff !important;
 }
 
@@ -924,14 +920,10 @@ a {
   color: #ffffff !important;
 
   background:
-    linear-gradient(
-      135deg,
-      #5b55d8,
-      #7b61d5
-    ) !important;
+    #2d80fa !important;
 
   box-shadow:
-    0 7px 18px rgba(92, 79, 193, .16);
+    0 7px 18px rgba(79, 128, 193, .16);
 }
 
 
@@ -941,9 +933,9 @@ a {
   grid-column: 1;
   grid-row: 2;
 
-  border: 1px solid #ddd9f3 !important;
+  border: 1px solid #d9e4f3 !important;
 
-  color: #5f54c5 !important;
+  color: #5485c5 !important;
   background: #ffffff !important;
 }
 
@@ -952,15 +944,15 @@ a {
 
 .linked-contract-actions .secondary-button:hover,
 .linked-contract-actions .comparison-toggle-button:hover {
-  border-color: #cac3ed !important;
-  background: #f8f7ff !important;
+  border-color: #c3d5ed !important;
+  background: #f7faff !important;
 }
 
 .linked-contract-actions .comparison-button:hover:not(:disabled) {
   transform: translateY(-1px);
 
   box-shadow:
-    0 9px 22px rgba(92, 79, 193, .22);
+    0 9px 22px rgba(79, 128, 193, .22);
 }
 
 
@@ -1025,7 +1017,7 @@ a {
 
   border-radius: 11px !important;
 
-  font-size: 14px !important;
+  font-size: 17px !important;
   line-height: 1 !important;
   font-weight: 650 !important;
 
@@ -1033,8 +1025,8 @@ a {
 }
 
 .linked-contract-actions .secondary-button {
-  border: 1px solid #ddd9f3 !important;
-  color: #5f54c5 !important;
+  border: 1px solid #d9e4f3 !important;
+  color: #5485c5 !important;
   background: #ffffff !important;
 }
 
@@ -1043,26 +1035,22 @@ a {
   color: #ffffff !important;
 
   background:
-    linear-gradient(
-      135deg,
-      #5b55d8,
-      #7b61d5
-    ) !important;
+    #2d80fa !important;
 
   box-shadow:
-    0 7px 18px rgba(92, 79, 193, .16);
+    0 7px 18px rgba(79, 128, 193, .16);
 }
 
 .linked-contract-actions .secondary-button:hover {
-  border-color: #cac3ed !important;
-  background: #f8f7ff !important;
+  border-color: #c3d5ed !important;
+  background: #f7faff !important;
 }
 
 .linked-contract-actions .comparison-button:hover:not(:disabled) {
   transform: translateY(-1px);
 
   box-shadow:
-    0 9px 22px rgba(92, 79, 193, .22);
+    0 9px 22px rgba(79, 128, 193, .22);
 }
 
 @media (max-width: 520px) {
@@ -1103,3 +1091,14 @@ main.page-content > router-outlet + * > :is(.home, .dashboard, .documents-page, 
   margin-inline: 0 !important;
 }
 @media (max-width: 650px) { main.page-content { padding-inline: 16px; } }
+
+/* Quiet headers across authenticated pages; functional counters/buttons remain. */
+main.page-content :is(.df-hero, app-sed .page-header) { min-height: 0 !important; padding: 30px 32px !important; background: linear-gradient(112deg,#e7f5ff,#edf5ff) !important; }
+main.page-content :is(.df-hero, app-sed .page-header)::before,
+main.page-content :is(.df-hero, app-sed .page-header)::after { content: none !important; }
+main.page-content :is(.hero-copy,.home-hero-copy,.settings-hero-copy,.header-copy) { max-width: none !important; padding-right: 0 !important; }
+.compact-lists :is(.document-row:not(.table-head),.admin-route-card,.task-card,.user-row,.result-card,.review-row,.history-row) { padding-block: 10px !important; min-height: 0 !important; }
+.needs-review-highlight { box-shadow: inset 4px 0 #dfac57; background-color: #fffaf0 !important; }
+@media(max-width:650px) { main.page-content :is(.df-hero,app-sed .page-header) { padding:22px !important; } }
+
+.compact-lists .users-page tbody td { padding-top:10px !important; padding-bottom:10px !important; }

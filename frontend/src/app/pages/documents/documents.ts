@@ -1,4 +1,6 @@
-﻿import {
+import { inject as injectPreferences } from '@angular/core';
+import { UiPreferencesService } from '../../core/settings/ui-preferences.service';
+import {
   ChangeDetectorRef,
   Component,
   OnInit
@@ -58,6 +60,7 @@ interface UploadFlowResult {
   styleUrl: './documents.scss'
 })
 export class Documents implements OnInit {
+  readonly uiPreferences = injectPreferences(UiPreferencesService);
 
   documents: WorkspaceDocument[] = [];
 
@@ -652,6 +655,8 @@ export class Documents implements OnInit {
 
             this.uploadMessage =
               'Документ успешно загружен и проанализирован.';
+
+            if (!this.uiPreferences.preferences().openAfterUpload) { this.loadDocuments(); return; }
 
             this.changeDetectorRef
               .markForCheck();

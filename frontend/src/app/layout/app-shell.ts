@@ -1,3 +1,5 @@
+import { inject } from '@angular/core';
+import { AccessRequestsService } from '../core/access/access-requests.service';
 import {
   ChangeDetectorRef,
   Component,
@@ -13,6 +15,7 @@ import {
 } from '@angular/forms';
 
 import {
+  NavigationEnd,
   Router,
   RouterLink,
   RouterLinkActive,
@@ -70,6 +73,8 @@ import {
 export class AppShell
   implements OnInit, OnDestroy {
 
+  readonly accessRequests = inject(AccessRequestsService);
+
   @ViewChild(
     'globalSearchInput'
   )
@@ -125,8 +130,14 @@ export class AppShell
   }
 
   ngOnInit(): void {
+    this.uiPreferencesService.activateUser();
+    this.uiPreferencesService.rememberPage(this.router.url);
+    this.router.events.pipe(takeUntil(this.destroySubject)).subscribe(event => {
+      if (event instanceof NavigationEnd) { this.uiPreferencesService.rememberPage(event.urlAfterRedirects); if(this.isAdmin()) this.accessRequests.refreshCount(); }
+    });
 
     this.loadCurrentUser();
+    if (this.authService.getCurrentUser()?.role === 'ADMIN') this.accessRequests.refreshCount();
     this.initializeSearch();
     this.loadNotifications();
   }
@@ -457,6 +468,11 @@ export class AppShell
             .markForCheck();
         }
       });
+  }
+
+  get visibleNotifications() {
+    return this.uiPreferencesService.preferences().unreadNotificationsOnly
+      ? this.notifications.filter(item => !item.read) : this.notifications;
   }
 
   get notificationCount(): number {

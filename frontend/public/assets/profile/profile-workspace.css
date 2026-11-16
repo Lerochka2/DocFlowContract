@@ -29,7 +29,7 @@
   margin-bottom: 18px;
   padding: 18px 20px;
   background:
-    radial-gradient(circle at 92% 20%, rgba(101, 89, 221, 0.09), transparent 28%), #ffffff;
+    radial-gradient(circle at 92% 20%, rgba(89, 146, 221, 0.09), transparent 28%), #ffffff;
 }
 
 .profile-page.df-workspace.profile-page .big-avatar {
@@ -39,9 +39,9 @@
   place-items: center;
   border-radius: 18px;
   color: #ffffff;
-  background: linear-gradient(145deg, #3779e8, #655edc);
+  background: linear-gradient(145deg, #3779e8, #5e95dc);
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .profile-page.df-workspace.profile-page .hero-user h2 {
@@ -102,14 +102,14 @@
   place-items: center;
   flex: 0 0 auto;
   border-radius: 10px;
-  color: #526fc2;
+  color: #5283c2;
   background: #edf2ff;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .profile-page.df-workspace.profile-page .card-icon.security {
-  color: #7457a2;
-  background: #f3ebfa;
+  color: #5777a2;
+  background: #ebf2fa;
 }
 
 .profile-page.df-workspace.profile-page .card-icon.reminder {
@@ -216,7 +216,7 @@
   padding: 12px 14px;
   border: 1px solid #e8ecf2;
   border-radius: 10px;
-  background: #fafbfe;
+  background: #fafcfe;
 }
 
 .profile-page.df-workspace.profile-page .info-field strong {
@@ -242,7 +242,7 @@
   padding: 13px;
   border: 1px solid #e7ebf1;
   border-radius: 10px;
-  background: #fafbfe;
+  background: #fafcfe;
 }
 
 .profile-page.df-workspace.profile-page .security-placeholder strong,
@@ -267,7 +267,7 @@
   color: #39745f;
   background: #e7f5ef;
   font-size: var(--df-body-size);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .profile-page.df-workspace.profile-page .security-note {
@@ -427,7 +427,7 @@
   padding: 13px;
   border: 1px solid #e5e9f1;
   border-radius: 10px;
-  background: #fafbfe;
+  background: #fafcfe;
 }
 
 .profile-page.df-workspace.profile-page .password-email-icon {
@@ -439,7 +439,7 @@
   border-radius: 9px;
   color: #5874bf;
   background: #eaf0ff;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .profile-page.df-workspace.profile-page .password-email-box span,
@@ -498,7 +498,7 @@
   max-width: 240px;
   letter-spacing: 0.28em;
   font-size: var(--df-body-size);
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 
 .profile-page.df-workspace.profile-page .password-timer {
@@ -734,9 +734,9 @@
   --df-section-size: 27px;
   --df-card-title-size: 23px;
   --df-body-size: 17px;
-  --df-table-size: 16px;
+  --df-table-size: 17px;
   --df-description-size: 18px;
-  --df-caption-size: 15px;
+  --df-caption-size: 17px;
   --df-label-size: 17px;
   max-width: none;
   margin: 0;
@@ -760,7 +760,7 @@
   padding: 27px 30px;
   margin-bottom: 20px;
   border: 1px solid white;
-  background: linear-gradient(115deg, #e2f5ff, #e2e9ff 55%, #f3e5fc);
+  background: linear-gradient(115deg, #e2f5ff, #e2efff 55%, #e5effc);
   border-radius: 23px;
 }
 .profile-page.df-workspace.profile-page .page-header > div {
@@ -787,7 +787,7 @@
 }
 .profile-page.df-workspace.profile-page :is(.profile-card, .profile-hero) {
   border-radius: 23px;
-  border: 1px solid #e2e7fc;
+  border: 1px solid #e2edfc;
   background: linear-gradient(145deg, #fffffffa, #ffffffe0);
   box-shadow: 0 9px 28px #859cd018;
 }
@@ -808,9 +808,9 @@
   font-size: 45px;
   box-shadow:
     inset 0 0 0 4px #ffffffa0,
-    0 10px 28px #7486ee24;
+    0 10px 28px #74a9ee24;
   overflow: hidden;
-  background: linear-gradient(140deg, #d8f3ff, #9bacff 55%, #ba94ef);
+  background: linear-gradient(140deg, #d8f3ff, #9bc6ff 55%, #94bbef);
   color: white;
 }
 .profile-page.df-workspace.profile-page .big-avatar img {
@@ -828,7 +828,7 @@
   height: 42px;
   border: 3px solid white;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4e95ff, #7865ff);
+  background: linear-gradient(135deg, #4e95ff, #65a8ff);
   color: white;
   cursor: pointer;
 }
@@ -854,20 +854,20 @@
   margin: 0 0 14px;
 }
 .profile-page.df-workspace.profile-page .active-label {
-  font-size: 15px;
+  font-size: 17px;
   padding: 5px 10px;
 }
 .profile-page.df-workspace.profile-page .user-contacts {
   display: flex;
   flex-wrap: wrap;
   gap: 10px 22px;
-  font-size: 16px;
+  font-size: 17px;
   color: #61729d;
   overflow-wrap: anywhere;
 }
 .profile-page.df-workspace.profile-page .hero-user small {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
   line-height: 1.5;
   margin-top: 9px;
@@ -879,11 +879,11 @@
 }
 .profile-page.df-workspace.profile-page .photo-actions button {
   font: inherit;
-  font-size: 15px;
+  font-size: 17px;
   background: none;
   border: 0;
   padding: 0;
-  color: #5f73ee;
+  color: #5f9dee;
   cursor: pointer;
 }
 .profile-page.df-workspace.profile-page .hero-facts {
@@ -900,12 +900,12 @@
   padding: 16px 14px;
   border: 1px solid #e4eafa;
   border-radius: 16px;
-  background: #f7f9ff8c;
+  background: #f7faff8c;
   min-width: 0;
 }
 .profile-page.df-workspace.profile-page .hero-facts small,
 .profile-page.df-workspace.profile-page .hero-facts article > span:last-child {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
   line-height: 1.4;
 }
@@ -922,8 +922,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #e3eaff, #f3e9ff);
-  color: #7772ff;
+  background: linear-gradient(135deg, #e3efff, #e9f3ff);
+  color: #72afff;
 }
 .profile-page.df-workspace.profile-page .profile-layout {
   display: grid;
@@ -951,7 +951,7 @@
   margin: 5px 0 6px;
 }
 .profile-page.df-workspace.profile-page .card-heading p {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
 }
 .profile-page.df-workspace.profile-page .card-icon {
@@ -960,8 +960,8 @@
   flex: 0 0 46px;
   border-radius: 13px;
   font-size: 23px;
-  color: #6873ff;
-  background: linear-gradient(135deg, #e6e9ff, #f1eaff);
+  color: #68a9ff;
+  background: linear-gradient(135deg, #e6f1ff, #eaf3ff);
 }
 .profile-page.df-workspace.profile-page .card-icon.mint {
   color: #24a18a;
@@ -984,11 +984,11 @@
   min-height: 85px;
   padding: 13px 15px;
   background: #f8faffb0;
-  border: 1px solid #e3e9fa;
+  border: 1px solid #e3edfa;
   border-radius: 14px;
 }
 .profile-page.df-workspace.profile-page .info-field > span {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .profile-page.df-workspace.profile-page .info-field strong {
@@ -1001,7 +1001,7 @@
   width: 100%;
   min-width: 0;
   font: inherit;
-  font-size: 16px;
+  font-size: 17px;
   min-height: 32px;
   padding: 5px 0;
   border: 0;
@@ -1010,33 +1010,33 @@
   color: var(--df-ink);
 }
 .profile-page.df-workspace.profile-page .info-field input:focus {
-  outline: 2px solid #a1b6ff;
+  outline: 2px solid #a1caff;
   outline-offset: 3px;
 }
 .profile-page.df-workspace.profile-page .info-field small {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .profile-page.df-workspace.profile-page .contact-email {
   grid-column: 1/-1;
 }
 .profile-page.df-workspace.profile-page .local-note {
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.55;
   color: var(--df-muted);
   margin: 14px 0;
 }
 .profile-page.df-workspace.profile-page .primary-action {
   font: inherit;
-  font-size: 16px;
-  font-weight: 750;
+  font-size: 17px;
+  font-weight: 700;
   border: 0;
   border-radius: 11px;
   padding: 13px 20px;
   min-height: 46px;
-  background: linear-gradient(135deg, #5f70ff, #518aff);
+  background: #5fa4ff;
   color: white;
-  box-shadow: 0 5px 13px #6888e224;
+  box-shadow: 0 5px 13px #689de224;
   cursor: pointer;
 }
 .profile-page.df-workspace.profile-page button:disabled {
@@ -1044,7 +1044,7 @@
   cursor: default;
 }
 .profile-page.df-workspace.profile-page button:focus-visible {
-  outline: 3px solid #9ca9ff;
+  outline: 3px solid #9cc7ff;
   outline-offset: 3px;
 }
 .profile-page.df-workspace.profile-page .work-grid {
@@ -1054,7 +1054,7 @@
 }
 .profile-page.df-workspace.profile-page .work-grid article {
   padding: 15px;
-  border: 1px solid #e6eafa;
+  border: 1px solid #e6effa;
   background: #f8faff99;
   border-radius: 14px;
   min-width: 0;
@@ -1062,7 +1062,7 @@
 .profile-page.df-workspace.profile-page .work-grid span {
   display: block;
   color: var(--df-muted);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.4;
 }
 .profile-page.df-workspace.profile-page .work-grid strong {
@@ -1077,14 +1077,14 @@
 }
 .profile-page.df-workspace.profile-page .reminder-form textarea {
   font: inherit;
-  font-size: 16px;
-  border: 1px solid #e1e7ff;
+  font-size: 17px;
+  border: 1px solid #e1eeff;
   border-radius: 13px;
   padding: 14px;
   min-height: 104px;
 }
 .profile-page.df-workspace.profile-page .reminder-form span {
-  font-size: 14px;
+  font-size: 17px;
 }
 .profile-page.df-workspace.profile-page .reminder-item {
   display: grid;
@@ -1093,28 +1093,28 @@
   align-items: center;
   padding: 17px 0;
   border: 0;
-  border-bottom: 1px solid #e8ecfa;
+  border-bottom: 1px solid #e8f0fa;
   border-radius: 0;
   background: transparent;
 }
 .profile-page.df-workspace.profile-page .reminder-item p {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .profile-page.df-workspace.profile-page .reminder-item div > span {
-  font-size: 14px;
+  font-size: 17px;
 }
 .profile-page.df-workspace.profile-page .completion-button {
   width: 24px;
   height: 24px;
-  border: 1.5px solid #a3b2df;
+  border: 1.5px solid #a3bddf;
   border-radius: 50%;
   background: white;
   color: white;
   cursor: pointer;
   padding: 0;
-  font-size: 15px;
+  font-size: 17px;
 }
 .profile-page.df-workspace.profile-page .completed .completion-button {
   border-color: #3aa989;
@@ -1140,11 +1140,11 @@
   align-items: center;
 }
 .profile-page.df-workspace.profile-page .security-facts span {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .profile-page.df-workspace.profile-page .security-facts strong {
-  font-size: 15px;
+  font-size: 17px;
   text-align: right;
   overflow-wrap: anywhere;
   min-width: 0;
@@ -1153,9 +1153,9 @@
   margin-top: 20px;
 }
 .profile-page.df-workspace.profile-page .password-primary {
-  font-size: 16px;
+  font-size: 17px;
   min-height: 46px;
-  background: linear-gradient(135deg, #5f70ff, #6e68f3);
+  background: #5fa4ff;
 }
 .profile-page.df-workspace.profile-page .password-panel {
   padding: 16px;
@@ -1167,7 +1167,7 @@
   flex-wrap: wrap;
 }
 .profile-page.df-workspace.profile-page .password-field span {
-  font-size: 16px;
+  font-size: 17px;
 }
 .profile-page.df-workspace.profile-page .password-field input {
   font-size: 17px;
@@ -1180,7 +1180,7 @@
 .profile-page.df-workspace.profile-page .activity-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid #e4e8fa;
+  border: 1px solid #e4eefa;
   border-radius: 15px;
   overflow: hidden;
 }
@@ -1189,16 +1189,16 @@
   padding: 18px 6px;
 }
 .profile-page.df-workspace.profile-page .activity-metrics > div + div {
-  border-left: 1px solid #e4e8fa;
+  border-left: 1px solid #e4eefa;
 }
 .profile-page.df-workspace.profile-page .activity-metrics strong {
   display: block;
   font-size: 32px;
-  color: #696eeb;
+  color: #69a1eb;
 }
 .profile-page.df-workspace.profile-page .activity-metrics span {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
   margin-top: 6px;
 }
@@ -1311,7 +1311,7 @@
   }
   .profile-page.df-workspace.profile-page .activity-metrics > div + div {
     border-left: 0;
-    border-top: 1px solid #e4e8fa;
+    border-top: 1px solid #e4eefa;
   }
   .profile-page.df-workspace.profile-page .card-heading {
     flex-direction: column;
@@ -1331,12 +1331,12 @@
   isolation: isolate;
   overflow: hidden;
   padding: 26px;
-  border-color: #dedffb;
+  border-color: #deebfb;
   background:
-    radial-gradient(ellipse at 100% 0, #e7dcff80, transparent 55%),
+    radial-gradient(ellipse at 100% 0, #dcebff80, transparent 55%),
     radial-gradient(ellipse at 0 100%, #dcf5ff70, transparent 50%),
-    linear-gradient(145deg, #fff, #f9faff);
-  box-shadow: 0 12px 32px #8b91d41c;
+    linear-gradient(145deg, #fff, #f9fcff);
+  box-shadow: 0 12px 32px #8babd41c;
 }
 .profile-page.df-workspace.profile-page .reminders-card::before {
   content: '';
@@ -1378,16 +1378,16 @@
   margin-bottom: 17px;
 }
 .profile-page.df-workspace.profile-page .reminder-overview > span {
-  font-size: 15px;
-  color: #7776a9;
-  border: 1px solid #e2e5ff;
+  font-size: 17px;
+  color: #768ca9;
+  border: 1px solid #e2efff;
   background: #ffffffb0;
   border-radius: 12px;
   padding: 8px 12px;
 }
 .profile-page.df-workspace.profile-page .reminder-overview b {
   margin-right: 5px;
-  color: #676af0;
+  color: #67a2f0;
   font-size: 18px;
 }
 .profile-page.df-workspace.profile-page .reminders-card .reminder-form {
@@ -1400,13 +1400,13 @@
   padding: 17px 18px;
   border-radius: 17px;
   background: #ffffffd9;
-  box-shadow: inset 0 2px 6px #8791cc07;
+  box-shadow: inset 0 2px 6px #87a5cc07;
 }
 .profile-page.df-workspace.profile-page .reminders-card .reminder-form > div {
   margin-top: 12px;
 }
 .profile-page.df-workspace.profile-page .reminders-card .reminder-form span {
-  font-size: 15px;
+  font-size: 17px;
 }
 .profile-page.df-workspace.profile-page .reminders-card .primary-action {
   min-height: 48px;
@@ -1420,10 +1420,10 @@
 }
 .profile-page.df-workspace.profile-page .reminders-card .reminder-item {
   padding: 18px 16px;
-  border: 1px solid #e1e7fa;
+  border: 1px solid #e1ecfa;
   border-radius: 17px;
   background: linear-gradient(135deg, #ffffffed, #f1f5ffc9);
-  box-shadow: 0 5px 15px #8e9bcd0c;
+  box-shadow: 0 5px 15px #8ea9cd0c;
   grid-template-columns: 28px minmax(0, 1fr) 34px;
   gap: 14px;
 }
@@ -1432,7 +1432,7 @@
   line-height: 1.5;
 }
 .profile-page.df-workspace.profile-page .reminders-card .reminder-item div > span {
-  font-size: 15px;
+  font-size: 17px;
   margin-top: 8px;
 }
 .profile-page.df-workspace.profile-page .reminders-card .completed {
@@ -1455,7 +1455,7 @@
 .profile-page.df-workspace.profile-page .reminders-card .empty-reminders {
   padding: 30px 18px;
   background: #ffffff80;
-  border: 1px dashed #d7ddf9;
+  border: 1px dashed #d7e6f9;
   border-radius: 17px;
   margin-top: 20px;
 }
@@ -1481,12 +1481,12 @@
 
 .profile-page.df-workspace.profile-page .reminders-card .completion-button {
   padding: 0;
-  border: 1.5px solid #a3b2df;
+  border: 1.5px solid #a3bddf;
   border-radius: 50%;
   background: white;
   color: white;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 17px;
   min-height: 0;
   box-shadow: none;
 }

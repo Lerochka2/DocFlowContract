@@ -299,13 +299,14 @@ def format_classification_result(
 ) -> dict:
     predicted_type = result["document_type"]
 
+    raw_confidence = result["confidence"]
     confidence = round(
-        result["confidence"],
+        raw_confidence,
         4,
     )
 
     accepted = (
-        confidence >= CONFIDENCE_THRESHOLD
+        raw_confidence >= CONFIDENCE_THRESHOLD
     )
 
     return {

@@ -1,5 +1,5 @@
 <link rel="stylesheet" [attr.href]="workspaceStyles" />
-<section class="settings-page df-workspace"><header class="page-header settings-hero df-hero"><img class="settings-hero-art" src="assets/settings/settings-glass-waves.svg" alt="" aria-hidden="true" width="1400" height="220" /><div class="settings-hero-copy"><span class="eyebrow df-section-label">НАСТРОЙКИ DOCFLOW</span><h1 class="df-page-title">Настройки</h1>@if (isAdmin()) {<p>Параметры интерфейса, сведения о пользователе и системная конфигурация обработки документов.</p>} @else {<p>Персональные параметры интерфейса и сведения о текущей учетной записи.</p>}</div>@if(isAdmin()) {<div class="system-summary" aria-label="Состав системной конфигурации"><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span><div><span>Модули системы</span><strong>4 / 4</strong><small class="configured"><i></i>В конфигурации</small></div></div><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h5l3-8 4 16 3-8h5"/></svg></span><div><span>Состояние</span><strong class="summary-state">Рабочая конфигурация</strong><small>Интерфейс, API, AI и адаптер СЭД.</small></div></div></div>}</header>@if(successMessage) {<div class="message success">{{successMessage}}</div>} @if(errorMessage) {<div class="message error">{{errorMessage}}</div>}<div class="settings-layout"><div class="settings-main"><section class="settings-card interface-card df-card">
+<section class="settings-page df-workspace"><header class="page-header settings-hero df-hero"><div class="settings-hero-copy"><span class="eyebrow df-section-label">НАСТРОЙКИ DOCFLOW</span><h1 class="df-page-title">Настройки</h1>@if (isAdmin()) {<p>Параметры интерфейса, сведения о пользователе и системная конфигурация обработки документов.</p>} @else {<p>Персональные параметры интерфейса и сведения о текущей учетной записи.</p>}</div>@if(isAdmin()) {<div class="system-summary" aria-label="Состав системной конфигурации"><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span><div><span>Модули системы</span><strong>4 / 4</strong><small class="configured"><i></i>В конфигурации</small></div></div><div><span class="summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h5l3-8 4 16 3-8h5"/></svg></span><div><span>Состояние</span><strong class="summary-state">Рабочая конфигурация</strong><small>Интерфейс, API, AI и адаптер СЭД.</small></div></div></div>}</header>@if(successMessage) {<div class="message success">{{successMessage}}</div>} @if(errorMessage) {<div class="message error">{{errorMessage}}</div>}<div class="settings-layout"><div class="settings-main"><section class="settings-card interface-card df-card">
 
         <div class="card-heading">
 
@@ -24,34 +24,7 @@
         </div>
 
 
-        <div class="setting-row"><span class="row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M8 12v2M16 12v2M9 17h6"/></svg></span>
 
-          <div>
-
-            <strong>
-              AI-карточка в боковом меню
-            </strong>
-
-            <span>
-              Показывать информационный блок
-              «Сила AI в каждом документе».
-            </span>
-
-          </div>
-
-
-          <label class="switch">
-
-            <input
-              type="checkbox"
-              [(ngModel)]="form.showAiPromoCard" aria-label="AI-карточка в боковом меню"
-            />
-
-            <span class="slider"></span>
-
-          </label>
-
-        </div>
 
 
         <div class="setting-row"><span class="row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1M10 9h1M14 9h1M18 9h1M6 13h1M10 13h1M14 13h1M18 13h1M7 16h10"/></svg></span>
@@ -84,7 +57,7 @@
         </div>
 
 
-        <div class="settings-actions">
+        <div class="setting-row preference-row"><div><strong>Компактные списки</strong><span>Уменьшать отступы строк документов, задач и пользователей, сохраняя размер текста.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.compactMode" aria-label="Компактные списки" /><span class="slider"></span></label></div><div class="preference-section"><h2>Рабочее пространство</h2><p>Начальная страница выбирается только из разделов, доступных вашей роли.</p><label class="preference-select">Начальная страница<select [(ngModel)]="form.defaultPage" [disabled]="form.rememberLastPage" aria-label="Начальная страница">@for (page of startPages; track page.path) {<option [value]="page.path">{{page.label}}</option>}</select></label><div class="setting-row preference-row"><div><strong>Запоминать последний раздел</strong><span>После входа открывать последний рабочий раздел вместо начальной страницы. Карточки документов и настройки не запоминаются.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.rememberLastPage" aria-label="Запоминать последний раздел" /><span class="slider"></span></label></div></div><div class="preference-section"><h2>Уведомления</h2><p>Настройки меняют отображение в интерфейсе. Сервер продолжает сохранять все события.</p><div class="setting-row preference-row"><div><strong>Счётчик уведомлений</strong><span>Показывать число непрочитанных уведомлений возле колокольчика.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.showNotificationBadge" aria-label="Счётчик уведомлений" /><span class="slider"></span></label></div><div class="setting-row preference-row"><div><strong>Только непрочитанные</strong><span>В центре уведомлений скрывать уже прочитанные сообщения.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.unreadNotificationsOnly" aria-label="Только непрочитанные" /><span class="slider"></span></label></div></div>@if (currentUser?.role === 'DOCUMENT_OPERATOR' || isAdmin()) {<div class="preference-section role-preferences"><h2>Обработка документов</h2><div class="setting-row preference-row"><div><strong>Открывать документ после загрузки</strong><span>После успешной загрузки и AI-обработки переходить в карточку; иначе обновлять список документов.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.openAfterUpload" aria-label="Открывать документ после загрузки" /><span class="slider"></span></label></div><div class="setting-row preference-row"><div><strong>Выделять документы на проверке</strong><span>Добавлять цветную отметку строкам со статусом «Требует проверки» в списке документов.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.highlightReview" aria-label="Выделять документы на проверке" /><span class="slider"></span></label></div></div>}@if (currentUser?.role === 'LAWYER' || isAdmin()) {<div class="preference-section role-preferences"><h2>Работа с рисками</h2><div class="setting-row preference-row"><div><strong>Сначала наиболее критичные риски</strong><span>В карточке договора сортировать замечания по критичности. Состав замечаний не меняется.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.sortRisks" aria-label="Сначала наиболее критичные риски" /><span class="slider"></span></label></div><div class="setting-row preference-row"><div><strong>Выделять высокие риски</strong><span>Подсвечивать наиболее критичные замечания; при отключении их текст и уровень остаются видимыми.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.highlightHighRisks" aria-label="Выделять высокие риски" /><span class="slider"></span></label></div></div>}@if (currentUser?.role === 'CONTRACT_MANAGER' || currentUser?.role === 'LAWYER' || isAdmin()) {<div class="preference-section role-preferences"><h2>Согласование</h2><div class="setting-row preference-row"><div><strong>Подтверждать согласование</strong><span>Перед сохранением решения «Согласовать» спрашивать подтверждение. Отклонение и возврат всегда требуют подтверждения.</span></div><label class="switch"><input type="checkbox" [(ngModel)]="form.confirmApproval" aria-label="Подтверждать согласование" /><span class="slider"></span></label></div></div>}<p class="preferences-storage-note">Настройки сохраняются отдельно для вашей учётной записи в этом браузере и применяются после нажатия «Сохранить настройки».</p><div class="settings-actions">
 
           <button
             class="primary-button df-primary-button"
@@ -369,45 +342,7 @@
 
           </div>
 
-        </section>}</div><aside class="settings-sidebar"><section class="about-card df-card">
-
-        <div class="card-heading"><div class="heading-icon about"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg></div><div><span class="section-eyebrow df-section-label">
-          О СИСТЕМЕ
-        </span>
-
-        <h3>
-          DocFlow
-        </h3></div></div>
-
-        <img class="glass-stack" src="assets/settings/glass-stack.svg" alt="" aria-hidden="true" width="180" height="180" />
-        <p>
-          Программное средство интеллектуальной
-          классификации и автоматизированной
-          маршрутизации документов в корпоративной СЭД.
-        </p>
-
-
-        <div class="technology-list">
-
-          <span>
-            <b aria-hidden="true" style="color:#e83950">A</b> Angular
-          </span>
-
-          <span>
-            <b aria-hidden="true" style="color:#67b74a">S</b> Spring Boot
-          </span>
-
-          <span>
-            <b aria-hidden="true" style="color:#14a99b">ϟ</b> FastAPI
-          </span>
-
-          <span>
-            <b aria-hidden="true" style="color:#5598b9">M</b> MySQL
-          </span>
-
-        </div>
-
-      </section>@if(isAdmin()) {<section class="settings-card sed-card df-card">
+        </section>}</div><aside class="settings-sidebar">@if(isAdmin()) {<section class="settings-card sed-card df-card">
 
           <div class="card-heading">
 

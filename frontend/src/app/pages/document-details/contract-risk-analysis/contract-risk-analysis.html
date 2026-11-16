@@ -161,11 +161,11 @@
 
       <div class="risk-findings">
 
-        @for (risk of result.risks; track risk.code) {
+        @for (risk of displayedRisks; track risk.code) {
 
           <section
             class="risk-finding"
-            [class.finding-high]="risk.severity === 'HIGH'"
+            [class.finding-high]="isHighRisk(risk)"
             [class.finding-medium]="risk.severity === 'MEDIUM'"
             [class.finding-low]="risk.severity === 'LOW'"
           >

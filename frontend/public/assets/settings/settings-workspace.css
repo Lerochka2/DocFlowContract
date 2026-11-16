@@ -3,11 +3,11 @@
   --df-title-size:42px;
   --df-section-size:24px;
   --df-card-title-size:24px;
-  --df-body-size:16px;
-  --df-table-size:15px;
+  --df-body-size:17px;
+  --df-table-size:17px;
   --df-description-size:17px;
-  --df-caption-size:14px;
-  --df-label-size:15px;
+  --df-caption-size:17px;
+  --df-label-size:17px;
   max-width: none;
   min-width: 0;
 }
@@ -31,7 +31,7 @@
   padding: 24px 28px;
   border: 1px solid white;
   margin-bottom: 18px;
-  background: linear-gradient(115deg, rgba(229, 246, 255, 0.9294117647), rgba(229, 237, 255, 0.8588235294) 48%, rgba(241, 226, 255, 0.8588235294));
+  background: linear-gradient(115deg, rgba(229, 246, 255, 0.9294117647), rgba(229, 237, 255, 0.8588235294) 48%, rgba(226, 239, 255, 0.8588235294));
 }
 .settings-page.df-workspace.settings-page .settings-hero-art {
   position: absolute;
@@ -68,7 +68,7 @@
   background: rgba(255, 255, 255, 0.8784313725);
   border: 1px solid white;
   border-radius: 19px;
-  box-shadow: 0 7px 24px rgba(147, 154, 219, 0.0745098039);
+  box-shadow: 0 7px 24px rgba(147, 178, 219, 0.0745098039);
 }
 .settings-page.df-workspace.settings-page .system-summary > div {
   display: flex;
@@ -76,7 +76,7 @@
   gap: 13px;
 }
 .settings-page.df-workspace.settings-page .system-summary > div + div {
-  border-left: 1px solid #e2dcf7;
+  border-left: 1px solid #dce8f7;
   padding-left: 18px;
 }
 .settings-page.df-workspace.settings-page .summary-icon {
@@ -86,8 +86,8 @@
   height: 48px;
   border-radius: 18px;
   flex: 0 0 auto;
-  color: #547aff;
-  background: linear-gradient(135deg, #e1efff, #eee7ff);
+  color: #549eff;
+  background: linear-gradient(135deg, #e1efff, #e7f1ff);
 }
 .settings-page.df-workspace.settings-page .summary-icon svg {
   width: 26px;
@@ -95,7 +95,7 @@
 }
 .settings-page.df-workspace.settings-page .system-summary span:not(.summary-icon) {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .settings-page.df-workspace.settings-page .system-summary strong {
@@ -110,7 +110,7 @@
 }
 .settings-page.df-workspace.settings-page .system-summary small {
   display: block;
-  font-size: 13.5px;
+  font-size: 17px;
   color: var(--df-muted);
   line-height: 1.45;
 }
@@ -137,7 +137,7 @@
   gap: 18px;
 }
 .settings-page.df-workspace.settings-page .settings-card, .settings-page.df-workspace.settings-page .about-card, .settings-page.df-workspace.settings-page .profile-card {
-  border: 1px solid #e1e8ff;
+  border: 1px solid #e1eeff;
   border-radius: 22px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.9803921569), rgba(255, 255, 255, 0.8078431373));
   box-shadow: 0 9px 25px rgba(129, 149, 200, 0.0666666667), inset 0 1px 0 white;
@@ -161,17 +161,17 @@
   height: 52px;
   border-radius: 14px;
   font-size: 23px;
-  font-weight: 800;
+  font-weight: 700;
   color: white;
-  background: linear-gradient(140deg, #9e84ff, #6852f0);
-  box-shadow: 0 5px 12px rgba(123, 117, 236, 0.1333333333);
+  background: linear-gradient(140deg, #84b9ff, #5296f0);
+  box-shadow: 0 5px 12px rgba(117, 169, 236, 0.1333333333);
 }
 .settings-page.df-workspace.settings-page .heading-icon svg {
   width: 28px;
   height: 28px;
 }
 .settings-page.df-workspace.settings-page .heading-icon.about {
-  background: linear-gradient(140deg, #69a7ff, #4264f5);
+  background: linear-gradient(140deg, #69a7ff, #4290f5);
 }
 .settings-page.df-workspace.settings-page .heading-icon.sed {
   background: linear-gradient(140deg, #5dd48c, #22af62);
@@ -180,7 +180,7 @@
   background: linear-gradient(140deg, #66d4ca, #20b68d);
 }
 .settings-page.df-workspace.settings-page .section-eyebrow {
-  font-size: 15px;
+  font-size: 17px;
   text-transform: none;
   letter-spacing: 0.035em;
 }
@@ -191,7 +191,7 @@
 }
 .settings-page.df-workspace.settings-page .card-heading p {
   margin: 0;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
   line-height: 1.5;
 }
@@ -200,7 +200,7 @@
   align-items: center;
   gap: 16px;
   padding: 15px 8px;
-  border-top: 1px solid #ebeffb;
+  border-top: 1px solid #ebf2fb;
 }
 .settings-page.df-workspace.settings-page .setting-row > div {
   flex: 1;
@@ -208,13 +208,13 @@
 }
 .settings-page.df-workspace.settings-page .setting-row strong {
   display: block;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 650;
 }
 .settings-page.df-workspace.settings-page .setting-row div > span {
   display: block;
   margin-top: 5px;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .settings-page.df-workspace.settings-page .row-icon, .settings-page.df-workspace.settings-page .mini-icon {
@@ -264,24 +264,24 @@
   top: 3px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 2px 6px rgba(67, 92, 171, 0.2);
+  box-shadow: 0 2px 6px rgba(67, 112, 171, 0.2);
   transition: transform 0.18s;
 }
 .settings-page.df-workspace.settings-page .switch input:checked + .slider {
-  background: linear-gradient(100deg, #577eff, #7565ff);
+  background: linear-gradient(100deg, #57a0ff, #65a8ff);
 }
 .settings-page.df-workspace.settings-page .switch input:checked + .slider::before {
   transform: translateX(25px);
 }
 .settings-page.df-workspace.settings-page .switch input:focus-visible + .slider {
-  outline: 3px solid #b8caff;
+  outline: 3px solid #b8d7ff;
   outline-offset: 3px;
 }
 .settings-page.df-workspace.settings-page .settings-actions {
   display: flex;
   gap: 14px;
   padding-top: 14px;
-  border-top: 1px solid #ebeffb;
+  border-top: 1px solid #ebf2fb;
 }
 .settings-page.df-workspace.settings-page .primary-button, .settings-page.df-workspace.settings-page .secondary-button {
   display: inline-flex;
@@ -291,20 +291,20 @@
   padding: 10px 16px;
   border-radius: 11px;
   font: inherit;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 650;
   cursor: pointer;
-  border: 1px solid #dce5ff;
+  border: 1px solid #dcebff;
   transition: transform 0.18s, box-shadow 0.18s;
 }
 .settings-page.df-workspace.settings-page .primary-button {
   color: white;
   border: 0;
-  background: linear-gradient(110deg, #4e91ff, #9a58ff);
-  box-shadow: 0 5px 12px rgba(120, 116, 232, 0.168627451);
+  background: #4e91ff;
+  box-shadow: 0 5px 12px rgba(116, 166, 232, 0.168627451);
 }
 .settings-page.df-workspace.settings-page .secondary-button {
-  color: #486fff;
+  color: #4897ff;
   background: white;
 }
 .settings-page.df-workspace.settings-page .settings-actions svg {
@@ -313,7 +313,7 @@
 }
 .settings-page.df-workspace.settings-page .settings-actions button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 15px rgba(135, 146, 211, 0.1490196078);
+  box-shadow: 0 6px 15px rgba(135, 168, 211, 0.1490196078);
 }
 .settings-page.df-workspace.settings-page .settings-actions button:disabled {
   opacity: 0.6;
@@ -327,7 +327,7 @@
   position: relative;
   min-width: 0;
   padding: 14px 12px 12px 49px;
-  border: 1px solid #e7ecfb;
+  border: 1px solid #e7f0fb;
   border-radius: 12px;
   background: rgba(249, 251, 255, 0.7803921569);
 }
@@ -344,7 +344,7 @@
 }
 .settings-page.df-workspace.settings-page .system-item > span:not(.mini-icon) {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   color: var(--df-muted);
 }
 .settings-page.df-workspace.settings-page .system-item strong {
@@ -356,14 +356,14 @@
 }
 .settings-page.df-workspace.settings-page .system-item small {
   display: block;
-  font-size: 13.5px;
+  font-size: 17px;
   color: var(--df-muted);
   line-height: 1.45;
 }
 .settings-page.df-workspace.settings-page .system-item .status-value {
   display: inline-flex;
   gap: 7px;
-  font-size: 14px;
+  font-size: 17px;
   color: #278964;
   background: #e6f8ee;
   padding: 5px 9px;
@@ -381,7 +381,7 @@
   padding: 10px 12px;
   margin-top: 12px;
   border-radius: 10px;
-  background: rgba(240, 243, 252, 0.6901960784);
+  background: rgba(240, 245, 252, 0.6901960784);
 }
 .settings-page.df-workspace.settings-page .readonly-note > span {
   display: grid;
@@ -392,11 +392,11 @@
   border-radius: 50%;
   background: #536aa6;
   color: white;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
 }
 .settings-page.df-workspace.settings-page .readonly-note p {
-  font-size: 14px;
+  font-size: 17px;
   margin: 0;
   color: var(--df-muted);
 }
@@ -419,20 +419,20 @@
   justify-self: start;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 650;
-  color: #4c73e7;
+  color: #4c8fe7;
   background: #e3edff;
 }
 .settings-page.df-workspace.settings-page .arrow {
-  color: #a0acd0;
+  color: #a0b5d0;
   text-align: center;
 }
 .settings-page.df-workspace.settings-page .routing-rule strong {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 650;
 }
 .settings-page.df-workspace.settings-page .routing-rule strong svg {
@@ -441,8 +441,8 @@
   flex-shrink: 0;
   padding: 4px;
   border-radius: 9px;
-  background: #f1e7ff;
-  color: #9164d8;
+  background: #e7f1ff;
+  color: #6496d8;
 }
 .settings-page.df-workspace.settings-page .about-card {
   position: relative;
@@ -456,7 +456,7 @@
   max-width: 77%;
   margin: 0 0 14px;
   color: var(--df-muted);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
 }
 .settings-page.df-workspace.settings-page .glass-stack {
@@ -479,8 +479,8 @@
   gap: 10px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: #f0f3fc;
-  font-size: 15px;
+  background: #f0f5fc;
+  font-size: 17px;
 }
 .settings-page.df-workspace.settings-page .technology-list b {
   font-size: 20px;
@@ -517,21 +517,21 @@
 }
 .settings-page.df-workspace.settings-page .integration-status strong {
   display: block;
-  font-size: 16px;
+  font-size: 17px;
   color: #188b4e;
 }
 .settings-page.df-workspace.settings-page .integration-status div div > span {
   display: block;
   margin-top: 5px;
-  font-size: 14px;
+  font-size: 17px;
   color: #6c8b80;
 }
 .settings-page.df-workspace.settings-page .integration-status .status-badge {
-  font-size: 13px;
+  font-size: 17px;
   padding: 5px 7px;
 }
 .settings-page.df-workspace.settings-page .integration-details {
-  border: 1px solid #e7ecfa;
+  border: 1px solid #e7effa;
   border-radius: 12px;
   padding: 0 10px;
 }
@@ -548,7 +548,7 @@
 .settings-page.df-workspace.settings-page .detail-icon {
   display: grid;
   place-items: center;
-  color: #7185c6;
+  color: #7196c6;
 }
 .settings-page.df-workspace.settings-page .detail-icon svg {
   width: 20px;
@@ -556,10 +556,10 @@
 }
 .settings-page.df-workspace.settings-page .integration-details span:not(.detail-icon) {
   color: var(--df-muted);
-  font-size: 14px;
+  font-size: 17px;
 }
 .settings-page.df-workspace.settings-page .integration-details strong {
-  font-size: 15px;
+  font-size: 17px;
 }
 .settings-page.df-workspace.settings-page .audit-grid {
   display: grid;
@@ -570,7 +570,7 @@
   position: relative;
   min-width: 0;
   padding: 12px;
-  border: 1px solid #e7ecfa;
+  border: 1px solid #e7effa;
   border-radius: 12px;
   background: #fafcff;
 }
@@ -581,24 +581,24 @@
 }
 .settings-page.df-workspace.settings-page .audit-item > span:not(.mini-icon) {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 650;
 }
 .settings-page.df-workspace.settings-page .audit-item strong {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   color: #19854c;
   margin: 8px 0;
 }
 .settings-page.df-workspace.settings-page .audit-item small {
   display: block;
   color: var(--df-muted);
-  font-size: 13.5px;
+  font-size: 17px;
   line-height: 1.45;
 }
 .settings-page.df-workspace.settings-page .account-settings {
   margin-top: 20px;
-  border: 1px solid #e1e8ff;
+  border: 1px solid #e1eeff;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.8117647059);
 }
@@ -610,7 +610,7 @@
 }
 .settings-page.df-workspace.settings-page .account-settings summary > span {
   float: right;
-  color: #6c80d0;
+  color: #6c97d0;
 }
 .settings-page.df-workspace.settings-page .account-layout {
   padding: 0 18px 18px;
@@ -630,9 +630,9 @@
   width: 52px;
   height: 52px;
   border-radius: 18px;
-  background: #e8edff;
-  color: #5c73e6;
-  font-weight: 800;
+  background: #e8f2ff;
+  color: #5c98e6;
+  font-weight: 700;
   flex-shrink: 0;
 }
 .settings-page.df-workspace.settings-page .profile-header strong, .settings-page.df-workspace.settings-page .profile-header span {
@@ -651,7 +651,7 @@
 }
 .settings-page.df-workspace.settings-page .profile-card dt {
   color: var(--df-muted);
-  font-size: 14px;
+  font-size: 17px;
 }
 .settings-page.df-workspace.settings-page .profile-card dd {
   margin: 5px 0 0;
@@ -756,7 +756,7 @@
   .settings-page.df-workspace.settings-page .system-summary > div + div {
     border-left: 0;
     padding-left: 0;
-    border-top: 1px solid #e2dcf7;
+    border-top: 1px solid #dce8f7;
     padding-top: 12px;
   }
   .settings-page.df-workspace.settings-page .settings-sidebar, .settings-page.df-workspace.settings-page .system-grid, .settings-page.df-workspace.settings-page .audit-grid {
@@ -828,9 +828,9 @@
 }
 
 .settings-page.df-workspace.settings-page .heading-icon.security {
-  color: #5c63cf;
-  background: linear-gradient(135deg, #eef2ff, #f3efff);
-  border: 1px solid #e0e5fb;
+  color: #5c8ecf;
+  background: linear-gradient(135deg, #eef5ff, #eff6ff);
+  border: 1px solid #e0ecfb;
   font-size: 18px;
 }
 
@@ -868,16 +868,16 @@
   border: 1px solid #dde3ed;
   border-radius: 50%;
   color: #8994a6;
-  background: #f8f9fc;
-  font-size: 16px;
-  font-weight: 800;
+  background: #f8fafc;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .settings-page.df-workspace.settings-page .password-step.active .password-step-number {
-  border-color: #b9c8f5;
+  border-color: #b9d3f5;
   color: #ffffff;
-  background: linear-gradient(135deg, #4f76df, #725ed1);
-  box-shadow: 0 5px 14px rgba(77, 102, 190, 0.16);
+  background: linear-gradient(135deg, #4f76df, #5e90d1);
+  box-shadow: 0 5px 14px rgba(77, 126, 190, 0.16);
 }
 
 .settings-page.df-workspace.settings-page .password-step.done .password-step-number {
@@ -916,7 +916,7 @@
 }
 
 .settings-page.df-workspace.settings-page .password-step-line.done {
-  background: linear-gradient(90deg, #7f9be8, #83c5ad);
+  background: linear-gradient(90deg, #7face8, #83c5ad);
 }
 
 .settings-page.df-workspace.settings-page .password-message {
@@ -936,7 +936,7 @@
   flex: 0 0 auto;
   border-radius: 50%;
   font-size: var(--df-body-size);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .settings-page.df-workspace.settings-page .password-message p {
@@ -976,9 +976,9 @@
   align-items: center;
   gap: 13px;
   padding: 16px;
-  border: 1px solid #e4e8f5;
+  border: 1px solid #d2ddeb;
   border-radius: 11px;
-  background: linear-gradient(135deg, #f8faff, #fbfaff);
+  background: linear-gradient(135deg, #f8faff, #fafcff);
 }
 
 .settings-page.df-workspace.settings-page .password-info-icon, .settings-page.df-workspace.settings-page .code-mail-icon {
@@ -988,10 +988,10 @@
   place-items: center;
   flex: 0 0 auto;
   border-radius: 10px;
-  color: #596fd0;
-  background: #edf1ff;
+  color: #598dd0;
+  background: #edf5ff;
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .settings-page.df-workspace.settings-page .password-info-box span, .settings-page.df-workspace.settings-page .password-info-box strong, .settings-page.df-workspace.settings-page .password-info-box small {
@@ -1048,7 +1048,7 @@
 .settings-page.df-workspace.settings-page .password-primary-button {
   border: 0;
   color: #ffffff;
-  background: linear-gradient(135deg, #4f75dc, #6b5dcc);
+  background: #4f75dc;
 }
 
 .settings-page.df-workspace.settings-page .password-primary-button:hover:not(:disabled) {
@@ -1067,7 +1067,7 @@
 
 .settings-page.df-workspace.settings-page .password-link-button {
   border: 0;
-  color: #5973c4;
+  color: #5987c4;
   background: transparent;
 }
 
@@ -1100,7 +1100,7 @@
 }
 
 .settings-page.df-workspace.settings-page .code-heading b {
-  color: #6072a9;
+  color: #6080a9;
 }
 
 .settings-page.df-workspace.settings-page .verification-code-wrap {
@@ -1117,10 +1117,10 @@
   border-radius: 11px;
   outline: none;
   color: #33425c;
-  background: #fbfcff;
+  background: #fbfdff;
   font: inherit;
   font-size: var(--df-body-size);
-  font-weight: 760;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-align: center;
   box-sizing: border-box;
@@ -1128,8 +1128,8 @@
 }
 
 .settings-page.df-workspace.settings-page .verification-code-input:focus {
-  border-color: #8ea7ec;
-  box-shadow: 0 0 0 4px rgba(79, 113, 207, 0.08);
+  border-color: #8eb7ec;
+  box-shadow: 0 0 0 4px rgba(79, 134, 207, 0.08);
 }
 
 .settings-page.df-workspace.settings-page .verification-code-input::placeholder {
@@ -1151,7 +1151,7 @@
 
 .settings-page.df-workspace.settings-page .code-timer strong {
   margin-top: 3px;
-  color: #516cbf;
+  color: #5181bf;
   font-size: var(--df-body-size);
   font-variant-numeric: tabular-nums;
 }
@@ -1181,7 +1181,7 @@
   color: #ffffff;
   background: #55a584;
   font-size: var(--df-body-size);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .settings-page.df-workspace.settings-page .password-confirmed-note strong {
@@ -1231,7 +1231,7 @@
 
 .settings-page.df-workspace.settings-page .password-fields input:focus {
   border-color: #91a9e8;
-  box-shadow: 0 0 0 3px rgba(74, 111, 216, 0.07);
+  box-shadow: 0 0 0 3px rgba(74, 136, 216, 0.07);
 }
 
 .settings-page.df-workspace.settings-page .password-fields small {
@@ -1258,7 +1258,7 @@
 }
 
 .settings-page.df-workspace.settings-page .change-token-timer strong {
-  color: #5671c1;
+  color: #5684c1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1292,3 +1292,22 @@
     width: 100%;
   }
 }
+
+.settings-page .preference-section { margin-top:26px; padding-top:24px; border-top:1px solid #e0e6f4; }
+.settings-page .preference-section h2 { margin:0 0 8px; font-size:23px; color:#152b47; }
+.settings-page .preference-section p,.settings-page .preferences-storage-note { color:#637193; font-size:17px; line-height:1.55; }
+.settings-page .preference-row { display:flex; align-items:center; gap:24px; padding:18px 0; }
+.settings-page .preference-row > div { flex:1; min-width:0; }
+.settings-page .preference-row strong,.settings-page .preference-row span { display:block; }
+.settings-page .preference-row div > span { margin-top:6px; color:#637193; font-size:17px; line-height:1.5; }
+.settings-page .preference-row .switch { flex:0 0 48px; }
+.settings-page .preference-select { display:flex; flex-wrap:wrap; align-items:center; gap:16px; font-size:17px; }
+.settings-page .preference-select select { min-height:44px; max-width:100%; padding:8px 14px; border:1px solid #d7dff1; border-radius:9px; font:inherit; color:#203754; background:#fff; }
+.settings-page .preferences-storage-note { margin-top:24px; }
+
+.settings-page .settings-layout:has(> .settings-sidebar:empty) { grid-template-columns: minmax(0,1fr); }
+.settings-page .settings-layout:has(> .settings-sidebar:empty) > .settings-sidebar { display:none; }
+.settings-page .interface-card { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); column-gap:28px; }
+.settings-page .interface-card > * { grid-column:1 / -1; }
+.settings-page .interface-card > .preference-section:not(.role-preferences) { grid-column:auto; }
+@media(max-width:1000px) { .settings-page .interface-card { grid-template-columns:minmax(0,1fr); } }

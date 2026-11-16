@@ -1,0 +1,26 @@
+<section class="requests-page df-workspace">
+  <header class="df-hero"><div><span class="eyebrow">АДМИНИСТРИРОВАНИЕ</span><h1>Заявки на доступ</h1><p>Проверка обращений сотрудников и предоставление доступа к DocFlow</p></div></header>
+  @if(success()){<p class="success" role="status">{{success()}}</p>}
+  @if(error() && !detailDialog.open){<p class="error" role="alert">{{error()}}</p>}
+  <div class="request-toolbar"><div class="filters">@for(f of filters;track f.code){<button type="button" [class.active]="filter===f.code" (click)="filter=f.code">{{f.name}} @if(f.code==='NEW'){<span>{{api.pendingCount()}}</span>}</button>}</div><button type="button" class="secondary" (click)="load()" [disabled]="loading()">Обновить</button></div>
+  <div class="table-container"><table><thead><tr><th>Сотрудник</th><th>Подразделение / должность</th><th>Дата подачи</th><th>Статус</th><th></th></tr></thead><tbody>
+    @for(r of filtered;track r.id){<tr><td><strong>{{r.fullName}}</strong><span>{{r.email}}</span></td><td>{{r.department}}<span>{{r.position}}</span></td><td>{{r.createdAt | date:'dd.MM.yyyy, HH:mm'}}</td><td><span class="status" [class]="'status '+r.status">{{statusName(r.status)}}</span></td><td><button type="button" class="secondary" (click)="open(r)">Открыть</button></td></tr>}
+    @empty{<tr><td colspan="5" class="empty">{{loading()?'Загрузка заявок…':'Заявок в этой категории пока нет'}}</td></tr>}
+  </tbody></table></div>
+</section>
+<dialog #detailDialog aria-labelledby="detail-title" (cancel)="busy() ? $event.preventDefault() : null">
+  @if(selected();as r){
+  <button class="close" (click)="close()" [disabled]="busy()" aria-label="Закрыть">×</button><h2 id="detail-title">Заявка #{{r.id}}</h2><span [class]="'status '+r.status">{{statusName(r.status)}}</span>
+  <dl><dt>ФИО</dt><dd>{{r.fullName}}</dd><dt>Электронная почта</dt><dd>{{r.email}}</dd><dt>Подразделение и должность</dt><dd>{{r.department}} · {{r.position}}</dd><dt>Причина запроса</dt><dd>{{r.comment || 'Не указана'}}</dd><dt>Дата подачи</dt><dd>{{r.createdAt | date:'dd.MM.yyyy, HH:mm'}}</dd>
+  @if(r.processedAt){<dt>Дата рассмотрения</dt><dd>{{r.processedAt | date:'dd.MM.yyyy, HH:mm'}}</dd>}@if(r.adminComment){<dt>Причина отказа</dt><dd>{{r.adminComment}}</dd>}@if(r.createdUserId){<dt>Созданная учётная запись</dt><dd>ID {{r.createdUserId}}</dd>}</dl>
+  @if(r.status==='NEW'){
+    @if(mode==='view'){<div class="actions"><button class="reject" (click)="mode='reject'">Отклонить</button><button class="primary" (click)="mode='approve'">Одобрить и создать пользователя</button></div>}
+    @else{<form (ngSubmit)="decide()">
+      @if(mode==='approve'){<label for="new-login">Логин</label><input id="new-login" name="login" [(ngModel)]="login" placeholder="i.ivanov" maxlength="100" required><label for="new-role">Роль</label><select id="new-role" name="role" [(ngModel)]="roleCode" [disabled]="!!matchingRole"><option value="DOCUMENT_OPERATOR">Делопроизводитель</option><option value="LAWYER">Юрист</option><option value="CONTRACT_MANAGER">Менеджер по договорам</option></select>@if(matchingRole){<p class="note">Роль соответствует подразделению и должности сотрудника.</p>}<p class="note">Временный пароль будет сформирован автоматически и отправлен сотруднику на указанную почту.</p>}
+      @else{<label for="reject-reason">Причина отказа</label><textarea id="reject-reason" name="reason" [(ngModel)]="reason" maxlength="1000" rows="3" required></textarea>}
+      @if(error()){<p class="error" role="alert">{{error()}}</p>}
+      <div class="actions"><button class="secondary" type="button" (click)="mode='view';error.set('')" [disabled]="busy()">Назад</button><button class="primary" [disabled]="busy()">{{busy()?'Сохранение и отправка письма…':mode==='approve'?'Создать пользователя':'Подтвердить отказ'}}</button></div>
+    </form>}
+  }
+  }
+</dialog>

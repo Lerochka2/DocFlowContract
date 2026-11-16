@@ -1,3 +1,5 @@
+import { inject as injectPreferences } from '@angular/core';
+import { UiPreferencesService } from '../../../core/settings/ui-preferences.service';
 import {
   ChangeDetectorRef,
   Component,
@@ -26,6 +28,7 @@ import {
   styleUrl: './contract-risk-analysis.scss'
 })
 export class ContractRiskAnalysisComponent implements OnInit {
+  readonly uiPreferences = injectPreferences(UiPreferencesService);
 
   @Input({ required: true })
   documentId!: number;
@@ -47,6 +50,15 @@ export class ContractRiskAnalysisComponent implements OnInit {
   ) {
   }
 
+  get displayedRisks(): AiRiskFinding[] {
+    const risks = this.result?.risks ?? [];
+    if (!this.uiPreferences.preferences().sortRisks) return risks;
+    const order: Record<string, number> = { CRITICAL: 5, VERY_HIGH: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+    return [...risks].sort((a, b) => (order[b.severity] ?? 0) - (order[a.severity] ?? 0));
+  }
+  isHighRisk(risk: AiRiskFinding): boolean {
+    return this.uiPreferences.preferences().highlightHighRisks && ['CRITICAL', 'VERY_HIGH', 'HIGH'].includes(risk.severity);
+  }
   ngOnInit(): void {
     this.loadLatest();
   }

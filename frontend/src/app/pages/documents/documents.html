@@ -25,10 +25,7 @@
         </p>
       }
     </div>
-    <div class="documents-hero-art" aria-hidden="true">
-      <img src="assets/documents/documents-folder-glass.png" alt="" width="1536" height="1024" decoding="sync" fetchpriority="high" />
-      <span class="documents-float-card"><svg viewBox="0 0 48 54" fill="none"><path d="M12 6h17l8 8v32H12Z" fill="#eef4ff" stroke="white" stroke-width="1.5"/><path d="M29 6v9h8M19 23h11M19 29h11M19 35h7" stroke="#9aacfa" stroke-width="2.5" stroke-linecap="round"/></svg></span>
-    </div>
+
     @if (canManageDocuments) {
       <input
         #fileInput
@@ -177,6 +174,7 @@
           @for (document of documents; track document.documentId) {
             <div
               class="document-row clickable-row"
+              [class.needs-review-highlight]="uiPreferences.preferences().highlightReview && document.status === 'REVIEW_REQUIRED'"
               [class.selected]="isDocumentSelected(document.documentId)"
               role="button"
               tabindex="0"

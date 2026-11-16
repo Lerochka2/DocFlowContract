@@ -2,6 +2,7 @@ package by.bsuir.docflow.docflow_backend.entity.enums;
 
 public enum NotificationType {
 
+    ACCESS_REQUEST_CREATED,
     DOCUMENT_ASSIGNED,
     DOCUMENT_RETURNED,
     DOCUMENT_APPROVED,

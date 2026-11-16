@@ -1,4 +1,4 @@
-<div class="app-shell">
+<div class="app-shell" [class.compact-lists]="uiPreferencesService.preferences().compactMode">
 
   <aside class="sidebar">
 
@@ -173,6 +173,14 @@
 
       }
 
+      @if(isAdmin()) {
+        <a routerLink="/access-requests" routerLinkActive="active" class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h3"/></svg>
+          <span>Заявки на доступ</span>
+          @if(accessRequests.pendingCount()){<span class="access-count">{{accessRequests.pendingCount()}}</span>}
+        </a>
+      }
+
       <a
         routerLink="/settings"
         routerLinkActive="active"
@@ -190,34 +198,6 @@
       </a>
 
     </nav>
-
-
-    @if (
-      uiPreferencesService.showAiPromoCard()
-    ) {
-
-      <div class="sidebar-ai-card">
-
-        <div class="sidebar-ai-title">
-          Сила AI<br>
-          в каждом<br>
-          документе
-        </div>
-
-        <p>
-          Автоматизируем рутинное.
-          Освобождаем время для важного.
-        </p>
-
-        <div class="sidebar-waves">
-          <i></i>
-          <i></i>
-          <i></i>
-        </div>
-
-      </div>
-
-    }
 
 
     <div class="sidebar-footer">
@@ -551,7 +531,7 @@
             </svg>
 
 
-            @if (notificationCount > 0) {
+            @if (notificationCount > 0 && uiPreferencesService.preferences().showNotificationBadge) {
 
               <span class="notification-badge">
                 {{ notificationBadge }}
@@ -651,7 +631,7 @@
 
                 </div>
 
-              } @else if (notifications.length === 0) {
+              } @else if (visibleNotifications.length === 0) {
 
                 <div class="notification-state empty">
 
@@ -678,7 +658,7 @@
                 <div class="notification-list">
 
                   @for (
-                    notification of notifications;
+                    notification of visibleNotifications;
                     track notification.id
                   ) {
 

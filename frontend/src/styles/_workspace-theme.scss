@@ -1,41 +1,36 @@
-// The SED page is the visual reference. Tokens are inherited only by opted-in pages.
-// No selectors in this module match app-login or the application shell.
-.df-workspace, app-sed > .sed-page {
+// Authenticated workspace colours follow the login page palette.
+// The shell supplies tokens to every authenticated page; login keeps its own styles.
+.app-shell, .df-workspace, app-sed > .sed-page {
   --df-font-family: 'Manrope', 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --df-ink: #101044;
-  --df-muted: #7d88b1;
-  --df-accent: #6275ff;
-  --df-accent-strong: #345aff;
-  --df-line: #e1e7fd;
+  --df-ink: #10234d;
+  --df-muted: #576b8d;
+  --df-accent: #2d80fa;
+  --df-accent-strong: #146ce4;
+  --df-line: #cbd7eb;
   --df-surface: #ffffffed;
-  --df-surface-soft: #f0f3fbd9;
+  --df-surface-soft: #edf4fc;
   --df-success: #00886a;
   --df-success-bg: #e3f8f0;
   --df-warning: #936226;
   --df-warning-bg: #fff4dd;
   --df-danger: #b94460;
   --df-danger-bg: #ffebef;
-  --df-info-bg: #e4ebff;
+  --df-info-bg: #e4efff;
   --df-radius-card: 22px;
-  --df-radius-control: 11px;
-  --df-card-shadow: 0 10px 28px #759bdd12, inset 0 1px 0 #fff;
-  --df-hero-bg: linear-gradient(112deg, #e0f4ffb8, #e7ecff9c 61%, #f8eeffb5);
-  --df-card-bg: linear-gradient(155deg, #fffffff5, #ffffffbb);
-  --df-primary-bg: linear-gradient(135deg, #5477ff, #7765ee);
-  --df-page-bg:
-    radial-gradient(ellipse at 93% 2%, #f8dffa85, transparent 39%),
-    radial-gradient(ellipse at 65% 8%, #b9d5ff8c, transparent 48%),
-    radial-gradient(ellipse at 0% 75%, #dfcaff7a, transparent 27%),
-    radial-gradient(ellipse at 5% 95%, #ccecff90, transparent 39%),
-    linear-gradient(135deg, #edf4ff, #f7f6ff 60%, #eef6ff);
+  --df-radius-control: 10px;
+  --df-card-shadow: 0 8px 24px #253d6710, inset 0 1px 0 #fff;
+  --df-hero-bg: linear-gradient(112deg, #e2f1ff, #eff5ff 70%, #ffffffd9);
+  --df-card-bg: linear-gradient(155deg, #fffffff5, #f8fbffed);
+  --df-primary-bg: #2d80fa;
+  --df-page-bg: linear-gradient(135deg, #eaf2fa, #f3f8ff 60%, #edf5fc);
   --df-title-size: clamp(30px, 2.5vw, 40px);
   --df-section-size: 23px;
   --df-card-title-size: 17px;
-  --df-label-size: 16px;
-  --df-body-size: 14px;
-  --df-description-size: 15px;
-  --df-table-size: 13px;
-  --df-caption-size: 12px;
+  --df-label-size: 17px;
+  --df-body-size: 17px;
+  --df-description-size: 17px;
+  --df-table-size: 17px;
+  --df-caption-size: 17px;
   --df-kpi-size: 34px;
 }
 
@@ -64,14 +59,14 @@ main.page-content > :not(app-sed) > .df-workspace {
   .df-page-title {
     color: var(--df-ink);
     font-size: var(--df-title-size);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.16;
     letter-spacing: -.045em;
   }
   .df-section-label {
     color: var(--df-accent);
     font-size: var(--df-label-size);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.5;
     letter-spacing: .09em;
     text-transform: uppercase;
@@ -79,12 +74,12 @@ main.page-content > :not(app-sed) > .df-workspace {
   .df-card-title, h2 {
     color: var(--df-ink);
     font-size: var(--df-section-size);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.2;
     letter-spacing: -.035em;
   }
   .df-page-title span { color: inherit; background: none; }
-  h3 { color: var(--df-ink); font-size: var(--df-card-title-size); font-weight: 750; line-height: 1.3; }
+  h3 { color: var(--df-ink); font-size: var(--df-card-title-size); font-weight: 700; line-height: 1.3; }
   p { font-size: var(--df-body-size); line-height: 1.5; }
   :is(.page-header, .page-heading, .welcome-copy, .hero-copy, .document-title) p {
     color: var(--df-muted);
@@ -100,13 +95,13 @@ main.page-content > :not(app-sed) > .df-workspace {
   .df-card:is(.danger, .overdue) { border-color: #efc6d0; }
 
   button, input, select, textarea { font-family: var(--df-font-family); }
-  button { font-size: var(--df-table-size); font-weight: 750; letter-spacing: normal; }
+  button { font-size: var(--df-table-size); font-weight: 600; letter-spacing: normal; }
   :is(.refresh-button, .secondary-button, .reset-button, .back-button, .details-button, .password-secondary-button, .password-secondary) {
     color: var(--df-accent-strong);
     background: var(--df-surface);
     border: 1px solid var(--df-line);
     border-radius: var(--df-radius-control);
-    box-shadow: 0 3px 5px #7389ed0d;
+    box-shadow: 0 3px 5px #73a8ed0d;
     min-height: 39px;
   }
   .df-primary-button {
@@ -115,10 +110,10 @@ main.page-content > :not(app-sed) > .df-workspace {
     border: 0;
     border-radius: var(--df-radius-control);
     min-height: 39px;
-    box-shadow: 0 5px 12px #7d85db20;
+    box-shadow: 0 5px 12px #7da6db20;
   }
-  :is(.refresh-button, .secondary-button, .reset-button, .back-button):hover:not(:disabled) { background: #edf0ff; transform: translateY(-1px); }
-  .df-primary-button:hover:not(:disabled) { background: #6269e8; transform: translateY(-1px); }
+  :is(.refresh-button, .secondary-button, .reset-button, .back-button):hover:not(:disabled) { background: #edf5ff; transform: translateY(-1px); }
+  .df-primary-button:hover:not(:disabled) { background: #146ce4; transform: translateY(-1px); }
   :is(.delete-selected-button, .delete-document-button, .decision-button-reject) { color: var(--df-danger); background: var(--df-danger-bg); border-color: #efc6d0; }
   :is(.decision-button-approve, .decision-approved) { color: var(--df-success); background: var(--df-success-bg); }
   :is(.decision-button-return, .decision-returned) { color: var(--df-warning); background: var(--df-warning-bg); }
@@ -137,7 +132,7 @@ main.page-content > :not(app-sed) > .df-workspace {
   :is(.search-field, .search-box) input { background: transparent; border: 0; border-radius: 0; }
   input::placeholder, textarea::placeholder { color: var(--df-muted); opacity: 1; }
   :is(label, .filter-field > span, .form-field > span) { color: var(--df-muted); font-size: var(--df-body-size); }
-  :is(button, input, select, textarea):focus-visible { outline: 3px solid #7285ef; outline-offset: 3px; }
+  :is(button, input, select, textarea):focus-visible { outline: 3px solid #72a8ef; outline-offset: 3px; }
 
   .df-status-chip {
     color: var(--df-accent-strong);
@@ -145,7 +140,7 @@ main.page-content > :not(app-sed) > .df-workspace {
     border-color: transparent;
     border-radius: 22px;
     font-size: var(--df-caption-size);
-    font-weight: 750;
+    font-weight: 700;
     line-height: 1.3;
   }
   .df-status-chip:is(.success, .active, .approved, .sent, .routed, .green, .decision-approved), :is(.feedback, .message):is(.success) { color: var(--df-success); background: var(--df-success-bg); }
@@ -155,25 +150,25 @@ main.page-content > :not(app-sed) > .df-workspace {
   .df-status-chip:is(.violet, .link) { color: var(--df-accent-strong); background: var(--df-info-bg); }
   .df-status-chip:is(.active-label, .security-status, .integration-status, .version-current) { color: var(--df-success); background: var(--df-success-bg); }
   :is(.df-table-header, th) {
-    color: #7983b0;
+    color: #7991b0;
     background: var(--df-surface-soft);
     font-size: var(--df-caption-size);
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: .035em;
     text-transform: uppercase;
   }
   :is(td, .document-row, .result-card, .admin-route-card, .task-card) { font-size: var(--df-table-size); border-color: var(--df-line); }
   :is(.document-row, .result-card, .admin-route-card, .task-card) { background: var(--df-surface); }
-  :is(.document-row, .result-card, .admin-route-card, .task-card):hover { background: #f5f7ff; }
+  :is(.document-row, .result-card, .admin-route-card, .task-card):hover { background: #f5f9ff; }
   .df-table-header { font-size: var(--df-caption-size); background: var(--df-surface-soft); }
-  .document-row.selected { background: #e4ebff; border-color: #b6c5ff; }
-  .document-row.selected:hover { background: #dce5ff; }
+  .document-row.selected { background: #e4f0ff; border-color: #b6d6ff; }
+  .document-row.selected:hover { background: #dcebff; }
   :is(.file-name, .user-cell, .document-main, .document-info, .type-cell, .target-cell, .ai-status-cell, .document-status-cell, .confidence-cell) :is(strong, span) { font-size: var(--df-table-size); }
-  :is(.file-name, .user-info strong, .document-main strong) { color: var(--df-ink); font-size: var(--df-table-size); font-weight: 750; }
-  .stat-number { font-size: var(--df-kpi-size); font-weight: 800; line-height: 1; letter-spacing: -.04em; }
-  .stat-card strong { font-size: var(--df-kpi-size); font-weight: 800; line-height: 1; letter-spacing: -.04em; }
+  :is(.file-name, .user-info strong, .document-main strong) { color: var(--df-ink); font-size: var(--df-table-size); font-weight: 700; }
+  .stat-number { font-size: var(--df-kpi-size); font-weight: 700; line-height: 1; letter-spacing: -.04em; }
+  .stat-card strong { font-size: var(--df-kpi-size); font-weight: 700; line-height: 1; letter-spacing: -.04em; }
   .stat-card span { color: var(--df-muted); font-size: var(--df-description-size); }
-  .stat-icon { color: var(--df-accent-strong); background: linear-gradient(135deg, #d8dfff, #eae6ff); }
+  .stat-icon { color: var(--df-accent-strong); background: linear-gradient(135deg, #d8e9ff, #e6f1ff); }
   .stat-icon:is(.routed, .analyzed, .cyan) { color: var(--df-success); background: var(--df-success-bg); }
   .stat-icon:is(.overdue, .error, .red) { color: var(--df-danger); background: var(--df-danger-bg); }
   .stat-icon:is(.soon, .pending) { color: var(--df-warning); background: var(--df-warning-bg); }

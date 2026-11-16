@@ -17,11 +17,11 @@ describe('Users redesigned template interactions',()=>{
  });
  afterEach(()=>vi.restoreAllMocks());
  const input=async(el:Element,value:string)=>{(el as HTMLInputElement).value=value;el.dispatchEvent(new Event('input',{bubbles:true}));await fixture.whenStable();fixture.detectChanges();};
- it('renders real bindings, current-account protection and glass artwork',async()=>{
+ it('renders user bindings and current-account protection without decorative artwork',async()=>{
  expect(view.querySelectorAll('tbody tr')).toHaveLength(6);
  expect((view.querySelector('.role-select') as HTMLSelectElement).disabled).toBe(true);
  expect(view.querySelectorAll('.current-user-label')).toHaveLength(1);
- expect(view.querySelector('.users-hero-art')?.getAttribute('src')).toBe('assets/users/users-glass-spheres.svg');
+ expect(view.querySelector('.users-hero-art')).toBeNull();
  
  });
  it('submits the five bound create fields',async()=>{

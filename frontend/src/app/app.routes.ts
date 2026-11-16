@@ -50,9 +50,7 @@ import {
   ProfileWorkspace
 } from './pages/profile/profile';
 
-import {
-  Login
-} from './pages/login/login';
+
 
 import {
   authGuard
@@ -65,7 +63,7 @@ import {
 export const routes: Routes = [
   {
     path: 'login',
-    component: Login
+    loadComponent: () => import('./pages/login/login').then(m => m.Login)
   },
   {
     path: '',
@@ -154,6 +152,11 @@ export const routes: Routes = [
             'ADMIN'
           ]
         }
+      },
+      {
+        path: 'access-requests',
+        loadComponent: () => import('./pages/access-requests/access-requests').then(m => m.AccessRequestsPage),
+        canActivate: [roleGuard], data: { roles: ['ADMIN'] }
       },
       {
         path: 'settings',

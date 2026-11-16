@@ -1,3 +1,5 @@
+import { inject as injectPreferences } from '@angular/core';
+import { UiPreferencesService } from '../../core/settings/ui-preferences.service';
 import {
   ChangeDetectorRef,
   Component,
@@ -85,6 +87,7 @@ import {
   styleUrl: './document-details.scss'
 })
 export class DocumentDetails implements OnInit, OnDestroy {
+  readonly uiPreferences = injectPreferences(UiPreferencesService);
 
   document: DocumentSummary | null = null;
 
@@ -2237,10 +2240,7 @@ export class DocumentDetails implements OnInit, OnDestroy {
         'Отклонить документ? Документ не сможет продолжить текущий процесс обработки.';
     }
 
-    const confirmed =
-      window.confirm(
-        confirmationMessage
-      );
+    const confirmed = (decision === 'APPROVE' && !this.uiPreferences.preferences().confirmApproval) || window.confirm(confirmationMessage);
 
     if (!confirmed) {
       return;

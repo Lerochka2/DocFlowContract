@@ -32,7 +32,7 @@ export const authInterceptor: HttpInterceptorFn = (
   if (
     token &&
     isBackendRequest &&
-    !isLoginRequest
+    !isLoginRequest && !request.url.includes('/api/public/')
   ) {
 
     const authorizedRequest = request.clone({

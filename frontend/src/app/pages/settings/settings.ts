@@ -25,6 +25,7 @@ import {
 } from '../../core/auth/auth.service';
 
 import {
+  DEFAULT_UI_PREFERENCES,
   UiPreferences,
   UiPreferencesService
 } from '../../core/settings/ui-preferences.service';
@@ -49,11 +50,7 @@ export class SettingsWorkspace
   currentUser:
     CurrentUserResponse | null = null;
 
-  form:
-    UiPreferences = {
-      showAiPromoCard: true,
-      showSearchShortcut: true
-    };
+  form: UiPreferences = { ...DEFAULT_UI_PREFERENCES };
 
   loadingUser = true;
   saving = false;
@@ -105,7 +102,10 @@ export class SettingsWorkspace
   ) {
   }
 
+  get startPages() { return this.uiPreferencesService.availablePages; }
+
   ngOnInit(): void {
+    this.uiPreferencesService.activateUser();
 
     this.loadPreferences();
     this.loadUser();
@@ -135,16 +135,10 @@ export class SettingsWorkspace
     try {
 
       this.uiPreferencesService
-        .updatePreferences({
-          showAiPromoCard:
-            this.form.showAiPromoCard,
-
-          showSearchShortcut:
-            this.form.showSearchShortcut
-        });
+        .updatePreferences(this.form);
 
       this.successMessage =
-        'Настройки интерфейса сохранены.';
+        'Персональные настройки сохранены для этого браузера.';
 
     } catch {
 
@@ -790,13 +784,7 @@ export class SettingsWorkspace
       this.uiPreferencesService
         .preferences();
 
-    this.form = {
-      showAiPromoCard:
-        preferences.showAiPromoCard,
-
-      showSearchShortcut:
-        preferences.showSearchShortcut
-    };
+    this.form = { ...preferences };
   }
 
   private loadUser(): void {
