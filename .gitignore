@@ -49,10 +49,3 @@ Desktop.ini
 # Generated reports and local test results
 /output/
 /backend/jacoco.exec
-/rpa/Logs/
-/rpa/Processed/
-/rpa/Error/
-/rpa/Input/
-
-# RPA credentials are stored in local configuration files
-/rpa/Config/*.json
