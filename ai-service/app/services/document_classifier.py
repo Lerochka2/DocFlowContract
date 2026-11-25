@@ -11,7 +11,7 @@ MODEL_PATH = (
     / "document_classifier.joblib"
 )
 
-MODEL_VERSION = "tfidf-logreg-v1"
+MODEL_VERSION = "tfidf-logreg-v2"
 CONFIDENCE_THRESHOLD = 0.80
 
 

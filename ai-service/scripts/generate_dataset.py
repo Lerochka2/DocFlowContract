@@ -5,6 +5,7 @@ from pathlib import Path
 
 RANDOM_SEED = 42
 SAMPLES_PER_CLASS = 120
+EXTRA_CHANGE_SAMPLES = 40
 
 OUTPUT_PATH = Path("data") / "documents_dataset.csv"
 
@@ -139,6 +140,43 @@ def amendment_change_sample() -> str:
     return random.choice(variants)
 
 
+def amendment_change_full_document_sample() -> str:
+    """A longer agreement with the contract vocabulary found in PDF forms."""
+    base = random.choice([
+        "договору поставки",
+        "договору оказания услуг",
+        "договору подряда",
+        "основному договору",
+    ])
+    change = random.choice([
+        "изменить цену",
+        "уточнить предмет договора",
+        "изменить объем работ",
+        "скорректировать порядок оплаты",
+        "изменить условия поставки",
+        "дополнить перечень услуг",
+        "заменить реквизиты стороны",
+    ])
+    return (
+        f"ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № {random.randint(1, 99)}\n"
+        f"к {base} № DF-{random.randint(1, 999)}/25\n"
+        "г. Минск\n"
+        "Стороны заключили настоящее дополнительное соглашение "
+        f"к ранее заключенному {base}.\n"
+        "1. Изменения в условиях договора. "
+        f"Стороны согласовали {change}. "
+        f"Пункт {random.randint(1, 12)}.{random.randint(1, 9)} "
+        "договора изложить в новой редакции. "
+        f"Новая стоимость составляет {random.randint(1000, 99000)} "
+        "белорусских рублей. "
+        "2. Права и обязанности сторон, порядок расчетов, срок "
+        "действия договора и остальные условия, не затронутые настоящим "
+        "соглашением, сохраняют силу. Настоящее дополнительное "
+        "соглашение является неотъемлемой частью договора. "
+        "Реквизиты и подписи сторон."
+    )
+
+
 def amendment_prolongation_sample() -> str:
     variants = [
         (
@@ -228,7 +266,15 @@ def main() -> None:
                 }
             )
 
+    # Keep the original 480 examples in their established order, then add
+    # the new full-document examples. This keeps the training set auditable.
     random.shuffle(rows)
+
+    for _ in range(EXTRA_CHANGE_SAMPLES):
+        rows.append({
+            "text": amendment_change_full_document_sample(),
+            "label": "AMENDMENT_CHANGE",
+        })
 
     with OUTPUT_PATH.open(
         "w",
@@ -238,6 +284,7 @@ def main() -> None:
         writer = csv.DictWriter(
             csv_file,
             fieldnames=["text", "label"],
+            lineterminator="\n",
         )
 
         writer.writeheader()

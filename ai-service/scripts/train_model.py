@@ -108,6 +108,10 @@ def main() -> None:
     print(
         f"Accuracy: {accuracy:.4f}"
     )
+    print(
+        "Это проверка на тех же шаблонах, что и обучение; "
+        "качество на отдельных PDF измеряет scripts.evaluate_classifier."
+    )
 
     print()
     print(
@@ -153,10 +157,10 @@ def main() -> None:
         exist_ok=True,
     )
 
-    joblib.dump(
-        model,
-        MODEL_PATH,
-    )
+    # The split measures quality; the released model uses every available
+    # training example. Independent PDF checks are documented separately.
+    model.fit(texts, labels)
+    joblib.dump(model, MODEL_PATH)
 
     print()
     print(
