@@ -1,0 +1,22 @@
+{
+  "filename": "ocr-scan-contract.pdf",
+  "pageCount": 1,
+  "characterCount": 218,
+  "hasText": true,
+  "requiresOcr": false,
+  "ocrUsed": true,
+  "classificationAvailable": true,
+  "predictedType": "CONTRACT",
+  "documentType": "CONTRACT",
+  "confidence": 0.84,
+  "classificationAccepted": true,
+  "reviewRequired": false,
+  "modelVersion": "tfidf-logreg-v1",
+  "probabilities": {
+    "AMENDMENT_CHANGE": 0.0526,
+    "AMENDMENT_PROLONGATION": 0.0497,
+    "APPENDIX": 0.0577,
+    "CONTRACT": 0.84
+  },
+  "text": "ДОГОВОР ПОСТАВКИ №125\nПоставщик обязуется передать товар,\nа покупатель принять и оплатить его.\nСтоимость договора составляет 50000 рублей.\nСрок поставки товара: 30 дней.\nПрава и обязанности сторон определены договором."
+}

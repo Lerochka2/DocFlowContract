@@ -10,6 +10,7 @@ public class AiAnalyzeResponse {
 
     private Boolean hasText;
     private Boolean requiresOcr;
+    private Boolean ocrUsed;
     private Boolean classificationAvailable;
 
     private String predictedType;
@@ -63,6 +64,14 @@ public class AiAnalyzeResponse {
 
     public Boolean getRequiresOcr() {
         return requiresOcr;
+    }
+
+    public Boolean getOcrUsed() {
+        return ocrUsed;
+    }
+
+    public void setOcrUsed(Boolean ocrUsed) {
+        this.ocrUsed = ocrUsed;
     }
 
     public void setRequiresOcr(Boolean requiresOcr) {

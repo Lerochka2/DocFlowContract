@@ -482,10 +482,7 @@ export class Documents implements OnInit {
 
     const allowedExtensions =
       [
-        'pdf',
-        'jpg',
-        'jpeg',
-        'png'
+        'pdf'
       ];
 
     if (
@@ -498,7 +495,7 @@ export class Documents implements OnInit {
     ) {
 
       this.uploadErrorMessage =
-        'Можно загружать только PDF, JPG, JPEG и PNG.';
+        'Можно загружать только PDF-файлы.';
 
       this.changeDetectorRef
         .markForCheck();

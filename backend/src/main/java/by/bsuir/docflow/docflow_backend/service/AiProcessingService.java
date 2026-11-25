@@ -216,7 +216,7 @@ public class AiProcessingService {
         );
 
         result.setOcrUsed(
-                false
+                Boolean.TRUE.equals(aiResponse.getOcrUsed())
         );
 
         result.setModelVersion(
@@ -462,6 +462,8 @@ public class AiProcessingService {
                 + Boolean.TRUE.equals(
                         aiResponse.getRequiresOcr()
                 )
+                + "\nOCR использован: "
+                + Boolean.TRUE.equals(aiResponse.getOcrUsed())
                 + "\nСтатус обработки: "
                 + processingStatus.name()
                 + "\nВерсия модели: "

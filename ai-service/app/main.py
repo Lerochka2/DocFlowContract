@@ -1,3 +1,7 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from threading import BoundedSemaphore
+
 from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
@@ -8,6 +12,24 @@ from app.services.pdf_text_extractor import PdfTextExtractor
 
 MAX_FILE_SIZE = 20 * 1024 * 1024
 CONFIDENCE_THRESHOLD = 0.80
+
+# PyMuPDF work stays on one dedicated thread. The event loop remains available
+# for health checks, and concurrent PDF requests fail quickly rather than queue.
+PDF_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pdf-processing")
+PDF_SLOT = BoundedSemaphore(1)
+
+
+async def run_pdf_task(function, *args):
+    if not PDF_SLOT.acquire(blocking=False):
+        raise HTTPException(status_code=503, detail="Обрабатывается другой PDF. Повторите запрос позже.")
+    try:
+        future = asyncio.get_running_loop().run_in_executor(PDF_EXECUTOR, function, *args)
+    except BaseException:
+        PDF_SLOT.release()
+        raise
+    future.add_done_callback(lambda _: PDF_SLOT.release())
+    # A disconnected caller must not release the slot while its OCR is running.
+    return await asyncio.shield(future)
 
 pdf_text_extractor = PdfTextExtractor()
 document_classifier = DocumentClassifier()
@@ -53,7 +75,7 @@ async def extract_text(
     file_bytes = await read_and_validate_pdf(file)
 
     try:
-        result = pdf_text_extractor.extract(file_bytes)
+        result = await run_pdf_task(pdf_text_extractor.extract, file_bytes)
     except ValueError as exception:
         raise HTTPException(
             status_code=400,
@@ -65,7 +87,8 @@ async def extract_text(
         "pageCount": result["page_count"],
         "characterCount": result["character_count"],
         "hasText": result["has_text"],
-        "requiresOcr": not result["has_text"],
+        "requiresOcr": result["requires_ocr"],
+        "ocrUsed": result["ocr_used"],
         "text": result["text"],
     }
 
@@ -123,7 +146,8 @@ async def analyze_document(
         else "document.pdf"
     )
 
-    return analyze_pdf_content(
+    return await run_pdf_task(
+        analyze_pdf_content,
         filename,
         file_bytes,
     )
@@ -160,7 +184,8 @@ async def internal_analyze_document(
         else "document.pdf"
     )
 
-    return analyze_pdf_content(
+    return await run_pdf_task(
+        analyze_pdf_content,
         filename,
         file_bytes,
     )
@@ -187,6 +212,7 @@ def analyze_pdf_content(
             "characterCount": 0,
             "hasText": False,
             "requiresOcr": True,
+            "ocrUsed": extraction_result["ocr_used"],
             "classificationAvailable": False,
             "predictedType": None,
             "documentType": None,
@@ -214,13 +240,20 @@ def analyze_pdf_content(
         classification_result
     )
 
+    if extraction_result["requires_ocr"]:
+        # Never automatically accept classification based on only part of a PDF.
+        formatted["classificationAccepted"] = False
+        formatted["documentType"] = None
+        formatted["reviewRequired"] = True
+
     return {
         "filename": filename,
         "pageCount": extraction_result["page_count"],
         "characterCount":
             extraction_result["character_count"],
         "hasText": True,
-        "requiresOcr": False,
+        "requiresOcr": extraction_result["requires_ocr"],
+        "ocrUsed": extraction_result["ocr_used"],
         "classificationAvailable": True,
         "predictedType":
             formatted["predictedType"],

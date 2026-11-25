@@ -40,10 +40,7 @@ public class DocumentService {
 
     private static final Set<String> ALLOWED_EXTENSIONS =
             Set.of(
-                    "pdf",
-                    "jpg",
-                    "jpeg",
-                    "png"
+                    "pdf"
             );
 
     private final StoredFileRepository storedFileRepository;
@@ -604,7 +601,7 @@ public class DocumentService {
                         )
         ) {
             throw new IllegalArgumentException(
-                    "Разрешены только PDF, JPG, JPEG и PNG"
+                    "Поддерживаются только PDF-файлы"
             );
         }
 
@@ -614,13 +611,7 @@ public class DocumentService {
         boolean validMime =
                 "application/pdf".equals(
                         mimeType
-                )
-                        || "image/jpeg".equals(
-                                mimeType
-                        )
-                        || "image/png".equals(
-                                mimeType
-                        );
+                );
 
         if (!validMime) {
             throw new IllegalArgumentException(
@@ -672,23 +663,6 @@ public class DocumentService {
                                     && bytes[2] == 'D'
                                     && bytes[3] == 'F'
                                     && bytes[4] == '-';
-
-                    case "jpg", "jpeg" ->
-                            bytes.length >= 3
-                                    && (bytes[0] & 0xFF) == 0xFF
-                                    && (bytes[1] & 0xFF) == 0xD8
-                                    && (bytes[2] & 0xFF) == 0xFF;
-
-                    case "png" ->
-                            bytes.length >= 8
-                                    && (bytes[0] & 0xFF) == 0x89
-                                    && bytes[1] == 0x50
-                                    && bytes[2] == 0x4E
-                                    && bytes[3] == 0x47
-                                    && bytes[4] == 0x0D
-                                    && bytes[5] == 0x0A
-                                    && bytes[6] == 0x1A
-                                    && bytes[7] == 0x0A;
 
                     default ->
                             false;
